@@ -5,7 +5,8 @@ A daily soccer trivia game. Each prompt asks you to name something, like a Ballo
 **Play:** https://kennyshii.github.io/top-bins/
 
 - 7 prompts a day with 25 seconds each, plus an unlimited mode
-- 80 prompts covering players, clubs, countries and trophies
+- 291 prompts covering players, clubs, countries, managers, finals and trophies
+- You never see the same prompt twice: each game is dealt from prompts you haven't played yet, and an unfinished daily game picks up where you left off
 - Small typos are fixed automatically, and close or ambiguous answers get suggestions
 - Every result plays its own pixel-art animation: tap-in, off the post, a 30-yard free kick, a Panenka or top bins
 - Scores, streaks and today's result are saved in your browser

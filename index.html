@@ -122,7 +122,7 @@ svg { display: block; width: 100%; height: auto; overflow: visible; }
 .box .pa small { font-family: var(--display); font-size: 10px; letter-spacing: 2px; }
 .box .ps { grid-area: s; font-size: 30px; font-variant-numeric: tabular-nums; align-self: center; }
 .box .cut { grid-area: c; font-size: 16px; color: rgba(125, 147, 184, 0.85); }
-.logbook { margin: 0; font-family: var(--display); font-size: 10px; letter-spacing: 2px; color: var(--mute); line-height: 1.8; }
+.logbook { margin: 0; font-family: var(--display); font-size: 10px; letter-spacing: 2px; color: var(--mute); line-height: 1.8; white-space: pre-line; }
 .note { margin: 0; font-size: 16px; color: rgba(125, 147, 184, 0.75); }
 .sr { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; }
 #copyBox { width: 100%; min-height: 120px; font-family: var(--body); font-size: 18px; color: var(--ink); background: var(--void); border: 2px solid var(--line); padding: 8px; }
@@ -147,6 +147,7 @@ svg { display: block; width: 100%; height: auto; overflow: visible; }
       <li><span>1</span>Type any answer that fits the prompt. Small typos are fixed for you.</li>
       <li><span>2</span>Answers everyone gives are tap-ins. The rarer your answer, the better the finish, all the way up to top bins.</li>
       <li><span>3</span>Niche prompts pay more, because fewer people can answer them at all.</li>
+      <li><span>4</span>You never get the same prompt twice. Every strike is built from prompts you haven't seen yet.</li>
     </ul>
     <div class="row">
       <button class="btn" id="go" type="button">KICK OFF ▶</button>
@@ -588,9 +589,895 @@ const PROMPTS = [
     ["Liverpool", 200, ""], ["Manchester City", 200, "man city|city"], ["Chelsea", 150, ""], ["Arsenal", 60, ""],
     ["Feyenoord", 45, ""],
   ] },
+  { q: "Name a club Wayne Rooney played for or managed", sub: "Senior career and club jobs, up to 2026", know: 0.8, a: [
+    ["Manchester United", 280, "man utd|man united|manchester utd|united"], ["Everton", 160, ""], ["DC United", 90, "d.c. united|dc utd"], ["Derby County", 70, "derby"], ["Birmingham City", 50, "birmingham"],
+    ["Plymouth Argyle", 35, "plymouth"],
+  ] },
+  { q: "Name a club Frank Lampard played for or managed", sub: "Senior career and club jobs, up to 2026 · loans count", know: 0.75, a: [
+    ["Chelsea", 280, ""], ["West Ham United", 120, "west ham|hammers"], ["Manchester City", 70, "man city|city"], ["Derby County", 60, "derby"], ["Everton", 60, ""], ["New York City FC", 50, "nycfc|new york city|nyc"],
+    ["Coventry City", 45, "coventry"], ["Swansea City", 15, "swansea"],
+  ] },
+  { q: "Name a club Steven Gerrard played for or managed", sub: "Senior career and club jobs, up to 2026", know: 0.8, a: [
+    ["Liverpool", 300, ""], ["Rangers", 120, "glasgow rangers"], ["Aston Villa", 90, "villa"], ["LA Galaxy", 80, "galaxy|los angeles galaxy"], ["Al-Ettifaq", 40, "ettifaq|al ettifaq"],
+  ] },
+  { q: "Name a club Pep Guardiola played for or managed", sub: "Senior career and club jobs · Barcelona B counts as Barcelona", know: 0.7, a: [
+    ["Manchester City", 260, "man city|city"], ["Barcelona", 260, "barca|fc barcelona"], ["Bayern Munich", 180, "bayern|fc bayern|bayern munchen"], ["Roma", 25, "as roma"], ["Brescia", 25, ""], ["Al-Ahli", 10, "al ahli"],
+    ["Dorados de Sinaloa", 8, "dorados|sinaloa"],
+  ] },
+  { q: "Name a club Mikel Arteta played for or managed", sub: "Senior career and club jobs · Barcelona B counts as Barcelona", know: 0.6, a: [
+    ["Arsenal", 280, ""], ["Everton", 150, ""], ["Real Sociedad", 60, "sociedad|la real"], ["Rangers", 50, "glasgow rangers"], ["Paris Saint-Germain", 40, "psg|paris sg|paris"], ["Barcelona", 30, "barca|barcelona b|fc barcelona"],
+  ] },
+  { q: "Name a club Patrick Vieira played for or managed", sub: "Senior career and club jobs, up to 2026", know: 0.6, a: [
+    ["Arsenal", 280, ""], ["Juventus", 80, "juve"], ["Inter Milan", 70, "inter|internazionale"], ["Manchester City", 60, "man city|city"], ["Crystal Palace", 60, "palace"], ["AC Milan", 40, "milan"], ["Nice", 40, "ogc nice"],
+    ["New York City FC", 30, "nycfc|new york city|nyc"], ["Strasbourg", 25, "rc strasbourg"], ["Genoa", 25, ""], ["Cannes", 10, "as cannes"],
+  ] },
+  { q: "Name a club Diego Simeone played for or managed", sub: "Senior career and club jobs, up to 2026", know: 0.5, a: [
+    ["Atlético Madrid", 300, "atletico|atleti|atletico de madrid"], ["Inter Milan", 60, "inter|internazionale"], ["Lazio", 60, "ss lazio"], ["Sevilla", 30, ""], ["Racing Club", 30, "racing"], ["River Plate", 25, "river"],
+    ["Estudiantes", 20, "estudiantes de la plata"], ["Vélez Sarsfield", 15, "velez|velez sarsfield"], ["Catania", 12, ""], ["Pisa", 10, ""], ["San Lorenzo", 10, ""],
+  ] },
+  { q: "Name a club Michael Carrick played for or managed", sub: "Senior career and club jobs, up to 2026 · loans count", know: 0.55, a: [
+    ["Manchester United", 300, "man utd|man united|manchester utd|united"], ["Tottenham Hotspur", 100, "tottenham|spurs"], ["West Ham United", 90, "west ham|hammers"], ["Middlesbrough", 70, "boro"],
+    ["Birmingham City", 10, "birmingham"], ["Swindon Town", 8, "swindon"],
+  ] },
+  { q: "Name a club Zinedine Zidane played for", sub: "Senior career", know: 0.8, a: [
+    ["Real Madrid", 300, "madrid|real"], ["Juventus", 220, "juve"], ["Bordeaux", 70, "girondins"], ["Cannes", 30, "as cannes"],
+  ] },
+  { q: "Name a club Ronaldinho played for", sub: "Senior career", know: 0.75, a: [
+    ["Barcelona", 300, "barca|fc barcelona"], ["AC Milan", 140, "milan"], ["Paris Saint-Germain", 130, "psg|paris sg|paris"], ["Grêmio", 50, "gremio"], ["Flamengo", 45, ""], ["Atlético Mineiro", 35, "atletico mineiro|atletico|galo"],
+    ["Querétaro", 12, "queretaro"], ["Fluminense", 12, ""],
+  ] },
+  { q: "Name a club Kaká played for", sub: "Senior career", know: 0.7, a: [
+    ["AC Milan", 280, "milan"], ["Real Madrid", 220, "madrid|real"], ["São Paulo", 80, "sao paulo"], ["Orlando City", 60, "orlando"],
+  ] },
+  { q: "Name a club Andrea Pirlo played for", sub: "Senior career · loans count", know: 0.6, a: [
+    ["AC Milan", 250, "milan"], ["Juventus", 230, "juve"], ["Inter Milan", 60, "inter|internazionale"], ["New York City FC", 50, "nycfc|new york city|nyc"], ["Brescia", 30, ""], ["Reggina", 15, ""],
+  ] },
+  { q: "Name a club Didier Drogba played for", sub: "Senior career", know: 0.7, a: [
+    ["Chelsea", 300, ""], ["Marseille", 100, "olympique de marseille|om"], ["Galatasaray", 70, "gala"], ["Shanghai Shenhua", 40, "shanghai|shenhua"], ["Montreal Impact", 30, "montreal|cf montreal"], ["Guingamp", 30, "en avant guingamp"],
+    ["Le Mans", 15, ""], ["Phoenix Rising", 15, "phoenix"],
+  ] },
+  { q: "Name a club Samuel Eto'o played for", sub: "Senior career · loans count", know: 0.6, a: [
+    ["Barcelona", 270, "barca|fc barcelona"], ["Inter Milan", 180, "inter|internazionale"], ["Chelsea", 100, ""], ["Mallorca", 60, "rcd mallorca|real mallorca"], ["Real Madrid", 50, "madrid|real"], ["Everton", 40, ""],
+    ["Anzhi Makhachkala", 40, "anzhi"], ["Sampdoria", 20, "samp"], ["Antalyaspor", 15, ""], ["Espanyol", 12, ""], ["Leganés", 8, "leganes"], ["Konyaspor", 6, ""], ["Qatar SC", 4, "qatar"],
+  ] },
+  { q: "Name a club Fernando Torres played for", sub: "Senior career", know: 0.75, a: [
+    ["Liverpool", 260, ""], ["Atlético Madrid", 230, "atletico|atleti|atletico de madrid"], ["Chelsea", 200, ""], ["AC Milan", 50, "milan"], ["Sagan Tosu", 25, "tosu"],
+  ] },
+  { q: "Name a club David Villa played for", sub: "Senior career · loans count", know: 0.55, a: [
+    ["Barcelona", 220, "barca|fc barcelona"], ["Valencia", 200, ""], ["Atlético Madrid", 90, "atletico|atleti|atletico de madrid"], ["New York City FC", 80, "nycfc|new york city|nyc"], ["Real Zaragoza", 40, "zaragoza"],
+    ["Sporting Gijón", 25, "sporting gijon|gijon|sporting"], ["Vissel Kobe", 20, "kobe"], ["Melbourne City", 10, "melbourne"],
+  ] },
+  { q: "Name a club Arjen Robben played for", sub: "Senior career", know: 0.65, a: [
+    ["Bayern Munich", 260, "bayern|fc bayern|bayern munchen"], ["Chelsea", 150, ""], ["Real Madrid", 110, "madrid|real"], ["PSV Eindhoven", 70, "psv"], ["Groningen", 40, "fc groningen"],
+  ] },
+  { q: "Name a club Wesley Sneijder played for", sub: "Senior career", know: 0.5, a: [
+    ["Inter Milan", 250, "inter|internazionale"], ["Real Madrid", 150, "madrid|real"], ["Ajax", 140, ""], ["Galatasaray", 90, "gala"], ["Nice", 20, "ogc nice"], ["Al-Gharafa", 10, "gharafa|al gharafa"],
+  ] },
+  { q: "Name a club Robin van Persie played for", sub: "Senior career", know: 0.6, a: [
+    ["Arsenal", 260, ""], ["Manchester United", 220, "man utd|man united|manchester utd|united"], ["Feyenoord", 90, ""], ["Fenerbahçe", 60, "fenerbahce|fener"],
+  ] },
+  { q: "Name a club Carlos Tevez played for", sub: "Senior career", know: 0.6, a: [
+    ["Manchester City", 200, "man city|city"], ["Manchester United", 200, "man utd|man united|manchester utd|united"], ["Juventus", 108, "juve"], ["West Ham United", 98, "west ham|hammers"], ["Boca Juniors", 98, "boca"],
+    ["Corinthians", 29, ""], ["Shanghai Shenhua", 16, "shanghai|shenhua"],
+  ] },
+  { q: "Name a club Sergio Agüero played for", sub: "Senior career", know: 0.7, a: [
+    ["Manchester City", 300, "man city|city"], ["Atlético Madrid", 150, "atletico|atleti|atletico de madrid"], ["Barcelona", 70, "barca|fc barcelona"], ["Independiente", 40, ""],
+  ] },
+  { q: "Name a club Gareth Bale played for", sub: "Senior career", know: 0.75, a: [
+    ["Real Madrid", 280, "madrid|real"], ["Tottenham Hotspur", 230, "tottenham|spurs"], ["Southampton", 80, "saints"], ["Los Angeles FC", 50, "lafc|los angeles"],
+  ] },
+  { q: "Name a club Luka Modrić has played for", sub: "Senior career up to 2026 · loans count", know: 0.7, a: [
+    ["Real Madrid", 300, "madrid|real"], ["Tottenham Hotspur", 170, "tottenham|spurs"], ["AC Milan", 90, "milan"], ["Dinamo Zagreb", 60, "dinamo|zagreb"], ["Zrinjski Mostar", 8, "zrinjski"], ["Inter Zaprešić", 5, "zapresic|inter zapresic"],
+  ] },
+  { q: "Name a club Mesut Özil played for", sub: "Senior career", know: 0.6, a: [
+    ["Arsenal", 260, ""], ["Real Madrid", 200, "madrid|real"], ["Werder Bremen", 70, "bremen|werder"], ["Schalke 04", 50, "schalke"], ["Fenerbahçe", 50, "fenerbahce|fener"], ["İstanbul Başakşehir", 15, "basaksehir|istanbul basaksehir"],
+  ] },
+  { q: "Name a club Petr Čech played for", sub: "Senior career", know: 0.55, a: [
+    ["Chelsea", 300, ""], ["Arsenal", 130, ""], ["Rennes", 40, "stade rennais"], ["Sparta Prague", 30, "sparta|sparta praha"], ["Chmel Blšany", 5, "blsany|chmel blsany"],
+  ] },
+  { q: "Name a club Edinson Cavani has played for", sub: "Senior career up to 2026", know: 0.55, a: [
+    ["Paris Saint-Germain", 250, "psg|paris sg|paris"], ["Napoli", 160, ""], ["Manchester United", 120, "man utd|man united|manchester utd|united"], ["Boca Juniors", 60, "boca"], ["Palermo", 40, ""], ["Valencia", 40, ""],
+    ["Danubio", 10, ""],
+  ] },
+  { q: "Name a club Radamel Falcao played for", sub: "Senior career · loans count", know: 0.5, a: [
+    ["Atlético Madrid", 200, "atletico|atleti|atletico de madrid"], ["Monaco", 134, "as monaco"], ["Porto", 99, "fc porto"], ["Manchester United", 66, "man utd|man united|manchester utd|united"], ["Chelsea", 47, ""],
+    ["Galatasaray", 30, "gala"], ["River Plate", 22, "river"], ["Rayo Vallecano", 15, "rayo"], ["Millonarios", 6, ""], ["Lanceros Boyacá", 1, "lanceros|lanceros boyaca"],
+  ] },
+  { q: "Name a club Gonzalo Higuaín played for", sub: "Senior career · loans count", know: 0.55, a: [
+    ["Real Madrid", 200, "madrid|real"], ["Juventus", 174, "juve"], ["Napoli", 162, ""], ["Chelsea", 42, ""], ["AC Milan", 42, "milan"], ["River Plate", 33, "river"], ["Inter Miami", 33, "miami"],
+  ] },
+  { q: "Name a club Mario Balotelli has played for", sub: "Senior career up to 2026 · loans count", know: 0.55, a: [
+    ["Manchester City", 220, "man city|city"], ["Inter Milan", 150, "inter|internazionale"], ["AC Milan", 130, "milan"], ["Liverpool", 110, ""], ["Nice", 60, "ogc nice"], ["Marseille", 40, "olympique de marseille|om"],
+    ["Brescia", 25, ""], ["Adana Demirspor", 20, "adana|demirspor"], ["Monza", 15, ""], ["Genoa", 12, ""], ["Sion", 10, "fc sion"], ["Lumezzane", 3, ""],
+  ] },
+  { q: "Name a club Erling Haaland has played for", sub: "Senior career up to 2026", know: 0.75, a: [
+    ["Manchester City", 280, "man city|city"], ["Borussia Dortmund", 200, "dortmund|bvb"], ["Red Bull Salzburg", 90, "salzburg|rb salzburg"], ["Molde", 40, "molde fk"], ["Bryne", 15, "bryne fk"],
+  ] },
+  { q: "Name a club Kylian Mbappé has played for", sub: "Senior career up to 2026", know: 0.9, a: [
+    ["Real Madrid", 280, "madrid|real"], ["Paris Saint-Germain", 260, "psg|paris sg|paris"], ["Monaco", 120, "as monaco"],
+  ] },
+  { q: "Name a club Lionel Messi has played for", sub: "Senior career up to 2026", know: 0.97, a: [
+    ["Barcelona", 330, "barca|fc barcelona"], ["Inter Miami", 180, "miami"], ["Paris Saint-Germain", 150, "psg|paris sg|paris"],
+  ] },
+  { q: "Name a club Neymar has played for", sub: "Senior career up to 2026", know: 0.85, a: [
+    ["Barcelona", 260, "barca|fc barcelona"], ["Paris Saint-Germain", 250, "psg|paris sg|paris"], ["Santos", 130, ""], ["Al-Hilal", 90, "al hilal|hilal"],
+  ] },
+  { q: "Name a club Robert Lewandowski has played for", sub: "Senior career up to 2026 · reserve sides count", know: 0.75, a: [
+    ["Bayern Munich", 280, "bayern|fc bayern|bayern munchen"], ["Borussia Dortmund", 180, "dortmund|bvb"], ["Barcelona", 180, "barca|fc barcelona"], ["Chicago Fire", 60, "chicago|chicago fire fc"],
+    ["Lech Poznań", 35, "lech|lech poznan|poznan"], ["Znicz Pruszków", 8, "znicz|znicz pruszkow"], ["Legia Warsaw", 5, "legia|legia warszawa"], ["Delta Warsaw", 3, "delta|delta warszawa"],
+  ] },
+  { q: "Name a club Karim Benzema has played for", sub: "Senior career up to 2026", know: 0.75, a: [
+    ["Real Madrid", 300, "madrid|real"], ["Lyon", 120, "olympique lyonnais|ol"], ["Al-Ittihad", 80, "al ittihad|ittihad"], ["Al-Hilal", 40, "al hilal|hilal"],
+  ] },
+  { q: "Name a club Thiago Silva has played for", sub: "Senior career up to 2026", know: 0.55, a: [
+    ["Paris Saint-Germain", 230, "psg|paris sg|paris"], ["Chelsea", 180, ""], ["AC Milan", 150, "milan"], ["Fluminense", 80, "flu"], ["Porto", 30, "fc porto"], ["Dynamo Moscow", 15, "dinamo moscow|dynamo"], ["Juventude", 8, ""],
+  ] },
+  { q: "Name a club Philippe Coutinho has played for", sub: "Senior career up to 2026 · loans count", know: 0.55, a: [
+    ["Liverpool", 250, ""], ["Barcelona", 200, "barca|fc barcelona"], ["Bayern Munich", 70, "bayern|fc bayern|bayern munchen"], ["Aston Villa", 70, "villa"], ["Inter Milan", 50, "inter|internazionale"], ["Vasco da Gama", 40, "vasco"],
+    ["Espanyol", 25, ""], ["Al-Duhail", 10, "duhail|al duhail"],
+  ] },
+  { q: "Name a club Dani Alves played for", sub: "Senior career", know: 0.5, a: [
+    ["Barcelona", 280, "barca|fc barcelona"], ["Sevilla", 130, ""], ["Juventus", 90, "juve"], ["Paris Saint-Germain", 90, "psg|paris sg|paris"], ["São Paulo", 40, "sao paulo"], ["Pumas UNAM", 25, "pumas|unam"], ["Bahia", 10, "ec bahia"],
+  ] },
+  { q: "Name a club Ruud van Nistelrooy played for", sub: "Senior career", know: 0.5, a: [
+    ["Manchester United", 280, "man utd|man united|manchester utd|united"], ["Real Madrid", 140, "madrid|real"], ["PSV Eindhoven", 110, "psv"], ["Hamburger SV", 40, "hamburg|hsv"], ["Málaga", 30, "malaga"],
+    ["Heerenveen", 25, "sc heerenveen"], ["Den Bosch", 8, "fc den bosch"],
+  ] },
+  { q: "Name a club Michael Owen played for", sub: "Senior career", know: 0.65, a: [
+    ["Liverpool", 300, ""], ["Real Madrid", 120, "madrid|real"], ["Newcastle United", 110, "newcastle"], ["Manchester United", 100, "man utd|man united|manchester utd|united"], ["Stoke City", 40, "stoke"],
+  ] },
+  { q: "Name a club Nicolas Anelka played for", sub: "Senior career · loans count", know: 0.5, a: [
+    ["Chelsea", 200, ""], ["Arsenal", 200, ""], ["Real Madrid", 65, "madrid|real"], ["Paris Saint-Germain", 45, "psg|paris sg|paris"], ["Manchester City", 37, "man city|city"], ["Liverpool", 28, ""],
+    ["Bolton Wanderers", 21, "bolton"], ["Fenerbahçe", 9, "fenerbahce|fener"], ["West Bromwich Albion", 7, "west brom|wba"], ["Juventus", 5, "juve"], ["Shanghai Shenhua", 3, "shanghai|shenhua"], ["Mumbai City", 1, "mumbai"],
+  ] },
+  { q: "Name a club Robbie Keane played for", sub: "Senior career · loans count", know: 0.45, a: [
+    ["Tottenham Hotspur", 280, "tottenham|spurs"], ["LA Galaxy", 120, "galaxy|los angeles galaxy"], ["Liverpool", 100, ""], ["Leeds United", 70, "leeds"], ["Coventry City", 40, "coventry"],
+    ["Wolverhampton Wanderers", 40, "wolves|wolverhampton"], ["Inter Milan", 40, "inter|internazionale"], ["West Ham United", 30, "west ham|hammers"], ["Celtic", 30, ""], ["Aston Villa", 25, "villa"], ["ATK", 8, "atletico de kolkata|kolkata"],
+  ] },
+  { q: "Name a club Peter Crouch played for", sub: "Senior career · loans count", know: 0.5, a: [
+    ["Liverpool", 200, ""], ["Stoke City", 170, "stoke"], ["Tottenham Hotspur", 91, "tottenham|spurs"], ["Portsmouth", 58, "pompey"], ["Southampton", 40, "saints"], ["Aston Villa", 31, "villa"],
+    ["Queens Park Rangers", 17, "qpr"], ["Burnley", 11, ""], ["Norwich City", 4, "norwich"], ["Dulwich Hamlet", 1, "dulwich"], ["IFK Hässleholm", 1, "hassleholm|ifk hassleholm"],
+  ] },
+  { q: "Name a club Franck Ribéry played for", sub: "Senior career", know: 0.5, a: [
+    ["Bayern Munich", 300, "bayern|fc bayern|bayern munchen"], ["Marseille", 110, "olympique de marseille|om"], ["Fiorentina", 50, ""], ["Galatasaray", 40, "gala"], ["Metz", 25, "fc metz"], ["Salernitana", 20, ""],
+    ["Brest", 10, "stade brestois"], ["Alès", 4, "ales|olympique ales"], ["Boulogne", 4, "us boulogne"],
+  ] },
+  { q: "Name a club Luís Figo played for", sub: "Senior career", know: 0.55, a: [
+    ["Real Madrid", 250, "madrid|real"], ["Barcelona", 230, "barca|fc barcelona"], ["Inter Milan", 90, "inter|internazionale"], ["Sporting CP", 70, "sporting|sporting lisbon"],
+  ] },
+  { q: "Name a club Clarence Seedorf played for", sub: "Senior career", know: 0.45, a: [
+    ["AC Milan", 250, "milan"], ["Real Madrid", 140, "madrid|real"], ["Ajax", 130, ""], ["Inter Milan", 70, "inter|internazionale"], ["Sampdoria", 30, "samp"], ["Botafogo", 20, ""],
+  ] },
+  { q: "Name a club Edgar Davids played for", sub: "Senior career · loans count", know: 0.4, a: [
+    ["Juventus", 220, "juve"], ["Ajax", 153, ""], ["Barcelona", 53, "barca|fc barcelona"], ["Tottenham Hotspur", 44, "tottenham|spurs"], ["AC Milan", 36, "milan"], ["Inter Milan", 28, "inter|internazionale"],
+    ["Crystal Palace", 8, "palace"], ["Barnet", 5, ""],
+  ] },
+  { q: "Name a club Henrikh Mkhitaryan has played for", sub: "Senior career up to 2026", know: 0.45, a: [
+    ["Borussia Dortmund", 200, "dortmund|bvb"], ["Manchester United", 134, "man utd|man united|manchester utd|united"], ["Arsenal", 105, ""], ["Inter Milan", 80, "inter|internazionale"], ["Roma", 57, "as roma"],
+    ["Shakhtar Donetsk", 23, "shakhtar"], ["Metalurh Donetsk", 1, "metalurh|metalurg donetsk"], ["Pyunik", 1, "pyunik yerevan"],
+  ] },
+  { q: "Name a club Emmanuel Adebayor played for", sub: "Senior career · loans count", know: 0.45, a: [
+    ["Arsenal", 220, ""], ["Tottenham Hotspur", 137, "tottenham|spurs"], ["Manchester City", 126, "man city|city"], ["Real Madrid", 53, "madrid|real"], ["Monaco", 35, "as monaco"], ["Crystal Palace", 27, "palace"],
+    ["Metz", 8, "fc metz"], ["İstanbul Başakşehir", 5, "basaksehir|istanbul basaksehir"], ["Kayserispor", 2, ""], ["Olimpia", 2, "club olimpia"],
+  ] },
+  { q: "Name a club Dimitar Berbatov played for", sub: "Senior career", know: 0.45, a: [
+    ["Manchester United", 250, "man utd|man united|manchester utd|united"], ["Tottenham Hotspur", 170, "tottenham|spurs"], ["Bayer Leverkusen", 90, "leverkusen|bayer"], ["Fulham", 70, ""], ["Monaco", 40, "as monaco"],
+    ["CSKA Sofia", 30, "cska"], ["PAOK", 15, "paok thessaloniki"], ["Kerala Blasters", 8, "kerala"],
+  ] },
+  { q: "Name a club Paul Pogba has played for", sub: "Senior career up to 2026", know: 0.7, a: [
+    ["Manchester United", 260, "man utd|man united|manchester utd|united"], ["Juventus", 240, "juve"], ["Monaco", 60, "as monaco"],
+  ] },
+  { q: "Name a club Raúl played for", sub: "Raúl González, senior career", know: 0.5, a: [
+    ["Real Madrid", 320, "madrid|real"], ["Schalke 04", 100, "schalke"], ["Al-Sadd", 30, "al sadd|sadd"], ["New York Cosmos", 20, "cosmos|ny cosmos"],
+  ] },
+  { q: "Name a club Xabi Alonso played for", sub: "Senior career · loans count", know: 0.55, a: [
+    ["Liverpool", 250, ""], ["Real Madrid", 220, "madrid|real"], ["Bayern Munich", 130, "bayern|fc bayern|bayern munchen"], ["Real Sociedad", 70, "sociedad|la real"], ["Eibar", 10, "sd eibar"],
+  ] },
+  { q: "Name a club Diego Costa played for", sub: "Senior career · loans count", know: 0.45, a: [
+    ["Chelsea", 230, ""], ["Atlético Madrid", 230, "atletico|atleti|atletico de madrid"], ["Wolverhampton Wanderers", 60, "wolves|wolverhampton"], ["Atlético Mineiro", 30, "atletico mineiro|galo"], ["Rayo Vallecano", 25, "rayo"],
+    ["Real Valladolid", 20, "valladolid"], ["Celta Vigo", 15, "celta"], ["Botafogo", 15, ""], ["Grêmio", 15, "gremio"], ["Braga", 10, "sc braga"], ["Albacete", 8, ""], ["Penafiel", 4, ""],
+  ] },
+  { q: "Name a club Kevin-Prince Boateng played for", sub: "Senior career · loans count", know: 0.35, a: [
+    ["AC Milan", 200, "milan"], ["Schalke 04", 48, "schalke"], ["Barcelona", 39, "barca|fc barcelona"], ["Eintracht Frankfurt", 31, "frankfurt|eintracht"], ["Tottenham Hotspur", 31, "tottenham|spurs"], ["Portsmouth", 23, "pompey"],
+    ["Hertha BSC", 23, "hertha|hertha berlin"], ["Fiorentina", 11, ""], ["Borussia Dortmund", 9, "dortmund|bvb"], ["Las Palmas", 7, "ud las palmas"], ["Beşiktaş", 5, "besiktas"], ["Sassuolo", 3, ""], ["Monza", 2, ""],
+    ["Genoa", 1, ""],
+  ] },
+  { q: "Name a club Juan Mata played for", sub: "Senior career · Real Madrid Castilla counts as Real Madrid", know: 0.45, a: [
+    ["Chelsea", 230, ""], ["Manchester United", 210, "man utd|man united|manchester utd|united"], ["Valencia", 110, ""], ["Galatasaray", 40, "gala"], ["Real Madrid", 30, "madrid|real|real madrid castilla|castilla"],
+    ["Vissel Kobe", 20, "kobe"], ["Western Sydney Wanderers", 15, "western sydney|wanderers"],
+  ] },
+  { q: "Name a club Toni Kroos played for", sub: "Senior career · loans count", know: 0.7, a: [
+    ["Real Madrid", 300, "madrid|real"], ["Bayern Munich", 200, "bayern|fc bayern|bayern munchen"], ["Bayer Leverkusen", 50, "leverkusen|bayer"],
+  ] },
+  { q: "Name a club Mario Götze has played for", sub: "Senior career up to 2026", know: 0.5, a: [
+    ["Borussia Dortmund", 250, "dortmund|bvb"], ["Bayern Munich", 200, "bayern|fc bayern|bayern munchen"], ["Eintracht Frankfurt", 80, "frankfurt|eintracht"], ["PSV Eindhoven", 60, "psv"],
+  ] },
+  { q: "Name a club İlkay Gündoğan has played for", sub: "Senior career up to 2026", know: 0.5, a: [
+    ["Manchester City", 280, "man city|city"], ["Borussia Dortmund", 150, "dortmund|bvb"], ["Barcelona", 100, "barca|fc barcelona"], ["Galatasaray", 60, "gala"], ["1. FC Nürnberg", 20, "nurnberg|nuremberg|fc nurnberg"],
+    ["VfL Bochum", 10, "bochum"],
+  ] },
+  { q: "Name a club Xherdan Shaqiri has played for", sub: "Senior career up to 2026", know: 0.45, a: [
+    ["Liverpool", 200, ""], ["Bayern Munich", 151, "bayern|fc bayern|bayern munchen"], ["Stoke City", 83, "stoke"], ["Basel", 61, "fc basel"], ["Inter Milan", 33, "inter|internazionale"], ["Chicago Fire", 18, "chicago"],
+    ["Lyon", 13, "olympique lyonnais|ol"],
+  ] },
+  { q: "Name a club Son Heung-min has played for", sub: "Senior career up to 2026", know: 0.7, a: [
+    ["Tottenham Hotspur", 300, "tottenham|spurs"], ["Los Angeles FC", 100, "lafc|los angeles"], ["Bayer Leverkusen", 60, "leverkusen|bayer"], ["Hamburger SV", 50, "hamburg|hsv"],
+  ] },
+  { q: "Name a club Virgil van Dijk has played for", sub: "Senior career up to 2026", know: 0.65, a: [
+    ["Liverpool", 300, ""], ["Southampton", 130, "saints"], ["Celtic", 90, ""], ["Groningen", 40, "fc groningen"],
+  ] },
+  { q: "Name a club Riyad Mahrez has played for", sub: "Senior career up to 2026", know: 0.55, a: [
+    ["Leicester City", 250, "leicester"], ["Manchester City", 220, "man city|city"], ["Al-Ahli", 60, "al ahli|ahli"], ["Le Havre", 30, ""], ["Quimper", 5, ""],
+  ] },
+  { q: "Name a club Jamie Vardy has played for", sub: "Senior career up to 2026", know: 0.55, a: [
+    ["Leicester City", 300, "leicester"], ["Fleetwood Town", 60, "fleetwood"], ["Cremonese", 50, "us cremonese"], ["FC Halifax Town", 25, "halifax|halifax town"], ["Stocksbridge Park Steels", 15, "stocksbridge"],
+  ] },
+  { q: "Name a club Jordan Henderson has played for", sub: "Senior career up to 2026 · loans count", know: 0.45, a: [
+    ["Liverpool", 300, ""], ["Sunderland", 100, ""], ["Al-Ettifaq", 60, "ettifaq|al ettifaq"], ["Ajax", 60, ""], ["Brentford", 50, ""], ["Coventry City", 10, "coventry"],
+  ] },
+  { q: "Name a club Rio Ferdinand played for", sub: "Senior career · loans count", know: 0.55, a: [
+    ["Manchester United", 300, "man utd|man united|manchester utd|united"], ["Leeds United", 120, "leeds"], ["West Ham United", 110, "west ham|hammers"], ["Queens Park Rangers", 40, "qpr"], ["Bournemouth", 10, "afc bournemouth"],
+  ] },
+  { q: "Name a club Ashley Cole played for", sub: "Senior career · loans count", know: 0.5, a: [
+    ["Chelsea", 250, ""], ["Arsenal", 230, ""], ["LA Galaxy", 60, "galaxy|los angeles galaxy"], ["Roma", 50, "as roma"], ["Derby County", 30, "derby"], ["Crystal Palace", 15, "palace"],
+  ] },
+  { q: "Name a club Joe Hart played for", sub: "Senior career · loans count", know: 0.4, a: [
+    ["Manchester City", 280, "man city|city"], ["Celtic", 90, ""], ["Burnley", 60, ""], ["West Ham United", 60, "west ham|hammers"], ["Torino", 60, ""], ["Tottenham Hotspur", 50, "tottenham|spurs"],
+    ["Birmingham City", 40, "birmingham"], ["Shrewsbury Town", 20, "shrewsbury"], ["Blackpool", 10, ""], ["Tranmere Rovers", 8, "tranmere"],
+  ] },
+  { q: "Name a club Jermain Defoe played for", sub: "Senior career · loans count", know: 0.45, a: [
+    ["Tottenham Hotspur", 250, "tottenham|spurs"], ["Sunderland", 120, ""], ["West Ham United", 100, "west ham|hammers"], ["Portsmouth", 80, "pompey"], ["Rangers", 60, "glasgow rangers"], ["Bournemouth", 50, "afc bournemouth"],
+    ["Toronto FC", 40, "toronto"],
+  ] },
+  { q: "Name a club Andy Carroll has played for", sub: "Senior career up to 2026 · loans count", know: 0.45, a: [
+    ["Newcastle United", 220, "newcastle"], ["Liverpool", 193, ""], ["West Ham United", 131, "west ham|hammers"], ["West Bromwich Albion", 22, "west brom|wba"], ["Reading", 22, ""], ["Bordeaux", 11, "girondins"],
+    ["Amiens", 8, "amiens sc"], ["Dagenham & Redbridge", 6, "dagenham"], ["Preston North End", 3, "preston"],
+  ] },
+  { q: "Name a club Daniel Sturridge played for", sub: "Senior career · loans count", know: 0.45, a: [
+    ["Liverpool", 270, ""], ["Chelsea", 150, ""], ["Manchester City", 90, "man city|city"], ["Bolton Wanderers", 40, "bolton"], ["West Bromwich Albion", 30, "west brom|wba"], ["Trabzonspor", 25, "trabzon"],
+    ["Perth Glory", 10, "perth"],
+  ] },
+  { q: "Name a club Danny Welbeck has played for", sub: "Senior career up to 2026 · loans count", know: 0.45, a: [
+    ["Manchester United", 220, "man utd|man united|manchester utd|united"], ["Arsenal", 180, ""], ["Brighton & Hove Albion", 150, "brighton"], ["Watford", 50, ""], ["Sunderland", 40, ""], ["Preston North End", 10, "preston"],
+  ] },
+  { q: "Name a club Emile Heskey played for", sub: "Senior career", know: 0.4, a: [
+    ["Liverpool", 250, ""], ["Leicester City", 141, "leicester"], ["Aston Villa", 80, "villa"], ["Birmingham City", 60, "birmingham"], ["Wigan Athletic", 51, "wigan"], ["Bolton Wanderers", 23, "bolton"], ["Newcastle Jets", 15, "jets"],
+  ] },
+  { q: "Name a club Pepe Reina played for", sub: "Senior career · loans count", know: 0.35, a: [
+    ["Liverpool", 250, ""], ["Napoli", 105, ""], ["Villarreal", 75, ""], ["Barcelona", 30, "barca|fc barcelona"], ["AC Milan", 22, "milan"], ["Lazio", 22, "ss lazio"], ["Bayern Munich", 15, "bayern|fc bayern|bayern munchen"],
+    ["Aston Villa", 15, "villa"], ["Como", 9, "como 1907"],
+  ] },
+  { q: "Name a club Edwin van der Sar played for", sub: "Senior career", know: 0.5, a: [
+    ["Manchester United", 260, "man utd|man united|manchester utd|united"], ["Ajax", 170, ""], ["Juventus", 80, "juve"], ["Fulham", 70, ""],
+  ] },
+  { q: "Name a club Thibaut Courtois has played for", sub: "Senior career up to 2026 · loans count", know: 0.6, a: [
+    ["Real Madrid", 270, "madrid|real"], ["Chelsea", 200, ""], ["Atlético Madrid", 130, "atletico|atleti|atletico de madrid"], ["Genk", 40, "krc genk"],
+  ] },
+  { q: "Name a club Jan Oblak has played for", sub: "Senior career up to 2026 · loans count", know: 0.4, a: [
+    ["Atlético Madrid", 300, "atletico|atleti|atletico de madrid"], ["Benfica", 80, ""], ["Olimpija Ljubljana", 20, "olimpija|ljubljana"], ["Rio Ave", 15, ""], ["União de Leiria", 8, "leiria|uniao de leiria"],
+    ["Beira-Mar", 5, "beira mar"], ["Olhanense", 5, ""],
+  ] },
+  { q: "Name a club Hugo Lloris has played for", sub: "Senior career up to 2026", know: 0.55, a: [
+    ["Tottenham Hotspur", 280, "tottenham|spurs"], ["Lyon", 120, "olympique lyonnais|ol"], ["Los Angeles FC", 60, "lafc|los angeles"], ["Nice", 40, "ogc nice"],
+  ] },
+  { q: "Name a club Sadio Mané has played for", sub: "Senior career up to 2026", know: 0.6, a: [
+    ["Liverpool", 300, ""], ["Bayern Munich", 100, "bayern|fc bayern|bayern munchen"], ["Southampton", 100, "saints"], ["Al-Nassr", 60, "al nassr|nassr"], ["Red Bull Salzburg", 40, "salzburg|rb salzburg"], ["Metz", 20, "fc metz"],
+  ] },
+  { q: "Name a club Olivier Giroud has played for", sub: "Senior career up to 2026 · loans count", know: 0.55, a: [
+    ["Arsenal", 250, ""], ["Chelsea", 180, ""], ["AC Milan", 120, "milan"], ["Montpellier", 60, "montpellier hsc"], ["Los Angeles FC", 50, "lafc|los angeles"], ["Lille", 30, "losc"], ["Tours", 15, "tours fc"],
+    ["Grenoble", 10, "grenoble foot"], ["Istres", 4, "fc istres"],
+  ] },
+  { q: "Name a club Rafael Benítez has managed", sub: "Senior club jobs up to 2026", know: 0.45, a: [
+    ["Liverpool", 250, ""], ["Valencia", 89, ""], ["Newcastle United", 79, "newcastle"], ["Chelsea", 69, ""], ["Real Madrid", 60, "madrid|real"], ["Napoli", 51, ""], ["Inter Milan", 34, "inter|internazionale"], ["Everton", 34, ""],
+    ["Celta Vigo", 10, "celta"], ["Panathinaikos", 7, "pao"], ["Tenerife", 5, "cd tenerife"], ["Dalian Yifang", 3, "dalian|dalian professional"], ["Osasuna", 2, ""], ["Real Valladolid", 2, "valladolid"], ["Extremadura", 1, "cf extremadura"],
+  ] },
+  { q: "Name a club Thomas Tuchel has managed", sub: "Club sides only, up to 2026", know: 0.55, a: [
+    ["Chelsea", 230, ""], ["Bayern Munich", 170, "bayern|fc bayern|bayern munchen"], ["Paris Saint-Germain", 170, "psg|paris sg|paris"], ["Borussia Dortmund", 150, "dortmund|bvb"], ["Mainz 05", 60, "mainz"], ["FC Augsburg", 5, "augsburg|augsburg ii"],
+  ] },
+  { q: "Name a club Unai Emery has managed", sub: "Club sides only, up to 2026", know: 0.5, a: [
+    ["Arsenal", 200, ""], ["Aston Villa", 165, "villa"], ["Sevilla", 134, ""], ["Paris Saint-Germain", 80, "psg|paris sg|paris"], ["Villarreal", 57, ""], ["Valencia", 23, ""], ["Spartak Moscow", 5, "spartak"], ["Almería", 3, "almeria"],
+    ["Lorca Deportiva", 1, "lorca"],
+  ] },
+  { q: "Name a club Claudio Ranieri has managed", sub: "Club sides only", know: 0.4, a: [
+    ["Leicester City", 250, "leicester"], ["Chelsea", 115, ""], ["Roma", 62, "as roma"], ["Juventus", 36, "juve"], ["Valencia", 29, ""], ["Inter Milan", 22, "inter|internazionale"], ["Monaco", 15, "as monaco"], ["Napoli", 15, ""],
+    ["Fiorentina", 15, ""], ["Cagliari", 15, ""], ["Fulham", 13, ""], ["Watford", 10, ""], ["Atlético Madrid", 8, "atletico|atleti|atletico de madrid"], ["Parma", 5, ""], ["Sampdoria", 5, "samp"], ["Nantes", 3, "fc nantes"],
+    ["Campania Puteolana", 1, "puteolana"], ["Vigor Lamezia", 1, "lamezia"],
+  ] },
+  { q: "Name a club Massimiliano Allegri has managed", sub: "Club sides only, up to 2026", know: 0.4, a: [
+    ["Juventus", 250, "juve"], ["AC Milan", 200, "milan"], ["Cagliari", 50, ""], ["Sassuolo", 30, ""], ["Grosseto", 10, ""], ["SPAL", 8, ""], ["Aglianese", 3, ""],
+  ] },
+  { q: "Name a club Louis van Gaal has managed", sub: "Club sides only", know: 0.45, a: [
+    ["Manchester United", 220, "man utd|man united|manchester utd|united"], ["Barcelona", 154, "barca|fc barcelona"], ["Ajax", 154, ""], ["Bayern Munich", 75, "bayern|fc bayern|bayern munchen"], ["AZ Alkmaar", 16, "az"],
+  ] },
+  { q: "Name a club Arsène Wenger has managed", sub: "Club sides only", know: 0.5, a: [
+    ["Arsenal", 330, ""], ["Monaco", 90, "as monaco"], ["Nagoya Grampus", 40, "nagoya|nagoya grampus eight|grampus"], ["Nancy", 20, "as nancy|nancy lorraine"],
+  ] },
+  { q: "Name a club Marcelo Bielsa has managed", sub: "Club sides only · counted if appointed", know: 0.3, a: [
+    ["Leeds United", 220, "leeds"], ["Athletic Bilbao", 75, "athletic club|bilbao|athletic"], ["Marseille", 54, "olympique de marseille|om"], ["Newell's Old Boys", 22, "newells|newells old boys"], ["Lille", 16, "losc"],
+    ["Lazio", 11, "ss lazio"], ["Espanyol", 6, ""], ["Vélez Sarsfield", 5, "velez|velez sarsfield"], ["Atlas", 2, ""], ["Club América", 2, "america"],
+  ] },
+  { q: "Name a club Luis Enrique has managed", sub: "Club sides only, up to 2026 · Barcelona B counts as Barcelona", know: 0.5, a: [
+    ["Paris Saint-Germain", 230, "psg|paris sg|paris"], ["Barcelona", 220, "barca|fc barcelona"], ["Roma", 70, "as roma"], ["Celta Vigo", 60, "celta"],
+  ] },
+  { q: "Name a club Harry Redknapp has managed", sub: "Club sides only", know: 0.4, a: [
+    ["Tottenham Hotspur", 220, "tottenham|spurs"], ["West Ham United", 138, "west ham|hammers"], ["Portsmouth", 124, "pompey"], ["Southampton", 28, "saints"], ["Queens Park Rangers", 21, "qpr"], ["Bournemouth", 15, "afc bournemouth"],
+    ["Birmingham City", 6, "birmingham"],
+  ] },
+  { q: "Name a club Sam Allardyce has managed", sub: "Club sides only, caretaker spells count", know: 0.4, a: [
+    ["Bolton Wanderers", 200, "bolton"], ["West Ham United", 92, "west ham|hammers"], ["Newcastle United", 57, "newcastle"], ["Sunderland", 48, ""], ["Everton", 48, ""], ["Crystal Palace", 38, "palace"],
+    ["Blackburn Rovers", 38, "blackburn"], ["West Bromwich Albion", 23, "west brom|wba"], ["Leeds United", 16, "leeds"], ["Blackpool", 3, ""], ["Notts County", 2, "notts"], ["Limerick", 1, "limerick fc"],
+    ["Preston North End", 1, "preston"],
+  ] },
+  { q: "Name a club David Moyes has managed", sub: "Club sides only, up to 2026", know: 0.5, a: [
+    ["Everton", 250, ""], ["West Ham United", 170, "west ham|hammers"], ["Manchester United", 150, "man utd|man united|manchester utd|united"], ["Real Sociedad", 50, "sociedad|la real"], ["Sunderland", 50, ""],
+    ["Preston North End", 30, "preston"],
+  ] },
+  { q: "Name a player from Brazil's 2002 World Cup-winning squad", sub: "Any of the 23", know: 0.7, a: [
+    ["Ronaldo Nazário", 250, "ronaldo|r9|ronaldo nazario|nazario|brazilian ronaldo|o fenomeno"], ["Ronaldinho", 209, "dinho"], ["Rivaldo", 158, ""], ["Roberto Carlos", 146, "carlos"], ["Cafu", 122, ""], ["Kaká", 69, "kaka"],
+    ["Lúcio", 26, "lucio"], ["Gilberto Silva", 26, "gilberto"], ["Marcos", 13, ""], ["Dida", 10, ""], ["Edmílson", 10, "edmilson"], ["Roque Júnior", 7, "roque junior"], ["Denílson", 7, "denilson"],
+    ["Kléberson", 7, "kleberson"], ["Juliano Belletti", 5, "belletti"], ["Juninho Paulista", 5, "juninho"], ["Rogério Ceni", 5, "rogerio ceni|ceni"], ["Edílson", 3, "edilson"], ["Luizão", 3, "luizao"],
+    ["Vampeta", 3, ""], ["Ricardinho", 2, ""], ["Júnior", 2, "junior"], ["Anderson Polga", 1, "polga"],
+  ] },
+  { q: "Name a player from Italy's 2006 World Cup-winning squad", sub: "Any of the 23", know: 0.65, a: [
+    ["Gianluigi Buffon", 220, "buffon|gigi buffon"], ["Andrea Pirlo", 185, "pirlo"], ["Fabio Cannavaro", 153, "cannavaro"], ["Francesco Totti", 124, "totti"], ["Alessandro Del Piero", 98, "del piero"], ["Gennaro Gattuso", 74, "gattuso"],
+    ["Marco Materazzi", 63, "materazzi"], ["Alessandro Nesta", 44, "nesta"], ["Filippo Inzaghi", 36, "inzaghi|pippo inzaghi"], ["Luca Toni", 28, "toni"], ["Fabio Grosso", 21, "grosso"], ["Daniele De Rossi", 21, "de rossi"],
+    ["Gianluca Zambrotta", 15, "zambrotta"], ["Mauro Camoranesi", 6, "camoranesi"], ["Alberto Gilardino", 6, "gilardino"], ["Simone Perrotta", 3, "perrotta"], ["Vincenzo Iaquinta", 3, "iaquinta"],
+    ["Andrea Barzagli", 3, "barzagli"], ["Massimo Oddo", 2, "oddo"], ["Cristian Zaccardo", 1, "zaccardo"], ["Angelo Peruzzi", 1, "peruzzi"], ["Simone Barone", 1, "barone"], ["Marco Amelia", 1, "amelia"],
+  ] },
+  { q: "Name a player from France's 1998 World Cup-winning squad", sub: "Any of the 22", know: 0.6, a: [
+    ["Zinedine Zidane", 250, "zidane|zizou"], ["Thierry Henry", 130, "henry"], ["Didier Deschamps", 96, "deschamps"], ["Fabien Barthez", 75, "barthez"], ["Lilian Thuram", 56, "thuram"], ["Patrick Vieira", 56, "vieira"],
+    ["Marcel Desailly", 47, "desailly"], ["Emmanuel Petit", 39, "petit"], ["David Trezeguet", 39, "trezeguet"], ["Laurent Blanc", 31, "blanc"], ["Bixente Lizarazu", 24, "lizarazu"], ["Youri Djorkaeff", 24, "djorkaeff"],
+    ["Robert Pirès", 17, "pires"], ["Frank Leboeuf", 11, "leboeuf"], ["Christian Karembeu", 9, "karembeu"], ["Christophe Dugarry", 9, "dugarry"], ["Stéphane Guivarc'h", 4, "guivarch"], ["Vincent Candela", 3, "candela"],
+    ["Alain Boghossian", 2, "boghossian"], ["Bernard Lama", 2, "lama"], ["Bernard Diomède", 1, "diomede"], ["Lionel Charbonnier", 1, "charbonnier"],
+  ] },
+  { q: "Name a player from Spain's Euro 2008-winning squad", sub: "Any of the 23", know: 0.6, a: [
+    ["Fernando Torres", 200, "torres"], ["Xavi", 165, "xavi hernandez"], ["Iker Casillas", 149, "casillas"], ["Andrés Iniesta", 134, "iniesta"], ["David Villa", 105, "villa"], ["Sergio Ramos", 92, "ramos"],
+    ["Carles Puyol", 68, "puyol"], ["Cesc Fàbregas", 57, "fabregas|cesc"], ["Xabi Alonso", 48, "alonso"], ["David Silva", 38, "silva"], ["Marcos Senna", 16, "senna"], ["Santi Cazorla", 11, "cazorla"],
+    ["Pepe Reina", 7, "reina"], ["Joan Capdevila", 5, "capdevila"], ["Carlos Marchena", 5, "marchena"], ["Álvaro Arbeloa", 3, "arbeloa"], ["Raúl Albiol", 3, "albiol"], ["Dani Güiza", 2, "guiza"],
+    ["Sergio García", 1, "sergio garcia"], ["Rubén de la Red", 1, "de la red"], ["Fernando Navarro", 1, "navarro"], ["Juanito", 1, "juanito gutierrez"], ["Andrés Palop", 1, "palop"],
+  ] },
+  { q: "Name a player from Spain's Euro 2012-winning squad", sub: "Any of the 23", know: 0.6, a: [
+    ["Andrés Iniesta", 190, "iniesta"], ["Xavi", 172, "xavi hernandez"], ["Iker Casillas", 156, "casillas"], ["Sergio Ramos", 124, "ramos"], ["Fernando Torres", 96, "torres"], ["Gerard Piqué", 83, "pique"],
+    ["Sergio Busquets", 71, "busquets"], ["Cesc Fàbregas", 71, "fabregas|cesc"], ["Xabi Alonso", 60, "alonso"], ["David Silva", 60, "silva"], ["Jordi Alba", 50, "alba"], ["Juan Mata", 24, "mata"],
+    ["Pedro", 17, "pedro rodriguez"], ["Santi Cazorla", 12, "cazorla"], ["Jesús Navas", 9, "navas"], ["Álvaro Arbeloa", 7, "arbeloa"], ["Pepe Reina", 5, "reina"], ["Víctor Valdés", 5, "valdes"],
+    ["Fernando Llorente", 3, "llorente"], ["Álvaro Negredo", 3, "negredo"], ["Javi Martínez", 2, "javi martinez|martinez"], ["Raúl Albiol", 1, "albiol"], ["Juanfran", 1, ""],
+  ] },
+  { q: "Name a player from England's Euro 2024 squad", sub: "Any of the 26", know: 0.75, a: [
+    ["Harry Kane", 250, "kane"], ["Jude Bellingham", 215, "bellingham"], ["Bukayo Saka", 167, "saka"], ["Phil Foden", 125, "foden"], ["Declan Rice", 112, "rice"], ["Cole Palmer", 88, "palmer"],
+    ["Jordan Pickford", 67, "pickford"], ["Kyle Walker", 48, "walker"], ["John Stones", 48, "stones"], ["Trent Alexander-Arnold", 48, "trent|alexander arnold|taa"], ["Kobbie Mainoo", 32, "mainoo"],
+    ["Ollie Watkins", 32, "watkins"], ["Marc Guéhi", 19, "guehi"], ["Luke Shaw", 19, "shaw"], ["Kieran Trippier", 14, "trippier"], ["Ivan Toney", 9, "toney"], ["Conor Gallagher", 9, "gallagher"],
+    ["Anthony Gordon", 7, "gordon"], ["Eberechi Eze", 6, "eze"], ["Jarrod Bowen", 6, "bowen"], ["Ezri Konsa", 4, "konsa"], ["Aaron Ramsdale", 3, "ramsdale"], ["Joe Gomez", 2, "gomez"],
+    ["Lewis Dunk", 1, "dunk"], ["Dean Henderson", 1, "henderson"], ["Adam Wharton", 1, "wharton"],
+  ] },
+  { q: "Name a player from England's Women's Euro 2022-winning squad", sub: "Any of the 23 Lionesses", know: 0.45, a: [
+    ["Beth Mead", 200, "mead"], ["Leah Williamson", 165, "williamson"], ["Chloe Kelly", 149, "kelly"], ["Mary Earps", 134, "earps"], ["Lucy Bronze", 119, "bronze"], ["Alessia Russo", 105, "russo"],
+    ["Ella Toone", 80, "toone"], ["Millie Bright", 57, "bright"], ["Lauren Hemp", 48, "hemp"], ["Georgia Stanway", 38, "stanway"], ["Ellen White", 38, "white"], ["Keira Walsh", 30, "walsh"],
+    ["Fran Kirby", 23, "kirby"], ["Rachel Daly", 16, "daly"], ["Jill Scott", 16, "scott"], ["Alex Greenwood", 11, "greenwood"], ["Bethany England", 7, "england"], ["Nikita Parris", 5, "parris"],
+    ["Demi Stokes", 3, "stokes"], ["Jess Carter", 3, "carter"], ["Hannah Hampton", 3, "hampton"], ["Lotte Wubben-Moy", 2, "wubben moy"], ["Ellie Roebuck", 1, "roebuck"],
+  ] },
+  { q: "Name a player from Leicester's 2015–16 title team", sub: "Made a Premier League appearance that season", know: 0.6, a: [
+    ["Jamie Vardy", 250, "vardy"], ["Riyad Mahrez", 179, "mahrez"], ["N'Golo Kanté", 153, "kante|ngolo kante"], ["Kasper Schmeichel", 105, "schmeichel"], ["Wes Morgan", 45, "morgan"], ["Robert Huth", 37, "huth"],
+    ["Danny Drinkwater", 37, "drinkwater"], ["Shinji Okazaki", 29, "okazaki"], ["Christian Fuchs", 22, "fuchs"], ["Marc Albrighton", 19, "albrighton"], ["Danny Simpson", 13, "simpson"], ["Leonardo Ulloa", 10, "ulloa"],
+    ["Jeffrey Schlupp", 8, "schlupp"], ["Andy King", 8, "king"], ["Demarai Gray", 6, "gray"], ["Nathan Dyer", 4, "dyer"], ["Gökhan İnler", 3, "inler"], ["Ritchie De Laet", 2, "de laet"],
+    ["Marcin Wasilewski", 1, "wasilewski"], ["Daniel Amartey", 1, "amartey"], ["Yohan Benalouane", 1, "benalouane"], ["Mark Schwarzer", 1, "schwarzer"], ["Andrej Kramarić", 1, "kramaric"],
+  ] },
+  { q: "Name a player who played in the 2008 Champions League final", sub: "Man United v Chelsea in Moscow · starters or subs who came on", know: 0.5, a: [
+    ["Cristiano Ronaldo", 220, "cristiano|ronaldo|cr7"], ["Wayne Rooney", 110, "rooney"], ["John Terry", 110, "terry"], ["Frank Lampard", 85, "lampard"], ["Didier Drogba", 85, "drogba"], ["Petr Čech", 36, "cech"],
+    ["Edwin van der Sar", 36, "van der sar"], ["Carlos Tevez", 28, "tevez"], ["Ryan Giggs", 28, "giggs"], ["Paul Scholes", 21, "scholes"], ["Rio Ferdinand", 21, "ferdinand|rio"], ["Nemanja Vidić", 18, "vidic"],
+    ["Michael Ballack", 15, "ballack"], ["Ashley Cole", 13, ""], ["Michael Carrick", 10, "carrick"], ["Patrice Evra", 10, "evra"], ["Nicolas Anelka", 10, "anelka"], ["Claude Makélélé", 8, "makelele"],
+    ["Michael Essien", 8, "essien"], ["Owen Hargreaves", 6, "hargreaves"], ["Joe Cole", 4, ""], ["Ricardo Carvalho", 3, "carvalho"], ["Florent Malouda", 3, "malouda"], ["Wes Brown", 2, "brown"],
+    ["Nani", 2, ""], ["Anderson", 1, ""], ["Salomon Kalou", 1, "kalou"], ["Juliano Belletti", 1, "belletti"],
+  ] },
+  { q: "Name a player who played in the 2009 Champions League final", sub: "Barcelona v Man United in Rome · starters or subs who came on", know: 0.5, a: [
+    ["Lionel Messi", 230, "messi"], ["Cristiano Ronaldo", 179, "cristiano|ronaldo|cr7"], ["Andrés Iniesta", 82, "iniesta"], ["Xavi", 82, "xavi hernandez"], ["Wayne Rooney", 71, "rooney"], ["Samuel Eto'o", 61, "etoo|eto o"],
+    ["Thierry Henry", 51, "henry"], ["Gerard Piqué", 34, "pique"], ["Carles Puyol", 34, "puyol"], ["Sergio Busquets", 20, "busquets"], ["Víctor Valdés", 15, "valdes"], ["Ryan Giggs", 15, "giggs"],
+    ["Edwin van der Sar", 15, "van der sar"], ["Rio Ferdinand", 12, "ferdinand|rio"], ["Nemanja Vidić", 10, "vidic"], ["Carlos Tevez", 10, "tevez"], ["Patrice Evra", 8, "evra"], ["Michael Carrick", 8, "carrick"],
+    ["Yaya Touré", 6, "yaya|toure"], ["Dimitar Berbatov", 6, "berbatov"], ["Paul Scholes", 6, "scholes"], ["Park Ji-sung", 4, "park|ji sung park"], ["John O'Shea", 2, "oshea"], ["Anderson", 1, ""],
+    ["Sylvinho", 1, ""], ["Pedro", 1, "pedro rodriguez"], ["Seydou Keita", 1, "keita"],
+  ] },
+  { q: "Name a player who played in the 2011 Champions League final", sub: "Barcelona v Man United at Wembley · starters or subs who came on", know: 0.5, a: [
+    ["Lionel Messi", 230, "messi"], ["Wayne Rooney", 94, "rooney"], ["Xavi", 82, "xavi hernandez"], ["Andrés Iniesta", 82, "iniesta"], ["David Villa", 51, "villa"], ["Javier Hernández", 27, "chicharito|hernandez"],
+    ["Pedro", 20, "pedro rodriguez"], ["Gerard Piqué", 20, "pique"], ["Dani Alves", 20, "alves|daniel alves"], ["Sergio Busquets", 15, "busquets"], ["Javier Mascherano", 12, "mascherano"], ["Edwin van der Sar", 12, "van der sar"],
+    ["Ryan Giggs", 12, "giggs"], ["Rio Ferdinand", 10, "ferdinand|rio"], ["Nemanja Vidić", 10, "vidic"], ["Víctor Valdés", 8, "valdes"], ["Patrice Evra", 6, "evra"], ["Michael Carrick", 6, "carrick"],
+    ["Park Ji-sung", 4, "park|ji sung park"], ["Antonio Valencia", 3, "valencia"], ["Carles Puyol", 3, "puyol"], ["Éric Abidal", 3, "abidal"], ["Nani", 2, ""], ["Paul Scholes", 2, "scholes"],
+    ["Fábio", 1, "fabio da silva"], ["Ibrahim Afellay", 1, "afellay"], ["Seydou Keita", 1, "keita"],
+  ] },
+  { q: "Name a player who played in the 2005 Champions League final", sub: "Liverpool v AC Milan in Istanbul · starters or subs who came on", know: 0.5, a: [
+    ["Steven Gerrard", 230, "gerrard|stevie g"], ["Andriy Shevchenko", 71, "shevchenko|sheva"], ["Paolo Maldini", 71, "maldini"], ["Kaká", 61, "kaka"], ["Andrea Pirlo", 51, "pirlo"], ["Jamie Carragher", 51, "carragher"],
+    ["Xabi Alonso", 42, "alonso|xabi"], ["Jerzy Dudek", 34, "dudek"], ["Hernán Crespo", 20, "crespo"], ["Gennaro Gattuso", 20, "gattuso"], ["Cafu", 15, ""], ["Alessandro Nesta", 15, "nesta"],
+    ["Clarence Seedorf", 15, "seedorf"], ["Dida", 10, ""], ["Jaap Stam", 10, "stam"], ["Luis García", 10, "luis garcia"], ["Milan Baroš", 6, "baros"], ["Sami Hyypiä", 6, "hyypia"],
+    ["Dietmar Hamann", 6, "hamann|didi hamann"], ["Harry Kewell", 4, "kewell"], ["Vladimír Šmicer", 4, "smicer"], ["John Arne Riise", 4, "riise"], ["Djibril Cissé", 3, "cisse"], ["Steve Finnan", 2, "finnan"],
+    ["Rui Costa", 2, ""], ["Djimi Traoré", 2, "traore"], ["Serginho", 1, ""], ["Jon Dahl Tomasson", 1, "tomasson"],
+  ] },
+  { q: "Name a player who played in the 1999 Champions League final", sub: "Man United v Bayern in Barcelona · starters or subs who came on", know: 0.4, a: [
+    ["David Beckham", 200, "beckham"], ["Ole Gunnar Solskjær", 119, "solskjaer|ole"], ["Teddy Sheringham", 92, "sheringham"], ["Peter Schmeichel", 80, "schmeichel"], ["Ryan Giggs", 57, "giggs"], ["Oliver Kahn", 38, "kahn"],
+    ["Dwight Yorke", 30, "yorke"], ["Andy Cole", 30, "cole|andrew cole"], ["Gary Neville", 23, "neville"], ["Lothar Matthäus", 16, "matthaus|matthaeus"], ["Jaap Stam", 16, "stam"], ["Stefan Effenberg", 11, "effenberg"],
+    ["Nicky Butt", 9, "butt"], ["Denis Irwin", 7, "irwin"], ["Mario Basler", 7, "basler"], ["Ronny Johnsen", 3, "johnsen"], ["Jesper Blomqvist", 3, "blomqvist"], ["Mehmet Scholl", 3, "scholl"],
+    ["Hasan Salihamidžić", 2, "salihamidzic|brazzo"], ["Carsten Jancker", 2, "jancker"], ["Samuel Kuffour", 2, "kuffour"], ["Markus Babbel", 1, "babbel"], ["Thorsten Fink", 1, "fink"], ["Jens Jeremies", 1, "jeremies"],
+    ["Thomas Linke", 1, "linke"], ["Michael Tarnat", 1, "tarnat"], ["Alexander Zickler", 1, "zickler"],
+  ] },
+  { q: "Name a player who played in the 2006 Champions League final", sub: "Barcelona v Arsenal in Paris · starters or subs who came on", know: 0.45, a: [
+    ["Ronaldinho", 200, "dinho"], ["Thierry Henry", 182, "henry"], ["Samuel Eto'o", 92, "etoo|eto o"], ["Cesc Fàbregas", 48, "fabregas|cesc"], ["Andrés Iniesta", 38, "iniesta"], ["Jens Lehmann", 38, "lehmann"],
+    ["Sol Campbell", 30, "campbell"], ["Carles Puyol", 30, "puyol"], ["Deco", 23, ""], ["Henrik Larsson", 16, "larsson"], ["Ashley Cole", 16, "cole"], ["Robert Pirès", 11, "pires"],
+    ["Freddie Ljungberg", 11, "ljungberg"], ["Kolo Touré", 9, "toure|kolo"], ["Víctor Valdés", 9, "valdes"], ["Juliano Belletti", 9, "belletti"], ["Gilberto Silva", 7, "gilberto"], ["Alexander Hleb", 5, "hleb"],
+    ["Ludovic Giuly", 5, "giuly"], ["Rafael Márquez", 5, "marquez"], ["Mark van Bommel", 3, "van bommel"], ["Emmanuel Eboué", 3, "eboue"], ["Manuel Almunia", 2, "almunia"], ["Giovanni van Bronckhorst", 2, "van bronckhorst|gio"],
+    ["Mathieu Flamini", 1, "flamini"], ["José Antonio Reyes", 1, "reyes"], ["Edmílson", 1, "edmilson"], ["Oleguer", 1, ""],
+  ] },
+  { q: "Name a player who played in the 2019 Champions League final", sub: "Tottenham v Liverpool in Madrid · starters or subs who came on", know: 0.6, a: [
+    ["Mohamed Salah", 200, "salah|mo salah"], ["Harry Kane", 149, "kane"], ["Virgil van Dijk", 119, "van dijk|vvd"], ["Sadio Mané", 80, "mane"], ["Son Heung-min", 68, "son|heung min son|sonny"], ["Divock Origi", 48, "origi"],
+    ["Roberto Firmino", 38, "firmino"], ["Alisson Becker", 38, "alisson"], ["Hugo Lloris", 30, "lloris"], ["Trent Alexander-Arnold", 30, "trent|alexander arnold|taa"], ["Andy Robertson", 30, "robertson|robbo"], ["Jordan Henderson", 23, "henderson|hendo"],
+    ["Christian Eriksen", 23, "eriksen"], ["Dele Alli", 20, "dele|alli"], ["Lucas Moura", 16, "lucas|moura"], ["Fabinho", 14, ""], ["Georginio Wijnaldum", 14, "wijnaldum|gini"], ["James Milner", 11, "milner"],
+    ["Kieran Trippier", 7, "trippier"], ["Jan Vertonghen", 7, "vertonghen"], ["Toby Alderweireld", 7, "alderweireld"], ["Danny Rose", 5, "rose"], ["Moussa Sissoko", 5, "sissoko"], ["Joël Matip", 5, "matip"],
+    ["Harry Winks", 3, "winks"], ["Eric Dier", 3, "dier"], ["Fernando Llorente", 2, "llorente"], ["Joe Gomez", 2, "gomez"],
+  ] },
+  { q: "Name a player who played in the 2021 Champions League final", sub: "Man City v Chelsea in Porto · starters or subs who came on", know: 0.55, a: [
+    ["Kevin De Bruyne", 160, "de bruyne|kdb"], ["Kai Havertz", 142, "havertz"], ["N'Golo Kanté", 110, "kante|ngolo kante"], ["Phil Foden", 69, "foden"], ["Raheem Sterling", 69, "sterling"], ["Mason Mount", 57, "mount"],
+    ["Riyad Mahrez", 46, "mahrez"], ["Édouard Mendy", 36, "mendy"], ["Ederson", 27, ""], ["Rúben Dias", 27, "dias|ruben dias"], ["Thiago Silva", 27, ""], ["Timo Werner", 27, "werner"],
+    ["Kyle Walker", 20, "walker"], ["Jorginho", 20, ""], ["Reece James", 20, "reece|james"], ["Ben Chilwell", 16, "chilwell"], ["Christian Pulisic", 16, "pulisic"], ["Sergio Agüero", 16, "aguero|kun aguero"],
+    ["İlkay Gündoğan", 13, "gundogan"], ["Bernardo Silva", 13, "bernardo"], ["John Stones", 10, "stones"], ["César Azpilicueta", 10, "azpilicueta|dave"], ["Antonio Rüdiger", 10, "rudiger|ruediger"], ["Gabriel Jesus", 8, "jesus"],
+    ["Oleksandr Zinchenko", 6, "zinchenko"], ["Mateo Kovačić", 4, "kovacic"], ["Andreas Christensen", 2, "christensen"], ["Fernandinho", 2, ""],
+  ] },
+  { q: "Name a player who played in the 2014 Champions League final", sub: "Real Madrid v Atlético Madrid in Lisbon · starters or subs who came on", know: 0.5, a: [
+    ["Cristiano Ronaldo", 220, "cristiano|ronaldo|cr7"], ["Gareth Bale", 98, "bale"], ["Sergio Ramos", 85, "ramos"], ["Luka Modrić", 53, "modric"], ["Karim Benzema", 44, "benzema"], ["Iker Casillas", 44, "casillas"],
+    ["Thibaut Courtois", 36, "courtois"], ["Ángel Di María", 36, "di maria|dimaria"], ["Diego Costa", 28, "costa"], ["Diego Godín", 21, "godin"], ["David Villa", 21, "villa"], ["Marcelo", 21, ""],
+    ["Koke", 15, ""], ["Raphaël Varane", 13, "varane"], ["Dani Carvajal", 13, "carvajal"], ["Isco", 10, ""], ["Álvaro Morata", 8, "morata"], ["Gabi", 6, "gabi fernandez"], ["Filipe Luís", 6, "filipe luis"],
+    ["Juanfran", 6, ""], ["Miranda", 4, "joao miranda"], ["Sami Khedira", 4, "khedira"], ["Raúl García", 3, "raul garcia"], ["Fábio Coentrão", 2, "coentrao"], ["Tiago", 1, "tiago mendes"],
+    ["Toby Alderweireld", 1, "alderweireld"], ["Adrián López", 1, "adrian|adrian lopez"], ["José Sosa", 1, "sosa"],
+  ] },
+  { q: "Name a player who played in the 2022 Champions League final", sub: "Liverpool v Real Madrid in Paris · starters or subs who came on", know: 0.55, a: [
+    ["Mohamed Salah", 180, "salah|mo salah"], ["Vinícius Júnior", 162, "vinicius|vini|vinicius jr"], ["Karim Benzema", 130, "benzema"], ["Thibaut Courtois", 115, "courtois"], ["Luka Modrić", 87, "modric"], ["Virgil van Dijk", 74, "van dijk|vvd"],
+    ["Sadio Mané", 52, "mane"], ["Toni Kroos", 52, "kroos"], ["Casemiro", 42, ""], ["Federico Valverde", 33, "valverde|fede"], ["Alisson Becker", 33, "alisson"], ["Trent Alexander-Arnold", 33, "trent|alexander arnold|taa"],
+    ["Luis Díaz", 25, "diaz|lucho"], ["Andy Robertson", 18, "robertson|robbo"], ["Dani Carvajal", 18, "carvajal"], ["Éder Militão", 15, "militao"], ["David Alaba", 15, "alaba"], ["Fabinho", 12, ""],
+    ["Thiago Alcântara", 12, "thiago|alcantara"], ["Jordan Henderson", 12, "henderson|hendo"], ["Ferland Mendy", 7, "mendy"], ["Ibrahima Konaté", 7, "konate"], ["Diogo Jota", 7, "jota"], ["Roberto Firmino", 7, "firmino"],
+    ["Eduardo Camavinga", 5, "camavinga"], ["Rodrygo", 5, ""], ["Naby Keïta", 3, "keita"], ["Dani Ceballos", 1, "ceballos"],
+  ] },
+  { q: "Name a Man City player who played in the 93:20 game", sub: "City 3–2 QPR, May 2012 · starters or subs who came on", know: 0.45, a: [
+    ["Sergio Agüero", 250, "aguero|kun aguero"], ["Edin Džeko", 75, "dzeko"], ["Pablo Zabaleta", 56, "zabaleta"], ["Vincent Kompany", 56, "kompany"], ["Yaya Touré", 47, "yaya|toure"], ["Mario Balotelli", 47, "balotelli"],
+    ["Joe Hart", 39, "hart"], ["David Silva", 31, "silva"], ["Carlos Tevez", 31, "tevez"], ["Samir Nasri", 24, "nasri"], ["Joleon Lescott", 12, "lescott"], ["Gareth Barry", 12, "barry"], ["Gaël Clichy", 8, "clichy"],
+    ["Nigel de Jong", 8, "de jong"],
+  ] },
+  { q: "Name a player who scored in Brazil 1–7 Germany", sub: "2014 World Cup semi-final in Belo Horizonte", know: 0.55, a: [
+    ["Thomas Müller", 150, "muller|mueller|thomas muller"], ["Miroslav Klose", 150, "klose"], ["Toni Kroos", 132, "kroos"], ["André Schürrle", 48, "schurrle|schuerrle"], ["Sami Khedira", 29, "khedira"], ["Oscar", 14, ""],
+  ] },
+  { q: "Name a player who scored in Man United 8–2 Arsenal", sub: "Premier League, August 2011", know: 0.4, a: [
+    ["Wayne Rooney", 200, "rooney"], ["Ashley Young", 90, "young"], ["Danny Welbeck", 60, "welbeck"], ["Robin van Persie", 50, "van persie|rvp"], ["Nani", 40, ""], ["Theo Walcott", 40, "walcott"], ["Park Ji-sung", 30, "park|ji sung park"],
+  ] },
+  { q: "Name a player who scored in Real Madrid 2–6 Barcelona", sub: "La Liga at the Bernabéu, May 2009", know: 0.4, a: [
+    ["Lionel Messi", 200, "messi"], ["Thierry Henry", 111, "henry"], ["Carles Puyol", 59, "puyol"], ["Gerard Piqué", 49, "pique"], ["Gonzalo Higuaín", 40, "higuain"], ["Sergio Ramos", 40, "ramos"],
+  ] },
+  { q: "Name a player who scored in Barcelona 5–0 Real Madrid", sub: "La Liga at the Camp Nou, November 2010", know: 0.4, a: [
+    ["David Villa", 150, "villa"], ["Xavi", 120, "xavi hernandez"], ["Pedro", 90, "pedro rodriguez"], ["Jeffrén Suárez", 20, "jeffren"],
+  ] },
+  { q: "Name a player who scored in Man United 1–6 Man City", sub: "Premier League at Old Trafford, October 2011", know: 0.4, a: [
+    ["Mario Balotelli", 180, "balotelli"], ["Sergio Agüero", 114, "aguero|kun aguero"], ["Edin Džeko", 90, "dzeko"], ["David Silva", 48, "silva"], ["Darren Fletcher", 15, "fletcher"],
+  ] },
+  { q: "Name a player who scored in Liverpool 7–0 Man United", sub: "Premier League at Anfield, March 2023", know: 0.45, a: [
+    ["Mohamed Salah", 180, "salah|mo salah"], ["Darwin Núñez", 120, "nunez|darwin"], ["Cody Gakpo", 110, "gakpo"], ["Roberto Firmino", 80, "firmino"],
+  ] },
+  { q: "Name a player who scored in Barcelona 6–1 PSG", sub: "Champions League last 16, March 2017 · own goals don't count", know: 0.45, a: [
+    ["Neymar", 160, "neymar jr"], ["Lionel Messi", 126, "messi"], ["Sergi Roberto", 110, "roberto"], ["Luis Suárez", 69, "suarez"], ["Edinson Cavani", 20, "cavani"],
+  ] },
+  { q: "Name a player who scored in Tottenham 4–5 Arsenal", sub: "Premier League at White Hart Lane, November 2004", know: 0.3, a: [
+    ["Thierry Henry", 160, "henry"], ["Jermain Defoe", 46, "defoe"], ["Patrick Vieira", 36, "vieira"], ["Robert Pirès", 27, "pires"], ["Freddie Ljungberg", 27, "ljungberg"], ["Ledley King", 13, "king"],
+    ["Frédéric Kanouté", 8, "kanoute"], ["Lauren", 4, ""], ["Noureddine Naybet", 1, "naybet"],
+  ] },
+  { q: "Name a player who scored in Chelsea 6–0 Arsenal", sub: "Premier League, March 2014 · Wenger's 1,000th game", know: 0.35, a: [
+    ["Eden Hazard", 140, "hazard"], ["Samuel Eto'o", 76, "etoo|eto o"], ["Mohamed Salah", 76, "salah|mo salah"], ["Oscar", 51, ""], ["André Schürrle", 30, "schurrle|schuerrle"],
+  ] },
+  { q: "Name a player who scored in Man United 4–3 Man City", sub: "Premier League, September 2009 · Owen's late winner", know: 0.3, a: [
+    ["Michael Owen", 150, "owen"], ["Wayne Rooney", 116, "rooney"], ["Darren Fletcher", 48, "fletcher"], ["Craig Bellamy", 48, "bellamy"], ["Gareth Barry", 21, "barry"],
+  ] },
+  { q: "Name a player who scored in Liverpool 5–1 Arsenal", sub: "Premier League at Anfield, February 2014", know: 0.3, a: [
+    ["Raheem Sterling", 120, "sterling"], ["Martin Škrtel", 71, "skrtel"], ["Daniel Sturridge", 71, "sturridge"], ["Mikel Arteta", 17, "arteta"],
+  ] },
+  { q: "Name a player who scored for Argentina at the 2022 World Cup", sub: "Normal or extra time, not shootouts", know: 0.7, a: [
+    ["Lionel Messi", 250, "messi"], ["Julián Álvarez", 150, "julian alvarez|alvarez|julian"], ["Ángel Di María", 110, "di maria|dimaria"], ["Enzo Fernández", 80, "enzo|enzo fernandez|fernandez"],
+    ["Alexis Mac Allister", 70, "mac allister|macallister"], ["Nahuel Molina", 40, "molina"],
+  ] },
+  { q: "Name a player who scored for France at the 2018 World Cup", sub: "Own goals don't count", know: 0.65, a: [
+    ["Kylian Mbappé", 220, "mbappe"], ["Antoine Griezmann", 200, "griezmann"], ["Paul Pogba", 110, "pogba"], ["Raphaël Varane", 70, "varane"], ["Benjamin Pavard", 70, "pavard"], ["Samuel Umtiti", 60, "umtiti"],
+  ] },
+  { q: "Name a player who scored for England at the 2018 World Cup", sub: "Normal or extra time, not shootouts", know: 0.6, a: [
+    ["Harry Kane", 280, "kane"], ["John Stones", 90, "stones"], ["Harry Maguire", 80, "maguire"], ["Kieran Trippier", 80, "trippier"], ["Dele Alli", 60, "dele|alli"], ["Jesse Lingard", 60, "lingard"],
+  ] },
+  { q: "Name a player who scored for England at Euro 2024", sub: "Normal or extra time, not shootouts", know: 0.65, a: [
+    ["Jude Bellingham", 200, "bellingham"], ["Harry Kane", 200, "kane"], ["Bukayo Saka", 120, "saka"], ["Cole Palmer", 110, "palmer"], ["Ollie Watkins", 110, "watkins"],
+  ] },
+  { q: "Name a player who scored for Spain at Euro 2024", sub: "Own goals don't count", know: 0.55, a: [
+    ["Lamine Yamal", 160, "yamal|lamine"], ["Dani Olmo", 126, "olmo"], ["Nico Williams", 110, "nico|williams"], ["Álvaro Morata", 69, "morata"], ["Mikel Oyarzabal", 57, "oyarzabal"], ["Fabián Ruiz", 46, "fabian ruiz|fabian"],
+    ["Rodri", 36, ""], ["Mikel Merino", 27, "merino"], ["Dani Carvajal", 20, "carvajal"], ["Ferran Torres", 8, "ferran|torres"],
+  ] },
+  { q: "Name a player who scored for Brazil at the 2002 World Cup", sub: "Own goals don't count", know: 0.55, a: [
+    ["Ronaldo Nazário", 250, "ronaldo|r9|ronaldo nazario|nazario|brazilian ronaldo"], ["Rivaldo", 150, ""], ["Ronaldinho", 140, "dinho"], ["Roberto Carlos", 70, "carlos"], ["Edmílson", 20, "edmilson"], ["Júnior", 10, "junior"],
+  ] },
+  { q: "Name a player who scored for Germany at the 2014 World Cup", sub: "Own goals don't count", know: 0.55, a: [
+    ["Thomas Müller", 220, "muller|mueller|thomas muller"], ["Miroslav Klose", 122, "klose"], ["Mario Götze", 112, "gotze|goetze"], ["Toni Kroos", 91, "kroos"], ["André Schürrle", 71, "schurrle|schuerrle"], ["Mats Hummels", 61, "hummels"],
+    ["Mesut Özil", 42, "ozil"], ["Sami Khedira", 33, "khedira"],
+  ] },
+  { q: "Name a player who scored for Italy at the 2006 World Cup", sub: "Normal or extra time, not shootouts", know: 0.45, a: [
+    ["Marco Materazzi", 150, "materazzi"], ["Francesco Totti", 86, "totti"], ["Andrea Pirlo", 72, "pirlo"], ["Fabio Grosso", 72, "grosso"], ["Alessandro Del Piero", 60, "del piero"], ["Luca Toni", 48, "toni"],
+    ["Filippo Inzaghi", 29, "inzaghi|pippo inzaghi"], ["Gianluca Zambrotta", 14, "zambrotta"], ["Alberto Gilardino", 14, "gilardino"], ["Vincenzo Iaquinta", 4, "iaquinta"],
+  ] },
+  { q: "Name a player who took a penalty in a World Cup final shootout", sub: "2006 or 2022 · scored or missed", know: 0.45, a: [
+    ["Lionel Messi", 200, "messi"], ["Kylian Mbappé", 134, "mbappe"], ["Gonzalo Montiel", 48, "montiel"], ["Paulo Dybala", 30, "dybala"], ["Andrea Pirlo", 30, "pirlo"], ["Fabio Grosso", 30, "grosso"],
+    ["David Trezeguet", 23, "trezeguet"], ["Kingsley Coman", 16, "coman"], ["Aurélien Tchouaméni", 16, "tchouameni"], ["Leandro Paredes", 11, "paredes"], ["Marco Materazzi", 11, "materazzi"],
+    ["Alessandro Del Piero", 11, "del piero"], ["Daniele De Rossi", 7, "de rossi"], ["Randal Kolo Muani", 7, "kolo muani|muani"], ["Sylvain Wiltord", 3, "wiltord"], ["Éric Abidal", 2, "abidal"], ["Willy Sagnol", 2, "sagnol"],
+  ] },
+  { q: "Name a player who scored for Liverpool in a Champions League final", sub: "2005–2025 finals · not shootouts", know: 0.5, a: [
+    ["Steven Gerrard", 180, "gerrard|stevie g"], ["Mohamed Salah", 154, "salah|mo salah"], ["Divock Origi", 83, "origi"], ["Sadio Mané", 52, "mane"], ["Xabi Alonso", 52, "alonso|xabi"], ["Vladimír Šmicer", 25, "smicer"], ["Dirk Kuyt", 17, "kuyt"],
+  ] },
+  { q: "Name a player who scored for Man United in a European Cup or Champions League final", sub: "1968–2011 · not shootouts", know: 0.45, a: [
+    ["Cristiano Ronaldo", 160, "cristiano|ronaldo|cr7"], ["Ole Gunnar Solskjær", 126, "solskjaer|ole"], ["Wayne Rooney", 95, "rooney"], ["Teddy Sheringham", 82, "sheringham"], ["Bobby Charlton", 20, "charlton|sir bobby"],
+    ["George Best", 13, "best"], ["Brian Kidd", 2, "kidd"],
+  ] },
+  { q: "Name a player who scored for Bayern in a Champions League final", sub: "1999–2025 · not shootouts", know: 0.4, a: [
+    ["Arjen Robben", 160, "robben"], ["Thomas Müller", 110, "muller|mueller|thomas muller"], ["Kingsley Coman", 69, "coman"], ["Mario Mandžukić", 46, "mandzukic"], ["Stefan Effenberg", 13, "effenberg"], ["Mario Basler", 8, "basler"],
+  ] },
+  { q: "Name a player who scored in a Europa League final", sub: "2010–2025 · normal or extra time, own goals don't count", know: 0.4, a: [
+    ["Antoine Griezmann", 120, "griezmann"], ["Radamel Falcao", 86, "falcao"], ["Diego Forlán", 58, "forlan"], ["Eden Hazard", 58, "hazard"], ["Paul Pogba", 58, "pogba"], ["Fernando Torres", 45, "torres"],
+    ["Olivier Giroud", 34, "giroud"], ["Edinson Cavani", 34, "cavani"], ["Romelu Lukaku", 34, "lukaku"], ["Ademola Lookman", 34, "lookman"], ["Daniel Sturridge", 25, "sturridge"], ["Henrikh Mkhitaryan", 25, "mkhitaryan"],
+    ["Paulo Dybala", 25, "dybala"], ["Brennan Johnson", 25, "johnson"], ["Pedro", 17, "pedro rodriguez"], ["Branislav Ivanović", 17, "ivanovic"], ["Luuk de Jong", 17, "de jong"], ["Diego Godín", 10, "godin"],
+    ["Gerard Moreno", 10, "moreno"], ["Kevin Gameiro", 7, "gameiro"], ["Coke", 7, ""], ["Carlos Bacca", 7, "bacca"], ["Gabi", 5, "gabi fernandez"], ["Alex Iwobi", 5, "iwobi"], ["Diego", 3, "diego ribas"],
+    ["Grzegorz Krychowiak", 3, "krychowiak"], ["Rafael Santos Borré", 3, "borre|santos borre"], ["Joe Aribo", 2, "aribo"], ["Óscar Cardozo", 1, "cardozo"], ["Nikola Kalinić", 1, "kalinic"], ["Simon Davies", 1, "davies"],
+    ["Ruslan Rotan", 1, "rotan"],
+  ] },
+  { q: "Name a player who scored in an FA Cup final", sub: "2010–2026 · normal or extra time", know: 0.45, a: [
+    ["Didier Drogba", 120, "drogba"], ["Alexis Sánchez", 71, "alexis|sanchez"], ["Aaron Ramsey", 71, "ramsey"], ["Pierre-Emerick Aubameyang", 71, "aubameyang|auba"], ["Raheem Sterling", 58, "sterling"], ["Gabriel Jesus", 45, "jesus"],
+    ["Eden Hazard", 45, "hazard"], ["İlkay Gündoğan", 45, "gundogan"], ["Alejandro Garnacho", 45, "garnacho"], ["Kobbie Mainoo", 45, "mainoo"], ["Eberechi Eze", 45, "eze"], ["Antoine Semenyo", 34, "semenyo"],
+    ["Kevin De Bruyne", 34, "de bruyne|kdb"], ["David Silva", 25, "silva"], ["Juan Mata", 25, "mata"], ["Jesse Lingard", 25, "lingard"], ["Youri Tielemans", 25, "tielemans"], ["Ben Watson", 25, "watson"],
+    ["Yaya Touré", 25, "yaya|toure"], ["Bruno Fernandes", 17, "bruno|fernandes"], ["Jérémy Doku", 17, "doku"], ["Christian Pulisic", 17, "pulisic"], ["Diego Costa", 17, "costa"], ["Theo Walcott", 17, "walcott"],
+    ["Olivier Giroud", 17, "giroud"], ["Per Mertesacker", 17, "mertesacker"], ["Santi Cazorla", 13, "cazorla"], ["Laurent Koscielny", 13, "koscielny"], ["Ramires", 10, ""], ["Andy Carroll", 10, "carroll"],
+    ["Jason Puncheon", 5, "puncheon"], ["James Chester", 3, "chester"], ["Curtis Davies", 3, "davies"],
+  ] },
+  { q: "Name a club that has played in the Premier League", sub: "Any season, 1992–93 to 2026–27", know: 0.95, a: [
+    ["Manchester United", 200, "man utd|man united|manchester utd|united"], ["Arsenal", 200, ""], ["Liverpool", 182, ""], ["Chelsea", 165, ""], ["Manchester City", 149, "man city|city"], ["Tottenham Hotspur", 119, "tottenham|spurs"],
+    ["Everton", 48, ""], ["Newcastle United", 48, "newcastle"], ["Aston Villa", 38, "villa"], ["West Ham United", 38, "west ham|hammers"], ["Leicester City", 16, "leicester"], ["Leeds United", 14, "leeds"],
+    ["Crystal Palace", 11, "palace"], ["Brighton & Hove Albion", 9, "brighton"], ["Wolverhampton Wanderers", 9, "wolves|wolverhampton"], ["Southampton", 9, "saints"], ["Fulham", 7, ""], ["Bournemouth", 7, "afc bournemouth"],
+    ["Brentford", 5, ""], ["Nottingham Forest", 5, "forest|nottm forest"], ["Sunderland", 3, ""], ["Burnley", 3, ""], ["Stoke City", 2, "stoke"], ["Blackburn Rovers", 2, "blackburn"], ["Sheffield United", 1, "sheff utd|sheffield utd"],
+    ["Norwich City", 1, "norwich"], ["Watford", 1, ""], ["West Bromwich Albion", 1, "west brom|wba"], ["Swansea City", 1, "swansea"], ["Middlesbrough", 1, "boro"], ["Bolton Wanderers", 1, "bolton"], ["Wigan Athletic", 1, "wigan"],
+    ["Ipswich Town", 1, "ipswich"], ["Queens Park Rangers", 1, "qpr"], ["Hull City", 1, "hull"], ["Portsmouth", 1, "pompey"], ["Coventry City", 1, "coventry"], ["Luton Town", 1, "luton"], ["Cardiff City", 1, "cardiff"],
+    ["Huddersfield Town", 1, "huddersfield"], ["Birmingham City", 1, "birmingham"], ["Derby County", 1, "derby"], ["Reading", 1, ""], ["Charlton Athletic", 1, "charlton"], ["Sheffield Wednesday", 1, "sheffield wed|wednesday"],
+    ["Wimbledon", 1, "wimbledon fc"], ["Blackpool", 1, ""], ["Bradford City", 1, "bradford"], ["Oldham Athletic", 1, "oldham"], ["Barnsley", 1, ""], ["Swindon Town", 1, "swindon"],
+  ] },
+  { q: "Name a club in the 2026–27 Premier League", sub: "This season's 20 clubs", know: 0.95, a: [
+    ["Arsenal", 200, ""], ["Manchester United", 200, "man utd|man united|manchester utd|united"], ["Liverpool", 182, ""], ["Manchester City", 165, "man city|city"], ["Chelsea", 165, ""], ["Tottenham Hotspur", 119, "tottenham|spurs"],
+    ["Newcastle United", 48, "newcastle"], ["Aston Villa", 38, "villa"], ["Everton", 30, ""], ["Crystal Palace", 16, "palace"], ["Brighton & Hove Albion", 11, "brighton"], ["Leeds United", 11, "leeds"],
+    ["Nottingham Forest", 9, "forest|nottm forest"], ["Fulham", 7, ""], ["Bournemouth", 7, "afc bournemouth"], ["Brentford", 5, ""], ["Sunderland", 5, ""], ["Ipswich Town", 2, "ipswich"], ["Coventry City", 1, "coventry"],
+    ["Hull City", 1, "hull"],
+  ] },
+  { q: "Name a La Liga club from the 2025–26 season", sub: "Any of the 20", know: 0.8, a: [
+    ["Real Madrid", 250, "madrid|real"], ["Barcelona", 250, "barca|fc barcelona"], ["Atlético Madrid", 173, "atletico|atleti|atletico de madrid"], ["Sevilla", 80, ""], ["Valencia", 70, ""], ["Villarreal", 60, ""], ["Real Betis", 51, "betis"],
+    ["Athletic Club", 51, "athletic bilbao|bilbao|athletic"], ["Real Sociedad", 51, "sociedad|la real"], ["Girona", 32, ""], ["Celta Vigo", 28, "celta"], ["Getafe", 23, ""], ["Espanyol", 23, ""], ["Osasuna", 19, ""],
+    ["Mallorca", 19, "rcd mallorca|real mallorca"], ["Rayo Vallecano", 19, "rayo"], ["Alavés", 11, "alaves|deportivo alaves"], ["Levante", 11, ""], ["Elche", 8, ""], ["Real Oviedo", 7, "oviedo"],
+  ] },
+  { q: "Name a Serie A club from the 2025–26 season", sub: "Any of the 20", know: 0.75, a: [
+    ["Juventus", 220, "juve"], ["Inter Milan", 190, "inter|internazionale"], ["AC Milan", 190, "milan"], ["Napoli", 136, ""], ["Roma", 88, "as roma"], ["Lazio", 47, "ss lazio"], ["Atalanta", 39, ""], ["Fiorentina", 31, ""],
+    ["Bologna", 16, ""], ["Torino", 16, ""], ["Como", 11, "como 1907"], ["Genoa", 8, ""], ["Udinese", 8, ""], ["Parma", 8, ""], ["Cagliari", 6, ""], ["Hellas Verona", 6, "verona"], ["Lecce", 4, ""],
+    ["Sassuolo", 4, ""], ["Cremonese", 2, "us cremonese"], ["Pisa", 1, ""],
+  ] },
+  { q: "Name a Bundesliga club from the 2025–26 season", sub: "Any of the 18", know: 0.7, a: [
+    ["Bayern Munich", 250, "bayern|fc bayern|bayern munchen"], ["Borussia Dortmund", 200, "dortmund|bvb"], ["Bayer Leverkusen", 120, "leverkusen|bayer"], ["RB Leipzig", 90, "leipzig"], ["Eintracht Frankfurt", 60, "frankfurt|eintracht"],
+    ["VfB Stuttgart", 50, "stuttgart"], ["Borussia Mönchengladbach", 45, "gladbach|monchengladbach|borussia monchengladbach"], ["VfL Wolfsburg", 40, "wolfsburg"], ["Werder Bremen", 40, "bremen|werder"], ["Hamburger SV", 35, "hamburg|hsv"],
+    ["SC Freiburg", 30, "freiburg"], ["1. FC Köln", 30, "koln|cologne|fc koln|fc cologne"], ["Union Berlin", 25, "union"], ["Mainz 05", 25, "mainz"], ["TSG Hoffenheim", 20, "hoffenheim"], ["FC Augsburg", 15, "augsburg"],
+    ["FC St. Pauli", 15, "st pauli|sankt pauli"], ["1. FC Heidenheim", 8, "heidenheim"],
+  ] },
+  { q: "Name a Ligue 1 club from the 2025–26 season", sub: "Any of the 18", know: 0.6, a: [
+    ["Paris Saint-Germain", 250, "psg|paris sg"], ["Marseille", 150, "olympique de marseille|om"], ["Lyon", 120, "olympique lyonnais|ol"], ["Monaco", 100, "as monaco"], ["Lille", 70, "losc"], ["Nice", 50, "ogc nice"],
+    ["Lens", 35, "rc lens"], ["Rennes", 35, "stade rennais"], ["Nantes", 30, "fc nantes"], ["Strasbourg", 30, "rc strasbourg"], ["Brest", 20, "stade brestois"], ["Toulouse", 20, "tfc"], ["Auxerre", 15, "aj auxerre"],
+    ["Le Havre", 12, ""], ["Angers", 10, "sco angers"], ["Lorient", 10, "fc lorient"], ["Metz", 10, "fc metz"], ["Paris FC", 10, ""],
+  ] },
+  { q: "Name a club relegated from the Premier League in the 2020s", sub: "Went down at the end of 2019–20 through 2025–26", know: 0.6, a: [
+    ["Leicester City", 80, "leicester"], ["Southampton", 63, "saints"], ["Burnley", 63, ""], ["Leeds United", 48, "leeds"], ["West Ham United", 48, "west ham|hammers"], ["Sheffield United", 34, "sheff utd|sheffield utd"],
+    ["Watford", 34, ""], ["Norwich City", 34, "norwich"], ["Ipswich Town", 23, "ipswich"], ["Luton Town", 23, "luton"], ["Wolverhampton Wanderers", 23, "wolves|wolverhampton"], ["Fulham", 14, ""], ["West Bromwich Albion", 14, "west brom|wba"],
+    ["Bournemouth", 7, "afc bournemouth"],
+  ] },
+  { q: "Name a club promoted to the Premier League in the 2020s", sub: "Came up in 2020 through 2026", know: 0.55, a: [
+    ["Leeds United", 80, "leeds"], ["Burnley", 63, ""], ["Leicester City", 48, "leicester"], ["Southampton", 48, "saints"], ["Ipswich Town", 48, "ipswich"], ["Sunderland", 48, ""], ["Nottingham Forest", 34, "forest|nottm forest"],
+    ["Fulham", 34, ""], ["Brentford", 34, ""], ["Luton Town", 28, "luton"], ["Sheffield United", 23, "sheff utd|sheffield utd"], ["Coventry City", 23, "coventry"], ["Bournemouth", 18, "afc bournemouth"], ["Watford", 18, ""],
+    ["Norwich City", 18, "norwich"], ["West Bromwich Albion", 14, "west brom|wba"], ["Hull City", 14, "hull"],
+  ] },
+  { q: "Name a club that has finished runner-up in the Premier League", sub: "1992–93 to 2025–26", know: 0.75, a: [
+    ["Arsenal", 200, ""], ["Manchester United", 180, "man utd|man united|manchester utd|united"], ["Liverpool", 180, ""], ["Manchester City", 150, "man city|city"], ["Chelsea", 130, ""], ["Tottenham Hotspur", 60, "tottenham|spurs"],
+    ["Newcastle United", 40, "newcastle"], ["Aston Villa", 20, "villa"], ["Blackburn Rovers", 15, "blackburn"],
+  ] },
+  { q: "Name a club in the 2025–26 Champions League league phase", sub: "Any of the 36", know: 0.8, a: [
+    ["Real Madrid", 160, "madrid|real"], ["Barcelona", 142, "barca|fc barcelona"], ["Bayern Munich", 126, "bayern|fc bayern|bayern munchen"], ["Liverpool", 126, ""], ["Arsenal", 110, ""], ["Manchester City", 110, "man city|city"],
+    ["Paris Saint-Germain", 110, "psg|paris sg|paris"], ["Chelsea", 82, ""], ["Inter Milan", 69, "inter|internazionale"], ["Juventus", 57, "juve"], ["Atlético Madrid", 57, "atletico|atleti|atletico de madrid"], ["Borussia Dortmund", 57, "dortmund|bvb"],
+    ["Tottenham Hotspur", 46, "tottenham|spurs"], ["Newcastle United", 36, "newcastle"], ["Napoli", 36, ""], ["Bayer Leverkusen", 20, "leverkusen|bayer"], ["Atalanta", 13, ""], ["Benfica", 13, ""], ["Ajax", 13, ""],
+    ["Marseille", 10, "olympique de marseille|om"], ["Monaco", 8, "as monaco"], ["Sporting CP", 8, "sporting|sporting lisbon"], ["PSV Eindhoven", 8, "psv"], ["Galatasaray", 8, "gala"], ["Eintracht Frankfurt", 6, "frankfurt|eintracht"],
+    ["Athletic Club", 6, "athletic bilbao|bilbao|athletic"], ["Villarreal", 6, ""], ["Club Brugge", 4, "brugge|bruges"], ["Olympiacos", 4, "olympiakos"], ["Copenhagen", 2, "fc copenhagen|kobenhavn"], ["Slavia Prague", 2, "slavia|slavia praha"],
+    ["Bodø/Glimt", 2, "bodo glimt|bodo|glimt"], ["Union Saint-Gilloise", 1, "union sg|usg"], ["Qarabağ", 1, "qarabag"], ["Pafos", 1, "pafos fc"], ["Kairat Almaty", 1, "kairat"],
+  ] },
+  { q: "Name a club that has won the European Cup or Champions League more than once", sub: "1956–2026", know: 0.8, a: [
+    ["Real Madrid", 250, "madrid|real"], ["AC Milan", 150, "milan"], ["Bayern Munich", 150, "bayern|fc bayern|bayern munchen"], ["Liverpool", 150, ""], ["Barcelona", 150, "barca|fc barcelona"], ["Manchester United", 100, "man utd|man united|manchester utd|united"],
+    ["Paris Saint-Germain", 70, "psg|paris sg|paris"], ["Ajax", 60, ""], ["Inter Milan", 60, "inter|internazionale"], ["Chelsea", 60, ""], ["Juventus", 50, "juve"], ["Benfica", 25, ""], ["Porto", 25, "fc porto"], ["Nottingham Forest", 20, "forest|nottm forest"],
+  ] },
+  { q: "Name a club that has won the FIFA Club World Cup", sub: "2000–2025 · the 2024 Intercontinental Cup doesn't count", know: 0.6, a: [
+    ["Real Madrid", 250, "madrid|real"], ["Barcelona", 133, "barca|fc barcelona"], ["Chelsea", 111, ""], ["Bayern Munich", 101, "bayern|fc bayern|bayern munchen"], ["Manchester United", 70, "man utd|man united|manchester utd|united"], ["Liverpool", 70, ""],
+    ["Manchester City", 70, "man city|city"], ["AC Milan", 43, "milan"], ["Inter Milan", 43, "inter|internazionale"], ["Corinthians", 26, ""], ["São Paulo", 11, "sao paulo"], ["Internacional", 8, "inter porto alegre"],
+  ] },
+  { q: "Name a club that won the European Cup Winners' Cup", sub: "1961–1999", know: 0.35, a: [
+    ["Barcelona", 200, "barca|fc barcelona"], ["Chelsea", 80, ""], ["Manchester United", 57, "man utd|man united|manchester utd|united"], ["Arsenal", 48, ""], ["AC Milan", 38, "milan"], ["Juventus", 30, "juve"], ["Lazio", 23, "ss lazio"],
+    ["Paris Saint-Germain", 16, "psg|paris sg|paris"], ["Bayern Munich", 16, "bayern|fc bayern|bayern munchen"], ["Atlético Madrid", 11, "atletico|atleti|atletico de madrid"], ["Tottenham Hotspur", 11, "tottenham|spurs"], ["Everton", 7, ""],
+    ["Manchester City", 7, "man city|city"], ["West Ham United", 7, "west ham|hammers"], ["Ajax", 7, ""], ["Borussia Dortmund", 7, "dortmund|bvb"], ["Parma", 5, ""], ["Sampdoria", 5, "samp"], ["Aberdeen", 5, ""],
+    ["Valencia", 3, ""], ["Real Zaragoza", 3, "zaragoza"], ["Rangers", 3, "glasgow rangers"], ["Werder Bremen", 2, "bremen|werder"], ["Hamburger SV", 2, "hamburg|hsv"], ["Dynamo Kyiv", 2, "dynamo kiev|dinamo kiev"],
+    ["Anderlecht", 1, ""], ["Fiorentina", 1, ""], ["Sporting CP", 1, "sporting|sporting lisbon"], ["Mechelen", 1, "kv mechelen"], ["Dinamo Tbilisi", 1, "tbilisi"], ["Magdeburg", 1, "fc magdeburg"], ["Slovan Bratislava", 1, "slovan"],
+  ] },
+  { q: "Name a club that has won the Conference League", sub: "2022–2026", know: 0.55, a: [
+    ["Chelsea", 150, ""], ["West Ham United", 122, "west ham|hammers"], ["Roma", 108, "as roma"], ["Crystal Palace", 95, "palace"], ["Olympiacos", 39, "olympiakos"],
+  ] },
+  { q: "Name a club that has won the Eredivisie", sub: "1956–57 to 2025–26", know: 0.5, a: [
+    ["Ajax", 250, ""], ["PSV Eindhoven", 220, "psv"], ["Feyenoord", 170, ""], ["AZ Alkmaar", 50, "az"], ["Twente", 40, "fc twente"], ["Sparta Rotterdam", 6, "sparta"], ["DWS", 3, ""], ["DOS", 3, ""],
+  ] },
+  { q: "Name a club that has won the Portuguese league", sub: "1934–35 to 2025–26", know: 0.55, a: [
+    ["Benfica", 250, ""], ["Porto", 240, "fc porto"], ["Sporting CP", 200, "sporting|sporting lisbon"], ["Boavista", 20, ""], ["Belenenses", 6, "os belenenses"],
+  ] },
+  { q: "Name a club that has been Scottish league champions", sub: "1890–91 to 2025–26", know: 0.55, a: [
+    ["Celtic", 250, ""], ["Rangers", 240, "glasgow rangers"], ["Aberdeen", 60, ""], ["Heart of Midlothian", 30, "hearts"], ["Hibernian", 25, "hibs"], ["Dundee United", 20, "dundee utd"], ["Dundee", 12, "dundee fc"],
+    ["Kilmarnock", 8, "killie"], ["Motherwell", 6, ""], ["Third Lanark", 2, ""], ["Dumbarton", 2, ""],
+  ] },
+  { q: "Name a club that has won MLS Cup", sub: "1996–2025", know: 0.5, a: [
+    ["LA Galaxy", 200, "galaxy|los angeles galaxy"], ["Inter Miami", 126, "miami"], ["Seattle Sounders", 46, "seattle|sounders"], ["D.C. United", 46, "dc united|dc utd"], ["Columbus Crew", 29, "columbus|crew"], ["Toronto FC", 29, "toronto"],
+    ["Atlanta United", 29, "atlanta"], ["Los Angeles FC", 29, "lafc"], ["New York City FC", 22, "nycfc|nyc|new york city"], ["Portland Timbers", 15, "portland|timbers"], ["Sporting Kansas City", 15, "sporting kc|kansas city|kansas city wizards|wizards|skc"],
+    ["Houston Dynamo", 10, "houston|dynamo"], ["San Jose Earthquakes", 7, "san jose|earthquakes"], ["Real Salt Lake", 7, "rsl|salt lake"], ["Colorado Rapids", 5, "colorado|rapids"], ["Chicago Fire", 5, "chicago"],
+  ] },
+  { q: "Name a club playing in MLS in 2026", sub: "Any of the 30", know: 0.6, a: [
+    ["Inter Miami", 200, "miami"], ["LA Galaxy", 127, "galaxy|los angeles galaxy"], ["Los Angeles FC", 67, "lafc"], ["New York City FC", 47, "nycfc|nyc|new york city"], ["New York Red Bulls", 47, "red bulls|ny red bulls|rbny"], ["Seattle Sounders", 30, "seattle|sounders"],
+    ["Atlanta United", 30, "atlanta"], ["Toronto FC", 22, "toronto"], ["Chicago Fire", 22, "chicago"], ["Orlando City", 16, "orlando"], ["D.C. United", 16, "dc united|dc utd"], ["Columbus Crew", 13, "columbus|crew"],
+    ["Portland Timbers", 10, "portland|timbers"], ["Philadelphia Union", 10, "philadelphia|union|philly"], ["Austin FC", 10, "austin"], ["Charlotte FC", 7, "charlotte"], ["Nashville SC", 7, "nashville"], ["FC Cincinnati", 7, "cincinnati|cincy"],
+    ["Vancouver Whitecaps", 7, "vancouver|whitecaps"], ["CF Montréal", 5, "montreal|montreal impact"], ["New England Revolution", 5, "new england|revolution|revs"], ["Sporting Kansas City", 5, "sporting kc|kansas city|skc"],
+    ["Houston Dynamo", 5, "houston|dynamo"], ["FC Dallas", 5, "dallas"], ["Real Salt Lake", 3, "rsl|salt lake"], ["Colorado Rapids", 3, "colorado|rapids"], ["Minnesota United", 3, "minnesota|loons"], ["San Jose Earthquakes", 3, "san jose|earthquakes"],
+    ["St. Louis City", 3, "st louis|stl city"], ["San Diego FC", 2, "san diego"],
+  ] },
+  { q: "Name a club that played at the 2025 Club World Cup", sub: "Any of the 32 in the USA", know: 0.55, a: [
+    ["Real Madrid", 150, "madrid|real"], ["Chelsea", 132, ""], ["Paris Saint-Germain", 132, "psg|paris sg|paris"], ["Manchester City", 100, "man city|city"], ["Bayern Munich", 86, "bayern|fc bayern|bayern munchen"], ["Inter Miami", 86, "miami"],
+    ["Juventus", 48, "juve"], ["Inter Milan", 48, "inter|internazionale"], ["Borussia Dortmund", 48, "dortmund|bvb"], ["Atlético Madrid", 38, "atletico|atleti|atletico de madrid"], ["Benfica", 14, ""], ["Porto", 14, "fc porto"],
+    ["Flamengo", 14, ""], ["Palmeiras", 11, ""], ["Fluminense", 11, ""], ["Boca Juniors", 11, "boca"], ["River Plate", 11, "river"], ["Botafogo", 8, ""], ["Al-Hilal", 8, "al hilal|hilal"], ["Seattle Sounders", 6, "seattle|sounders"],
+    ["Los Angeles FC", 6, "lafc"], ["Red Bull Salzburg", 4, "salzburg|rb salzburg"], ["Monterrey", 4, "rayados"], ["Al Ahly", 4, "ahly"], ["Pachuca", 2, ""], ["Urawa Red Diamonds", 1, "urawa|urawa reds"],
+    ["Ulsan HD", 1, "ulsan|ulsan hyundai"], ["Al Ain", 1, ""], ["Espérance de Tunis", 1, "esperance|esperance tunis"], ["Wydad AC", 1, "wydad|wydad casablanca"], ["Mamelodi Sundowns", 1, "sundowns"], ["Auckland City", 1, "auckland"],
+  ] },
+  { q: "Name a club that has won the Copa Libertadores", sub: "1960–2025", know: 0.45, a: [
+    ["Boca Juniors", 200, "boca"], ["River Plate", 165, "river"], ["Flamengo", 119, ""], ["Palmeiras", 57, ""], ["Santos", 38, ""], ["São Paulo", 30, "sao paulo"], ["Independiente", 23, ""], ["Peñarol", 16, "penarol"],
+    ["Grêmio", 11, "gremio"], ["Corinthians", 11, ""], ["Botafogo", 11, ""], ["Fluminense", 11, ""], ["Atlético Mineiro", 7, "atletico mineiro|galo"], ["Nacional", 7, "club nacional"], ["Estudiantes", 7, "estudiantes de la plata"],
+    ["Internacional", 5, "inter"], ["Cruzeiro", 5, ""], ["Atlético Nacional", 5, ""], ["Racing Club", 3, "racing"], ["Vélez Sarsfield", 3, "velez|velez sarsfield"], ["Olimpia", 3, "club olimpia"],
+    ["Colo-Colo", 3, ""], ["LDU Quito", 2, "ldu|liga de quito"], ["San Lorenzo", 2, ""], ["Vasco da Gama", 2, "vasco"], ["Argentinos Juniors", 1, "argentinos"], ["Once Caldas", 1, ""],
+  ] },
+  { q: "Name an Italian club that has won a major UEFA trophy", sub: "European Cup/Champions League, UEFA Cup/Europa League, Cup Winners' Cup or Conference League", know: 0.6, a: [
+    ["AC Milan", 200, "milan"], ["Inter Milan", 174, "inter|internazionale"], ["Juventus", 174, "juve"], ["Roma", 51, "as roma"], ["Atalanta", 42, ""], ["Napoli", 33, ""], ["Lazio", 33, "ss lazio"], ["Parma", 25, ""],
+    ["Sampdoria", 10, "samp"], ["Fiorentina", 7, ""],
+  ] },
+  { q: "Name an English club that has won a major UEFA trophy", sub: "European Cup/Champions League, UEFA Cup/Europa League, Cup Winners' Cup or Conference League", know: 0.7, a: [
+    ["Liverpool", 200, ""], ["Manchester United", 168, "man utd|man united|manchester utd|united"], ["Chelsea", 153, ""], ["Manchester City", 99, "man city|city"], ["Tottenham Hotspur", 64, "tottenham|spurs"], ["Arsenal", 54, ""],
+    ["Aston Villa", 36, "villa"], ["West Ham United", 36, "west ham|hammers"], ["Crystal Palace", 28, "palace"], ["Nottingham Forest", 21, "forest|nottm forest"], ["Everton", 7, ""], ["Ipswich Town", 5, "ipswich"],
+  ] },
+  { q: "Name a German club that has won a major UEFA trophy", sub: "European Cup/Champions League, UEFA Cup/Europa League or Cup Winners' Cup", know: 0.5, a: [
+    ["Bayern Munich", 250, "bayern|fc bayern|bayern munchen"], ["Borussia Dortmund", 150, "dortmund|bvb"], ["Eintracht Frankfurt", 70, "frankfurt|eintracht"], ["Hamburger SV", 50, "hamburg|hsv"], ["Schalke 04", 50, "schalke"],
+    ["Borussia Mönchengladbach", 40, "gladbach|monchengladbach|borussia monchengladbach"], ["Werder Bremen", 35, "bremen|werder"], ["Bayer Leverkusen", 35, "leverkusen|bayer"], ["Magdeburg", 5, "fc magdeburg"],
+  ] },
+  { q: "Name a Premier League club with City in its name", sub: "Any season, 1992–93 to 2026–27", know: 0.75, a: [
+    ["Manchester City", 250, "man city"], ["Leicester City", 120, "leicester"], ["Norwich City", 60, "norwich"], ["Stoke City", 50, "stoke"], ["Swansea City", 50, "swansea"], ["Hull City", 40, "hull"], ["Cardiff City", 35, "cardiff"],
+    ["Coventry City", 35, "coventry"], ["Birmingham City", 30, "birmingham"], ["Bradford City", 10, "bradford"],
+  ] },
+  { q: "Name a country that has won the Africa Cup of Nations", sub: "1957 to the 2025 edition", know: 0.6, a: [
+    ["Egypt", 200, ""], ["Cameroon", 122, ""], ["Senegal", 95, ""], ["Ivory Coast", 83, "cote d ivoire|cote divoire"], ["Nigeria", 83, ""], ["Ghana", 72, ""], ["Algeria", 33, ""], ["Morocco", 25, ""],
+    ["Zambia", 13, ""], ["Tunisia", 8, ""], ["South Africa", 8, ""], ["DR Congo", 4, "congo dr|zaire|drc|democratic republic of the congo"], ["Congo", 1, "republic of the congo|congo brazzaville"], ["Sudan", 1, ""], ["Ethiopia", 1, ""],
+  ] },
+  { q: "Name a country that has won the AFC Asian Cup", sub: "1956–2023", know: 0.5, a: [
+    ["Japan", 200, ""], ["Saudi Arabia", 98, "saudi|ksa"], ["Iran", 87, ""], ["South Korea", 76, "korea|korea republic"], ["Qatar", 76, ""], ["Australia", 55, ""], ["Iraq", 21, ""], ["Kuwait", 5, ""], ["Israel", 2, ""],
+  ] },
+  { q: "Name a country that has won the Women's Euros", sub: "1984–2025", know: 0.5, a: [
+    ["England", 200, ""], ["Germany", 180, "west germany"], ["Netherlands", 70, "holland"], ["Norway", 50, ""], ["Sweden", 30, ""],
+  ] },
+  { q: "Name a country that won Olympic men's football gold", sub: "1992–2024", know: 0.45, a: [
+    ["Brazil", 200, "brasil"], ["Argentina", 142, ""], ["Spain", 88, "espana"], ["Mexico", 58, ""], ["Nigeria", 39, ""], ["Cameroon", 30, ""],
+  ] },
+  { q: "Name a country that has finished in the top four at a men's World Cup", sub: "1930–2026 · semi-finalists or final-round sides", know: 0.85, a: [
+    ["Brazil", 200, "brasil"], ["Germany", 182, "west germany"], ["Argentina", 149, ""], ["France", 134, ""], ["Italy", 105, ""], ["England", 68, ""], ["Spain", 68, "espana"], ["Netherlands", 48, "holland"],
+    ["Croatia", 30, ""], ["Uruguay", 16, ""], ["Morocco", 16, ""], ["Belgium", 11, ""], ["Portugal", 11, ""], ["Sweden", 5, ""], ["South Korea", 5, "korea|korea republic"], ["Turkey", 5, "turkiye"],
+    ["Poland", 2, ""], ["United States", 2, "usa|us|america"], ["Austria", 1, ""], ["Hungary", 1, ""], ["Czechoslovakia", 1, ""], ["Yugoslavia", 1, ""], ["Chile", 1, ""], ["Soviet Union", 1, "ussr"], ["Bulgaria", 1, ""],
+  ] },
+  { q: "Name a country that has played in a men's Euros final", sub: "1960–2024 · winners or runners-up", know: 0.7, a: [
+    ["Spain", 200, "espana"], ["Germany", 170, "west germany"], ["Italy", 115, ""], ["France", 115, ""], ["England", 102, ""], ["Portugal", 90, ""], ["Netherlands", 23, "holland"], ["Greece", 23, ""], ["Denmark", 16, ""],
+    ["Czech Republic", 6, "czechia"], ["Soviet Union", 4, "ussr"], ["Belgium", 2, ""], ["Yugoslavia", 2, ""], ["Czechoslovakia", 2, ""],
+  ] },
+  { q: "Name a country that has hosted men's Euros matches", sub: "1960–2024 · co-hosts and Euro 2020's 11 hosts count", know: 0.6, a: [
+    ["Germany", 150, "west germany"], ["France", 132, ""], ["England", 100, ""], ["Portugal", 48, ""], ["Spain", 38, "espana"], ["Italy", 38, ""], ["Netherlands", 21, "holland"], ["Belgium", 17, ""], ["Austria", 14, ""],
+    ["Switzerland", 14, ""], ["Poland", 11, ""], ["Ukraine", 11, ""], ["Scotland", 6, ""], ["Sweden", 4, ""], ["Denmark", 4, ""], ["Russia", 2, ""], ["Hungary", 2, ""], ["Yugoslavia", 1, ""], ["Romania", 1, ""],
+    ["Azerbaijan", 1, ""],
+  ] },
+  { q: "Name a CONMEBOL member country", sub: "South America's 10 football nations", know: 0.8, a: [
+    ["Brazil", 200, "brasil"], ["Argentina", 200, ""], ["Uruguay", 100, ""], ["Colombia", 90, ""], ["Chile", 80, ""], ["Peru", 50, ""], ["Ecuador", 45, ""], ["Paraguay", 40, ""], ["Bolivia", 30, ""], ["Venezuela", 25, ""],
+  ] },
+  { q: "Name a country that played at every men's World Cup from 1998 to 2026", sub: "All eight tournaments", know: 0.4, a: [
+    ["Brazil", 200, "brasil"], ["Argentina", 134, ""], ["Germany", 119, ""], ["Spain", 80, "espana"], ["France", 68, ""], ["England", 57, ""], ["Mexico", 23, ""], ["South Korea", 11, "korea|korea republic"], ["Japan", 11, ""],
+  ] },
+  { q: "Name a country that played at the 2010 World Cup", sub: "Any of the 32 teams in South Africa", know: 0.85, a: [
+    ["Spain", 100, "espana"], ["Netherlands", 67, "holland"], ["Germany", 67, ""], ["Brazil", 67, "brasil"], ["Argentina", 67, ""], ["South Africa", 67, ""], ["England", 53, ""], ["Uruguay", 29, ""], ["Italy", 29, ""],
+    ["France", 29, ""], ["Portugal", 24, ""], ["United States", 19, "usa|us|america"], ["Ghana", 19, ""], ["Mexico", 11, ""], ["Nigeria", 8, ""], ["Cameroon", 8, ""], ["Ivory Coast", 8, "cote d ivoire|cote divoire"],
+    ["Japan", 6, ""], ["South Korea", 6, "korea|korea republic"], ["Australia", 6, ""], ["Chile", 6, ""], ["Paraguay", 6, ""], ["Switzerland", 3, ""], ["Denmark", 3, ""], ["Serbia", 2, ""], ["Greece", 2, ""],
+    ["Algeria", 2, ""], ["North Korea", 2, "dprk|korea dpr"], ["Slovakia", 1, ""], ["Slovenia", 1, ""], ["New Zealand", 1, ""], ["Honduras", 1, ""],
+  ] },
+  { q: "Name a country that played at the 2018 World Cup", sub: "Any of the 32 teams in Russia", know: 0.85, a: [
+    ["France", 100, ""], ["Croatia", 67, ""], ["Russia", 67, ""], ["England", 67, ""], ["Belgium", 53, ""], ["Brazil", 53, "brasil"], ["Argentina", 53, ""], ["Germany", 53, ""], ["Spain", 40, "espana"], ["Portugal", 40, ""],
+    ["Mexico", 19, ""], ["Uruguay", 15, ""], ["Iceland", 15, ""], ["Japan", 11, ""], ["Sweden", 11, ""], ["Colombia", 11, ""], ["Denmark", 8, ""], ["Switzerland", 8, ""], ["Egypt", 8, ""], ["South Korea", 6, "korea|korea republic"],
+    ["Saudi Arabia", 6, "saudi|ksa"], ["Morocco", 6, ""], ["Nigeria", 6, ""], ["Senegal", 6, ""], ["Poland", 6, ""], ["Australia", 3, ""], ["Iran", 3, ""], ["Peru", 3, ""], ["Serbia", 2, ""], ["Costa Rica", 2, ""],
+    ["Tunisia", 2, ""], ["Panama", 2, ""],
+  ] },
+  { q: "Name a country that played at Euro 2024", sub: "Any of the 24 teams in Germany", know: 0.8, a: [
+    ["Germany", 100, ""], ["Spain", 100, "espana"], ["England", 100, ""], ["France", 67, ""], ["Portugal", 53, ""], ["Italy", 40, ""], ["Netherlands", 40, "holland"], ["Belgium", 19, ""], ["Croatia", 19, ""],
+    ["Scotland", 15, ""], ["Switzerland", 11, ""], ["Denmark", 8, ""], ["Turkey", 8, "turkiye"], ["Austria", 8, ""], ["Poland", 6, ""], ["Georgia", 6, ""], ["Serbia", 3, ""], ["Hungary", 3, ""],
+    ["Ukraine", 3, ""], ["Czech Republic", 2, "czechia"], ["Romania", 2, ""], ["Slovakia", 2, ""], ["Slovenia", 2, ""], ["Albania", 2, ""],
+  ] },
+  { q: "Name a host city of the 2026 World Cup", sub: "Any of the 16, by the name FIFA used", know: 0.7, a: [
+    ["New York New Jersey", 180, "new york|new jersey|nyc|east rutherford|metlife|ny nj"], ["Los Angeles", 162, "la|inglewood|sofi"], ["Miami", 100, "miami gardens"], ["Dallas", 100, "arlington|att stadium"],
+    ["Mexico City", 100, "ciudad de mexico|cdmx|azteca"], ["Toronto", 62, ""], ["Atlanta", 52, ""], ["Boston", 52, "foxborough|foxboro|gillette"], ["Seattle", 42, ""], ["Houston", 42, ""], ["Philadelphia", 42, "philly"],
+    ["San Francisco Bay Area", 33, "san francisco|bay area|santa clara|levis|sf"], ["Kansas City", 25, "kc|arrowhead"], ["Vancouver", 25, ""], ["Guadalajara", 12, "zapopan"], ["Monterrey", 12, "guadalupe"],
+  ] },
+  { q: "Name a host city of the 2014 World Cup in Brazil", sub: "Any of the 12", know: 0.45, a: [
+    ["Rio de Janeiro", 250, "rio"], ["São Paulo", 186, "sao paulo"], ["Belo Horizonte", 56, ""], ["Brasília", 56, "brasilia"], ["Salvador", 38, ""], ["Fortaleza", 22, ""], ["Recife", 22, ""], ["Manaus", 22, ""], ["Porto Alegre", 19, ""],
+    ["Curitiba", 12, ""], ["Natal", 9, ""], ["Cuiabá", 6, "cuiaba"],
+  ] },
+  { q: "Name a host city of the 2018 World Cup in Russia", sub: "Any of the 11", know: 0.45, a: [
+    ["Moscow", 250, "moskva"], ["Saint Petersburg", 170, "st petersburg|petersburg"], ["Sochi", 65, ""], ["Kazan", 56, ""], ["Kaliningrad", 37, ""], ["Rostov-on-Don", 29, "rostov"], ["Nizhny Novgorod", 25, "nizhny"],
+    ["Volgograd", 25, ""], ["Samara", 20, ""], ["Yekaterinburg", 17, "ekaterinburg"], ["Saransk", 9, ""],
+  ] },
+  { q: "Name a stadium that hosted 2022 World Cup matches", sub: "Any of the 8 in Qatar", know: 0.35, a: [
+    ["Lusail Stadium", 200, "lusail|lusail iconic stadium"], ["Al Bayt Stadium", 85, "al bayt|bayt"], ["Stadium 974", 62, "974|ras abu aboud"], ["Khalifa International Stadium", 43, "khalifa|khalifa international"], ["Education City Stadium", 19, "education city"],
+    ["Al Janoub Stadium", 13, "al janoub|janoub|al wakrah"], ["Al Thumama Stadium", 8, "al thumama|thumama"], ["Ahmad bin Ali Stadium", 6, "ahmad bin ali|al rayyan stadium"],
+  ] },
+  { q: "Name a stadium that has hosted a men's World Cup final", sub: "1930–2026", know: 0.5, a: [
+    ["Maracanã", 200, "maracana|estadio do maracana"], ["Wembley Stadium", 119, "wembley"], ["Estadio Azteca", 105, "azteca|estadio banorte"], ["Lusail Stadium", 80, "lusail|lusail iconic stadium"], ["MetLife Stadium", 80, "metlife|new york new jersey stadium"],
+    ["Stade de France", 57, ""], ["Luzhniki Stadium", 38, "luzhniki"], ["Olympiastadion Berlin", 38, "berlin olympic stadium|olympic stadium berlin"], ["Soccer City", 30, "fnb stadium|soccer city stadium"], ["Rose Bowl", 30, ""],
+    ["Santiago Bernabéu", 30, "bernabeu"], ["Stadio Olimpico", 23, "olimpico|rome olympic stadium"], ["Estadio Monumental", 11, "monumental|el monumental|mas monumental"], ["International Stadium Yokohama", 11, "yokohama|nissan stadium"],
+    ["Olympiastadion Munich", 7, "munich olympic stadium|olympic stadium munich"], ["Estadio Centenario", 5, "centenario"], ["Råsunda Stadium", 1, "rasunda"], ["Wankdorf Stadium", 1, "wankdorf"], ["Estadio Nacional", 1, "estadio nacional de chile"],
+    ["Stade Olympique de Colombes", 1, "colombes|stade de colombes"], ["Stadio Nazionale PNF", 1, "stadio nazionale|stadio flaminio"],
+  ] },
+  { q: "Name a city that hosted a Champions League final", sub: "2000–2026", know: 0.5, a: [
+    ["London", 150, "wembley"], ["Paris", 116, "saint denis|st denis"], ["Madrid", 100, ""], ["Istanbul", 86, ""], ["Munich", 72, "munchen"], ["Milan", 60, "milano"], ["Lisbon", 48, "lisboa"], ["Rome", 38, "roma"],
+    ["Berlin", 29, ""], ["Moscow", 21, "moskva"], ["Cardiff", 17, ""], ["Kyiv", 14, "kiev"], ["Porto", 14, "oporto"], ["Athens", 14, "athina"], ["Manchester", 11, ""], ["Budapest", 11, ""], ["Glasgow", 8, ""],
+    ["Gelsenkirchen", 2, ""],
+  ] },
+  { q: "Name a Premier League Player of the Season winner", sub: "The league's official award, 2010–11 to 2025–26", know: 0.55, a: [
+    ["Mohamed Salah", 200, "salah|mo salah"], ["Kevin De Bruyne", 134, "de bruyne|kdb"], ["Erling Haaland", 80, "haaland"], ["Virgil van Dijk", 57, "van dijk|vvd"], ["Eden Hazard", 48, "hazard"], ["Luis Suárez", 38, "suarez"],
+    ["Jamie Vardy", 38, "vardy"], ["N'Golo Kanté", 38, "kante|ngolo kante"], ["Gareth Bale", 30, "bale"], ["Phil Foden", 30, "foden"], ["Bruno Fernandes", 23, "bruno|fernandes"], ["Vincent Kompany", 16, "kompany"],
+    ["Rúben Dias", 11, "dias|ruben dias"], ["Nemanja Vidić", 7, "vidic"],
+  ] },
+  { q: "Name a European Golden Shoe winner", sub: "2000–2026 · shared awards count", know: 0.55, a: [
+    ["Lionel Messi", 250, "messi"], ["Cristiano Ronaldo", 204, "cristiano|ronaldo|cr7"], ["Robert Lewandowski", 77, "lewandowski|lewy"], ["Harry Kane", 67, "kane"], ["Luis Suárez", 49, "suarez"], ["Kylian Mbappé", 49, "mbappe"],
+    ["Erling Haaland", 49, "haaland"], ["Thierry Henry", 40, "henry"], ["Francesco Totti", 19, "totti"], ["Diego Forlán", 13, "forlan"], ["Ciro Immobile", 13, "immobile"], ["Luca Toni", 8, "toni"],
+    ["Henrik Larsson", 6, "larsson"], ["Kevin Phillips", 3, "phillips"], ["Roy Makaay", 3, "makaay"], ["Mário Jardel", 1, "jardel"],
+  ] },
+  { q: "Name an African Player of the Year winner", sub: "CAF award, 2000–2025", know: 0.5, a: [
+    ["Mohamed Salah", 200, "salah|mo salah"], ["Samuel Eto'o", 119, "etoo|eto o"], ["Didier Drogba", 105, "drogba"], ["Sadio Mané", 80, "mane"], ["Yaya Touré", 68, "yaya|toure"], ["Riyad Mahrez", 30, "mahrez"],
+    ["Achraf Hakimi", 30, "hakimi"], ["Victor Osimhen", 23, "osimhen"], ["Pierre-Emerick Aubameyang", 23, "aubameyang|auba"], ["Emmanuel Adebayor", 16, "adebayor"], ["Ademola Lookman", 11, "lookman"],
+    ["El Hadji Diouf", 5, "diouf"], ["Frédéric Kanouté", 5, "kanoute"], ["Patrick Mboma", 1, "mboma"],
+  ] },
+  { q: "Name a man who has won the Champions League five or more times as a player", sub: "European Cup wins count · players active from 2000 on", know: 0.5, a: [
+    ["Cristiano Ronaldo", 200, "cristiano|ronaldo|cr7"], ["Luka Modrić", 119, "modric"], ["Toni Kroos", 92, "kroos"], ["Karim Benzema", 68, "benzema"], ["Dani Carvajal", 48, "carvajal"], ["Marcelo", 48, ""],
+    ["Gareth Bale", 38, "bale"], ["Casemiro", 30, ""], ["Nacho", 23, "nacho fernandez"], ["Isco", 16, ""], ["Paolo Maldini", 16, "maldini"], ["Lucas Vázquez", 11, "lucas vazquez|vazquez"], ["Alessandro Costacurta", 1, "costacurta"],
+  ] },
+  { q: "Name a Ballon d'Or winner who has played in the Premier League", sub: "Men's award · any PL club, before or after winning", know: 0.55, a: [
+    ["Cristiano Ronaldo", 250, "cristiano|ronaldo|cr7"], ["Luka Modrić", 120, "modric"], ["Rodri", 110, "rodrigo hernandez"], ["Harry Kane", 110, "kane"], ["Michael Owen", 80, "owen"], ["Andriy Shevchenko", 60, "shevchenko|sheva"],
+    ["George Weah", 30, "weah"], ["Ruud Gullit", 30, "gullit"],
+  ] },
+  { q: "Name a player who has scored five goals in one Premier League game", sub: "Up to the end of 2025–26", know: 0.45, a: [
+    ["Sergio Agüero", 200, "aguero|kun aguero"], ["Alan Shearer", 142, "shearer"], ["Jermain Defoe", 87, "defoe"], ["Andy Cole", 67, "cole|andrew cole"], ["Dimitar Berbatov", 67, "berbatov"],
+  ] },
+  { q: "Name a player a Premier League club signed for £100m or more", sub: "Reported base fee, up to the end of 2025", know: 0.6, a: [
+    ["Jack Grealish", 160, "grealish"], ["Declan Rice", 142, "rice"], ["Moisés Caicedo", 110, "caicedo"], ["Enzo Fernández", 110, "enzo|enzo fernandez|fernandez"], ["Alexander Isak", 95, "isak"], ["Florian Wirtz", 82, "wirtz"],
+  ] },
+  { q: "Name a player who has turned out for both Arsenal and Chelsea", sub: "First-team players since 1992 · loans count", know: 0.55, a: [
+    ["Cesc Fàbregas", 150, "fabregas|cesc"], ["Ashley Cole", 116, "cole"], ["Olivier Giroud", 86, "giroud"], ["Petr Čech", 72, "cech"], ["David Luiz", 60, "luiz"], ["Kai Havertz", 60, "havertz"], ["Raheem Sterling", 48, "sterling"],
+    ["Jorginho", 48, ""], ["Willian", 38, ""], ["Pierre-Emerick Aubameyang", 38, "aubameyang|auba"], ["William Gallas", 29, "gallas"], ["Nicolas Anelka", 21, "anelka"], ["Noni Madueke", 14, "madueke"],
+    ["Kepa Arrizabalaga", 11, "kepa|arrizabalaga"], ["Emmanuel Petit", 8, "petit"], ["Lassana Diarra", 4, "diarra|lass"], ["Yossi Benayoun", 4, "benayoun"],
+  ] },
+  { q: "Name a player who has turned out for both Man United and Chelsea", sub: "First-team players since 1992 · loans count", know: 0.5, a: [
+    ["Juan Mata", 150, "mata"], ["Romelu Lukaku", 132, "lukaku"], ["Nemanja Matić", 100, "matic"], ["Mason Mount", 100, "mount"], ["Jadon Sancho", 60, "sancho"], ["Alejandro Garnacho", 48, "garnacho"], ["Radamel Falcao", 38, "falcao"],
+    ["Juan Sebastián Verón", 29, "veron|seba veron"], ["Mark Hughes", 21, "hughes|sparky"], ["Mark Bosnich", 2, "bosnich"], ["Paul Parker", 1, "parker"],
+  ] },
+  { q: "Name a player who has turned out for both Real Madrid and Barcelona", sub: "First-team players since 1985", know: 0.5, a: [
+    ["Luís Figo", 250, "figo"], ["Ronaldo Nazário", 174, "ronaldo|r9|ronaldo nazario|nazario|brazilian ronaldo"], ["Michael Laudrup", 71, "laudrup"], ["Luis Enrique", 71, "enrique|lucho"], ["Samuel Eto'o", 62, "etoo|eto o"],
+    ["Javier Saviola", 43, "saviola"], ["Bernd Schuster", 24, "schuster"], ["Gheorghe Hagi", 24, "hagi"], ["Robert Prosinečki", 11, "prosinecki"], ["Marcos Alonso", 11, "alonso"], ["Albert Celades", 7, "celades"],
+    ["Luis Milla", 6, "milla"], ["Alfonso Pérez", 6, "alfonso"], ["Julen Lopetegui", 6, "lopetegui"], ["Miquel Soler", 3, "soler"], ["Dani García", 3, "dani garcia"],
+  ] },
+  { q: "Name a player Liverpool signed from Southampton", sub: "Permanent moves since 2000", know: 0.5, a: [
+    ["Virgil van Dijk", 250, "van dijk|vvd"], ["Sadio Mané", 200, "mane"], ["Adam Lallana", 100, "lallana"], ["Dejan Lovren", 80, "lovren"], ["Nathaniel Clyne", 50, "clyne"], ["Rickie Lambert", 50, "lambert"], ["Peter Crouch", 40, "crouch"],
+  ] },
+  { q: "Name a player who has worn Man United's No. 7 shirt", sub: "Squad numbers era, 1993–94 to 2026–27", know: 0.65, a: [
+    ["Cristiano Ronaldo", 250, "cristiano|ronaldo|cr7"], ["David Beckham", 200, "beckham"], ["Eric Cantona", 150, "cantona"], ["Michael Owen", 60, "owen"], ["Ángel Di María", 60, "di maria|dimaria"], ["Edinson Cavani", 60, "cavani"],
+    ["Alexis Sánchez", 60, "alexis|sanchez"], ["Mason Mount", 60, "mount"], ["Memphis Depay", 40, "memphis|depay"], ["Antonio Valencia", 40, "valencia"],
+  ] },
+  { q: "Name a player who has worn Arsenal's No. 14 shirt", sub: "1999–2026", know: 0.45, a: [
+    ["Thierry Henry", 250, "henry"], ["Theo Walcott", 150, "walcott"], ["Pierre-Emerick Aubameyang", 100, "aubameyang|auba"], ["Viktor Gyökeres", 90, "gyokeres"], ["Eddie Nketiah", 60, "nketiah"],
+  ] },
+  { q: "Name a player who has worn Real Madrid's No. 7 shirt", sub: "1996–2026", know: 0.6, a: [
+    ["Cristiano Ronaldo", 250, "cristiano|ronaldo|cr7"], ["Vinícius Júnior", 150, "vinicius|vini|vinicius jr"], ["Raúl", 150, "raul gonzalez"], ["Eden Hazard", 120, "hazard"], ["Mariano Díaz", 30, "mariano|mariano diaz"],
+  ] },
+  { q: "Name an Arsenal club captain", sub: "1988–2026", know: 0.55, a: [
+    ["Tony Adams", 150, "adams"], ["Patrick Vieira", 132, "vieira"], ["Thierry Henry", 116, "henry"], ["Martin Ødegaard", 116, "odegaard"], ["Cesc Fàbregas", 86, "fabregas|cesc"], ["Robin van Persie", 48, "van persie|rvp"],
+    ["Pierre-Emerick Aubameyang", 29, "aubameyang|auba"], ["Mikel Arteta", 21, "arteta"], ["William Gallas", 14, "gallas"], ["Per Mertesacker", 14, "mertesacker"], ["Laurent Koscielny", 14, "koscielny"],
+    ["Granit Xhaka", 8, "xhaka"], ["Thomas Vermaelen", 8, "vermaelen"],
+  ] },
+  { q: "Name a Manchester United club captain", sub: "1990–2026", know: 0.55, a: [
+    ["Roy Keane", 180, "keane"], ["Wayne Rooney", 74, "rooney"], ["Bryan Robson", 62, "robson"], ["Eric Cantona", 62, "cantona"], ["Gary Neville", 62, "neville"], ["Bruno Fernandes", 62, "bruno|fernandes"],
+    ["Nemanja Vidić", 42, "vidic"], ["Harry Maguire", 42, "maguire"], ["Steve Bruce", 18, "bruce"], ["Michael Carrick", 12, "carrick"], ["Antonio Valencia", 7, "valencia"], ["Ashley Young", 5, "young"],
+  ] },
+  { q: "Name a Chelsea club captain", sub: "1993–2026", know: 0.55, a: [
+    ["John Terry", 250, "terry|jt"], ["César Azpilicueta", 120, "azpilicueta|dave"], ["Reece James", 100, "reece|james"], ["Dennis Wise", 70, "wise"], ["Marcel Desailly", 60, "desailly"], ["Gary Cahill", 50, "cahill"],
+  ] },
+  { q: "Name a Liverpool club captain", sub: "1997–2026", know: 0.55, a: [
+    ["Steven Gerrard", 250, "gerrard|stevie g"], ["Jordan Henderson", 150, "henderson|hendo"], ["Virgil van Dijk", 150, "van dijk|vvd"], ["Sami Hyypiä", 50, "hyypia"], ["Jamie Redknapp", 40, "redknapp"], ["Paul Ince", 40, "ince"],
+  ] },
+  { q: "Name a Real Madrid club captain", sub: "2000–2025", know: 0.55, a: [
+    ["Sergio Ramos", 200, "ramos"], ["Iker Casillas", 137, "casillas"], ["Raúl", 113, "raul gonzalez"], ["Marcelo", 60, ""], ["Karim Benzema", 60, "benzema"], ["Fernando Hierro", 41, "hierro"], ["Dani Carvajal", 41, "carvajal"],
+    ["Nacho", 32, "nacho fernandez"],
+  ] },
+  { q: "Name a goalkeeper who won a Champions League final", sub: "Played in the final for the winners, 2000–2025", know: 0.5, a: [
+    ["Iker Casillas", 170, "casillas"], ["Manuel Neuer", 136, "neuer"], ["Thibaut Courtois", 105, "courtois"], ["Keylor Navas", 78, "navas"], ["Alisson Becker", 65, "alisson"], ["Petr Čech", 54, "cech"],
+    ["Víctor Valdés", 44, "valdes"], ["Edwin van der Sar", 44, "van der sar"], ["Jerzy Dudek", 34, "dudek"], ["Gianluigi Donnarumma", 34, "donnarumma|gigio"], ["Ederson", 26, ""], ["Marc-André ter Stegen", 26, "ter stegen"],
+    ["Dida", 19, ""], ["Oliver Kahn", 19, "kahn"], ["Édouard Mendy", 13, "mendy"], ["Júlio César", 13, "julio cesar"], ["Vítor Baía", 4, "baia|vitor baia"], ["César Sánchez", 1, "cesar sanchez|cesar"],
+  ] },
+  { q: "Name a manager who has won the FA Cup", sub: "2000–2026", know: 0.55, a: [
+    ["Arsène Wenger", 220, "wenger"], ["Pep Guardiola", 120, "guardiola|pep"], ["José Mourinho", 44, "mourinho"], ["Alex Ferguson", 44, "ferguson|fergie|sir alex|sir alex ferguson"], ["Jürgen Klopp", 44, "klopp"], ["Mikel Arteta", 44, "arteta"],
+    ["Antonio Conte", 28, "conte"], ["Carlo Ancelotti", 28, "ancelotti"], ["Rafael Benítez", 21, "benitez|rafa"], ["Roberto Mancini", 21, "mancini"], ["Louis van Gaal", 21, "van gaal|lvg"], ["Erik ten Hag", 21, "ten hag"],
+    ["Oliver Glasner", 15, "glasner"], ["Brendan Rodgers", 15, "rodgers"], ["Roberto Di Matteo", 15, "di matteo"], ["Roberto Martínez", 15, "martinez"], ["Guus Hiddink", 9, "hiddink"], ["Harry Redknapp", 9, "redknapp"],
+    ["Gérard Houllier", 5, "houllier"], ["Gianluca Vialli", 3, "vialli"],
+  ] },
+  { q: "Name a manager who has won the UEFA Cup or Europa League", sub: "2000–2026", know: 0.45, a: [
+    ["José Mourinho", 150, "mourinho"], ["Unai Emery", 150, "emery"], ["Diego Simeone", 72, "simeone|cholo"], ["Rafael Benítez", 48, "benitez|rafa"], ["Ange Postecoglou", 38, "postecoglou|ange"], ["Gian Piero Gasperini", 29, "gasperini"],
+    ["Maurizio Sarri", 21, "sarri"], ["Oliver Glasner", 21, "glasner"], ["Julen Lopetegui", 14, "lopetegui"], ["André Villas-Boas", 14, "villas boas|avb"], ["Juande Ramos", 8, "juande"], ["José Luis Mendilibar", 8, "mendilibar"],
+    ["Gérard Houllier", 6, "houllier"], ["Quique Sánchez Flores", 4, "quique|sanchez flores"], ["Dick Advocaat", 2, "advocaat"], ["Mircea Lucescu", 2, "lucescu"], ["Fatih Terim", 2, "terim"], ["Bert van Marwijk", 1, "van marwijk"],
+    ["Valery Gazzaev", 1, "gazzaev"],
+  ] },
+  { q: "Name a man who has managed England", sub: "Permanent, interim or caretaker, 1990–2026", know: 0.6, a: [
+    ["Gareth Southgate", 220, "southgate"], ["Sven-Göran Eriksson", 119, "eriksson|sven"], ["Fabio Capello", 83, "capello"], ["Thomas Tuchel", 83, "tuchel"], ["Roy Hodgson", 73, "hodgson"], ["Sam Allardyce", 53, "allardyce|big sam"],
+    ["Steve McClaren", 44, "mcclaren"], ["Kevin Keegan", 28, "keegan"], ["Glenn Hoddle", 28, "hoddle"], ["Terry Venables", 21, "venables"], ["Lee Carsley", 21, "carsley"], ["Bobby Robson", 14, "robson|sir bobby"],
+    ["Graham Taylor", 14, ""], ["Stuart Pearce", 9, "pearce"], ["Peter Taylor", 3, ""], ["Howard Wilkinson", 3, "wilkinson"],
+  ] },
+  { q: "Name a Real Madrid manager since 2000", sub: "Permanent or interim, 2000–2026", know: 0.55, a: [
+    ["Zinedine Zidane", 200, "zidane|zizou"], ["Carlo Ancelotti", 200, "ancelotti"], ["José Mourinho", 134, "mourinho"], ["Xabi Alonso", 48, "alonso|xabi"], ["Rafael Benítez", 30, "benitez|rafa"], ["Vicente del Bosque", 30, "del bosque"],
+    ["Fabio Capello", 23, "capello"], ["Julen Lopetegui", 23, "lopetegui"], ["Manuel Pellegrini", 16, "pellegrini"], ["Santiago Solari", 11, "solari"], ["Álvaro Arbeloa", 11, "arbeloa"], ["Bernd Schuster", 5, "schuster"],
+    ["Juande Ramos", 3, "juande"], ["Carlos Queiroz", 3, "queiroz"], ["Vanderlei Luxemburgo", 2, "luxemburgo"], ["José Antonio Camacho", 1, "camacho"], ["Juan Ramón López Caro", 1, "lopez caro"],
+    ["Mariano García Remón", 1, "garcia remon"],
+  ] },
+  { q: "Name a Barcelona manager since 2000", sub: "Permanent or interim, 2000–2026", know: 0.55, a: [
+    ["Pep Guardiola", 220, "guardiola|pep"], ["Xavi", 123, "xavi hernandez"], ["Luis Enrique", 99, "enrique|lucho"], ["Frank Rijkaard", 66, "rijkaard"], ["Hansi Flick", 66, "flick"], ["Ronald Koeman", 47, "koeman"],
+    ["Ernesto Valverde", 39, "valverde"], ["Tito Vilanova", 23, "vilanova"], ["Quique Setién", 23, "setien"], ["Gerardo Martino", 16, "tata martino|martino"], ["Louis van Gaal", 16, "van gaal|lvg"], ["Carles Rexach", 4, "rexach"],
+    ["Llorenç Serra Ferrer", 2, "serra ferrer"], ["Radomir Antić", 2, "antic"], ["Sergi Barjuán", 1, "barjuan"], ["Jordi Roura", 1, "roura"],
+  ] },
+  { q: "Name a Liverpool manager since 1990", sub: "Permanent or caretaker, 1990–2026", know: 0.6, a: [
+    ["Jürgen Klopp", 250, "klopp"], ["Rafael Benítez", 143, "benitez|rafa"], ["Arne Slot", 112, "slot"], ["Brendan Rodgers", 91, "rodgers"], ["Kenny Dalglish", 81, "dalglish|king kenny"], ["Gérard Houllier", 62, "houllier"],
+    ["Roy Hodgson", 52, "hodgson"], ["Andoni Iraola", 52, "iraola"], ["Graeme Souness", 43, "souness"], ["Roy Evans", 33, "evans"], ["Phil Thompson", 11, "thompson"], ["Ronnie Moran", 7, "moran"],
+  ] },
+  { q: "Name an Arsenal manager since 1986", sub: "Permanent, interim or caretaker", know: 0.6, a: [
+    ["Arsène Wenger", 260, "wenger"], ["Mikel Arteta", 220, "arteta"], ["Unai Emery", 100, "emery"], ["George Graham", 80, "graham"], ["Freddie Ljungberg", 40, "ljungberg"], ["Bruce Rioch", 30, "rioch"], ["Stewart Houston", 15, "houston"],
+    ["Pat Rice", 10, "rice"],
+  ] },
+  { q: "Name a Manchester City manager since 1998", sub: "Permanent or caretaker, 1998–2026", know: 0.55, a: [
+    ["Pep Guardiola", 260, "guardiola|pep"], ["Roberto Mancini", 130, "mancini"], ["Manuel Pellegrini", 100, "pellegrini"], ["Enzo Maresca", 90, "maresca"], ["Mark Hughes", 60, "hughes|sparky"], ["Sven-Göran Eriksson", 60, "eriksson|sven"],
+    ["Kevin Keegan", 50, "keegan"], ["Stuart Pearce", 40, "pearce"], ["Joe Royle", 20, "royle"], ["Brian Kidd", 15, "kidd"],
+  ] },
+  { q: "Name a manager who has won La Liga", sub: "1999–2000 to 2025–26", know: 0.5, a: [
+    ["Pep Guardiola", 200, "guardiola|pep"], ["Carlo Ancelotti", 105, "ancelotti"], ["Zinedine Zidane", 92, "zidane|zizou"], ["Diego Simeone", 80, "simeone|cholo"], ["José Mourinho", 57, "mourinho"], ["Hansi Flick", 57, "flick"],
+    ["Luis Enrique", 48, "enrique|lucho"], ["Xavi", 38, "xavi hernandez"], ["Frank Rijkaard", 30, "rijkaard"], ["Ernesto Valverde", 23, "valverde"], ["Fabio Capello", 16, "capello"], ["Vicente del Bosque", 16, "del bosque"],
+    ["Rafael Benítez", 16, "benitez|rafa"], ["Tito Vilanova", 11, "vilanova"], ["Bernd Schuster", 5, "schuster"], ["Javier Irureta", 1, "irureta"],
+  ] },
+  { q: "Name a manager who has won Serie A", sub: "1999–2000 to 2025–26 · titles won on the pitch", know: 0.45, a: [
+    ["Massimiliano Allegri", 150, "allegri"], ["Antonio Conte", 150, "conte"], ["José Mourinho", 100, "mourinho"], ["Carlo Ancelotti", 60, "ancelotti"], ["Roberto Mancini", 60, "mancini"], ["Fabio Capello", 48, "capello"],
+    ["Simone Inzaghi", 38, "inzaghi"], ["Luciano Spalletti", 38, "spalletti"], ["Marcello Lippi", 29, "lippi"], ["Stefano Pioli", 29, "pioli"], ["Maurizio Sarri", 21, "sarri"], ["Cristian Chivu", 21, "chivu"],
+    ["Sven-Göran Eriksson", 8, "eriksson|sven"],
+  ] },
+  { q: "Name a manager who has won the Bundesliga", sub: "2009–10 to 2025–26", know: 0.45, a: [
+    ["Pep Guardiola", 150, "guardiola|pep"], ["Jürgen Klopp", 150, "klopp"], ["Xabi Alonso", 100, "alonso|xabi"], ["Hansi Flick", 72, "flick"], ["Vincent Kompany", 72, "kompany"], ["Jupp Heynckes", 60, "heynckes"],
+    ["Thomas Tuchel", 48, "tuchel"], ["Carlo Ancelotti", 38, "ancelotti"], ["Julian Nagelsmann", 38, "nagelsmann"], ["Louis van Gaal", 21, "van gaal|lvg"], ["Niko Kovač", 14, "kovac"],
+  ] },
+  { q: "Name a manager who has won Ligue 1", sub: "2009–10 to 2025–26", know: 0.35, a: [
+    ["Luis Enrique", 150, "enrique|lucho"], ["Thomas Tuchel", 86, "tuchel"], ["Carlo Ancelotti", 72, "ancelotti"], ["Laurent Blanc", 60, "blanc"], ["Mauricio Pochettino", 48, "pochettino|poch"], ["Unai Emery", 38, "emery"],
+    ["Didier Deschamps", 38, "deschamps"], ["Christophe Galtier", 29, "galtier"], ["Leonardo Jardim", 21, "jardim"], ["Rudi Garcia", 14, "garcia"], ["René Girard", 2, "girard"],
+  ] },
 ];
 
-const POOL = "modern-3";
+const POOL = "fresh-1";
 const STOP = new Set(["the", "fc", "afc", "cf", "club", "football", "sv"]);
 const norm = (s) => s.toLowerCase().normalize("NFD").replace(/[̀-ͯ]/g, "").replace(/ø/g, "o").replace(/ß/g, "ss").replace(/æ/g, "ae").replace(/&/g, " and ").replace(/[^a-z0-9 ]+/g, " ").replace(/\s+/g, " ").trim();
 const loose = (s) => { const n = norm(s); return n.split(" ").filter((t) => !STOP.has(t)).join(" ") || n; };
@@ -659,10 +1546,13 @@ function rng(seed) {
   return () => { s = (s + 0x6d2b79f5) >>> 0; let t = s; t = Math.imul(t ^ (t >>> 15), t | 1); t ^= t + Math.imul(t ^ (t >>> 7), t | 61); return ((t ^ (t >>> 14)) >>> 0) / 4294967296; };
 }
 const hashStr = (s) => [...s].reduce((h, c) => Math.imul(h ^ c.charCodeAt(0), 16777619) >>> 0, 2166136261);
-const pick7 = (rand) => { const idx = PROMPTS.map((_, i) => i); for (let i = idx.length - 1; i > 0; i--) { const j = Math.floor(rand() * (i + 1)); [idx[i], idx[j]] = [idx[j], idx[i]]; } return idx.slice(0, 7); };
+const shuffled = (list) => { const a = [...list]; for (let i = a.length - 1; i > 0; i--) { const j = Math.floor(Math.random() * (i + 1)); [a[i], a[j]] = [a[j], a[i]]; } return a; };
+const famOf = (q) => / (played for|has managed)\b/.test(q) ? "career" : /scored (in|for)|took a penalty/.test(q) ? "goals" : /squad|Invincibles|played in the|title team/.test(q) ? "team" : "other";
+for (const p of PROMPTS) { p.id = hashStr(p.q).toString(36); p.fam = famOf(p.q); }
+const byId = new Map(PROMPTS.map((p) => [p.id, p]));
+const CAP = { career: 3, goals: 2, team: 2 };
 const dayKey = (d) => `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}-${String(d.getDate()).padStart(2, "0")}`;
 const today = (() => { const d = new Date(); return { key: dayKey(d), no: Math.max(1, Math.floor((Date.UTC(d.getFullYear(), d.getMonth(), d.getDate()) - Date.UTC(2026, 9, 30)) / 86400000) + 1) }; })();
-const dailySet = pick7(rng(hashStr("top-bins-modern-" + today.key)));
 
 const TIERS = [
   { min: 0, max: 150, name: "SUNDAY LEAGUE", line: "You played it safe. The keeper had an easy day.", color: "#7d93b8" },
@@ -687,6 +1577,30 @@ const store = {
   save(v) { try { localStorage.setItem("top-bins-v2", JSON.stringify(v)); } catch {} },
 };
 
+const unseen = () => { const had = new Set(store.load().seen || []); return PROMPTS.filter((p) => !had.has(p.id)); };
+
+function deal() {
+  const old = (store.load().seen || []).map((id) => byId.get(id)).filter(Boolean);
+  const fresh = shuffled(unseen()), out = [];
+  const take = (list, cap) => {
+    for (const p of list) {
+      if (out.length >= 7) return;
+      if (out.includes(p) || (cap && CAP[p.fam] && out.filter((x) => x.fam === p.fam).length >= CAP[p.fam])) continue;
+      out.push(p);
+    }
+  };
+  take(fresh, true); take(fresh, false); take(old, true); take(old, false);
+  return shuffled(out).map((p) => p.id);
+}
+
+function markSeen(id) {
+  const s = store.load();
+  s.seen = (s.seen || []).filter((x) => x !== id).concat(id);
+  store.save(s);
+}
+
+const liveRun = (s) => { const r = s.run; return r && r.date === today.key && r.pool === POOL && r.set.every((id) => byId.has(id)) ? r : null; };
+
 const $ = (s) => document.querySelector(s);
 const el = { intro: $("#intro"), play: $("#play"), done: $("#done"), card: $("#card"), q: $("#q"), sub: $("#sub"), form: $("#form"), answer: $("#answer"), timer: $("#timer"), fb: $("#fb"),
   sugg: $("#sugg"), stamp: $("#stamp"), sName: $("#sName"), sPts: $("#sPts"), sSaid: $("#sSaid"), sHow: $("#sHow"), hGoals: $("#hGoals"), hRound: $("#hRound"), hScore: $("#hScore"),
@@ -695,14 +1609,17 @@ $("#strikeTag").textContent = `STRIKE #${today.no}`;
 for (let i = 0; i < 25; i++) el.timer.appendChild(document.createElement("i"));
 
 let game = null, tick = null, advanceTimer = null, pending = null, phase = "intro";
-const todayDone = () => { const d = store.load().daily; return d && d.date === today.key && d.pool === POOL ? d : null; };
+const todayDone = () => { const d = store.load().daily; return d && d.date === today.key && d.pool === POOL && d.set.every((id) => byId.has(id)) ? d : null; };
+const cur = () => byId.get(game.set[game.round]);
 
 function introLog() {
   const s = store.load();
-  const st = s.stats;
-  $("#introLog").textContent = st && st.played ? `STREAK ${st.streak} · PLAYED ${st.played} · AVG ${Math.round(st.sum / st.played)} · BEST ${st.best}` : "";
+  const st = s.stats, left = unseen().length, run = liveRun(s);
+  const lines = st && st.played ? [`STREAK ${st.streak} · PLAYED ${st.played} · AVG ${Math.round(st.sum / st.played)} · BEST ${st.best}`] : [];
+  lines.push(left ? `${left} OF ${PROMPTS.length} PROMPTS STILL NEW TO YOU` : `YOU'VE SEEN ALL ${PROMPTS.length} PROMPTS · REPEATS START WITH THE OLDEST`);
+  $("#introLog").textContent = lines.join("\n");
   const done = !!todayDone();
-  $("#go").textContent = done ? "PLAY UNLIMITED ∞" : "KICK OFF ▶";
+  $("#go").textContent = done ? "PLAY UNLIMITED ∞" : run && run.results.length ? `RESUME ${run.results.length}/7 ▶` : "KICK OFF ▶";
   $("#seeToday").hidden = !done;
 }
 
@@ -717,7 +1634,13 @@ function show(which) {
 }
 
 function start(mode) {
-  game = { mode, set: mode === "daily" ? dailySet : pick7(Math.random), round: 0, results: [], total: 0 };
+  const s = store.load(), run = mode === "daily" ? liveRun(s) : null;
+  if (run) game = { mode, set: run.set, round: run.results.length, results: run.results, total: run.total };
+  else {
+    game = { mode, set: deal(), round: 0, results: [], total: 0 };
+    if (mode === "daily") { s.run = { date: today.key, pool: POOL, set: game.set, results: [], total: 0 }; store.save(s); }
+  }
+  if (game.round >= 7) return finish();
   show("play");
   el.card.hidden = true;
   hud();
@@ -736,7 +1659,8 @@ function hud() {
 function clearSugg() { pending = null; el.sugg.hidden = true; el.sugg.textContent = ""; }
 
 function ask(how) {
-  const p = PROMPTS[game.set[game.round]];
+  const p = cur();
+  markSeen(p.id);
   clearTimeout(advanceTimer);
   if (how === "respot") pitch.respot(); else if (how === "idle") pitch.idle();
   phase = "ask";
@@ -768,11 +1692,12 @@ function resolve(i, typed, fixed) {
   clearInterval(tick);
   clearSugg();
   el.answer.disabled = true;
-  const p = PROMPTS[game.set[game.round]];
+  const p = cur();
   const ans = i === null ? null : p.answers[i];
   const pts = ans ? ans.pts : 0;
   game.results.push({ p: game.set[game.round], i, typed, pts });
   game.total += pts;
+  if (game.mode === "daily") { const s = store.load(), run = liveRun(s); if (run) { run.results = game.results; run.total = game.total; store.save(s); } }
   hud();
   const shot = shotOf(pts);
   el.card.hidden = true;
@@ -827,7 +1752,7 @@ function next() {
 }
 
 function suggest(list, why) {
-  const p = PROMPTS[game.set[game.round]];
+  const p = cur();
   pending = { list, typed: el.answer.value };
   el.sugg.textContent = "";
   const lab = document.createElement("span");
@@ -854,7 +1779,7 @@ el.form.addEventListener("submit", (e) => {
   e.preventDefault();
   if (!game || el.answer.disabled) return;
   if (pending && pending.typed === el.answer.value) return resolve(pending.list[0], pending.typed, true);
-  const p = PROMPTS[game.set[game.round]];
+  const p = cur();
   const m = match(p, el.answer.value);
   if (m.kind === "empty") return;
   if (m.kind === "ok") return resolve(m.i, el.answer.value, m.fixed);
@@ -890,6 +1815,7 @@ function finish() {
     }
     s.stats = st;
     s.daily = { date: today.key, pool: POOL, set: g.set, results: g.results, total: g.total };
+    delete s.run;
     store.save(s);
   }
   renderResults(g);
@@ -961,7 +1887,7 @@ function renderResults(g) {
     <div class="panel">
       <p class="h2"><span>THE BOX SCORE</span><b>YOUR ANSWERS</b></p>
       <div class="box">${g.results.map((r, k) => {
-        const p = PROMPTS[r.p], a = r.i === null ? null : p.answers[r.i], s = shotOf(r.pts);
+        const p = byId.get(r.p), a = r.i === null ? null : p.answers[r.i], s = shotOf(r.pts);
         return `<div class="it"><span class="n">${k + 1}</span><span class="pq">${esc(p.q.toUpperCase())}</span><span class="ps" style="color:${s.color}">${r.i === null ? "0" : "+" + r.pts}</span>
           <span class="pa ${a ? "" : "miss"}">${a ? esc(a.name) : "No answer"} <small style="color:${s.color}">${s.name}</small></span>
           <span class="cut">${a ? `About 1 in ${oneIn(a.share)} players say this. ` : ""}Most said: ${esc(p.top.name)}. Deepest cut: ${esc(p.deep.name)}.</span></div>`;
