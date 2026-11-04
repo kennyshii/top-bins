@@ -607,10 +607,6 @@ const PROMPTS = [
   { q: "Name a club Mikel Arteta played for or managed", sub: "Senior career and club jobs · Barcelona B counts as Barcelona", know: 0.6, a: [
     ["Arsenal", 280, ""], ["Everton", 150, ""], ["Real Sociedad", 60, "sociedad|la real"], ["Rangers", 50, "glasgow rangers"], ["Paris Saint-Germain", 40, "psg|paris sg|paris"], ["Barcelona", 30, "barca|barcelona b|fc barcelona"],
   ] },
-  { q: "Name a club Patrick Vieira played for or managed", sub: "Senior career and club jobs, up to 2026", know: 0.6, a: [
-    ["Arsenal", 280, ""], ["Juventus", 80, "juve"], ["Inter Milan", 70, "inter|internazionale"], ["Manchester City", 60, "man city|city"], ["Crystal Palace", 60, "palace"], ["AC Milan", 40, "milan"], ["Nice", 40, "ogc nice"],
-    ["New York City FC", 30, "nycfc|new york city|nyc"], ["Strasbourg", 25, "rc strasbourg"], ["Genoa", 25, ""], ["Cannes", 10, "as cannes"],
-  ] },
   { q: "Name a club Diego Simeone played for or managed", sub: "Senior career and club jobs, up to 2026", know: 0.5, a: [
     ["Atlético Madrid", 300, "atletico|atleti|atletico de madrid"], ["Inter Milan", 60, "inter|internazionale"], ["Lazio", 60, "ss lazio"], ["Sevilla", 30, ""], ["Racing Club", 30, "racing"], ["River Plate", 25, "river"],
     ["Estudiantes", 20, "estudiantes de la plata"], ["Vélez Sarsfield", 15, "velez|velez sarsfield"], ["Catania", 12, ""], ["Pisa", 10, ""], ["San Lorenzo", 10, ""],
@@ -629,36 +625,18 @@ const PROMPTS = [
   { q: "Name a club Kaká played for", sub: "Senior career", know: 0.7, a: [
     ["AC Milan", 280, "milan"], ["Real Madrid", 220, "madrid|real"], ["São Paulo", 80, "sao paulo"], ["Orlando City", 60, "orlando"],
   ] },
-  { q: "Name a club Andrea Pirlo played for", sub: "Senior career · loans count", know: 0.6, a: [
-    ["AC Milan", 250, "milan"], ["Juventus", 230, "juve"], ["Inter Milan", 60, "inter|internazionale"], ["New York City FC", 50, "nycfc|new york city|nyc"], ["Brescia", 30, ""], ["Reggina", 15, ""],
-  ] },
   { q: "Name a club Didier Drogba played for", sub: "Senior career", know: 0.7, a: [
     ["Chelsea", 300, ""], ["Marseille", 100, "olympique de marseille|om"], ["Galatasaray", 70, "gala"], ["Shanghai Shenhua", 40, "shanghai|shenhua"], ["Montreal Impact", 30, "montreal|cf montreal"], ["Guingamp", 30, "en avant guingamp"],
     ["Le Mans", 15, ""], ["Phoenix Rising", 15, "phoenix"],
   ] },
-  { q: "Name a club Samuel Eto'o played for", sub: "Senior career · loans count", know: 0.6, a: [
-    ["Barcelona", 270, "barca|fc barcelona"], ["Inter Milan", 180, "inter|internazionale"], ["Chelsea", 100, ""], ["Mallorca", 60, "rcd mallorca|real mallorca"], ["Real Madrid", 50, "madrid|real"], ["Everton", 40, ""],
-    ["Anzhi Makhachkala", 40, "anzhi"], ["Sampdoria", 20, "samp"], ["Antalyaspor", 15, ""], ["Espanyol", 12, ""], ["Leganés", 8, "leganes"], ["Konyaspor", 6, ""], ["Qatar SC", 4, "qatar"],
-  ] },
   { q: "Name a club Fernando Torres played for", sub: "Senior career", know: 0.75, a: [
     ["Liverpool", 260, ""], ["Atlético Madrid", 230, "atletico|atleti|atletico de madrid"], ["Chelsea", 200, ""], ["AC Milan", 50, "milan"], ["Sagan Tosu", 25, "tosu"],
-  ] },
-  { q: "Name a club David Villa played for", sub: "Senior career · loans count", know: 0.55, a: [
-    ["Barcelona", 220, "barca|fc barcelona"], ["Valencia", 200, ""], ["Atlético Madrid", 90, "atletico|atleti|atletico de madrid"], ["New York City FC", 80, "nycfc|new york city|nyc"], ["Real Zaragoza", 40, "zaragoza"],
-    ["Sporting Gijón", 25, "sporting gijon|gijon|sporting"], ["Vissel Kobe", 20, "kobe"], ["Melbourne City", 10, "melbourne"],
   ] },
   { q: "Name a club Arjen Robben played for", sub: "Senior career", know: 0.65, a: [
     ["Bayern Munich", 260, "bayern|fc bayern|bayern munchen"], ["Chelsea", 150, ""], ["Real Madrid", 110, "madrid|real"], ["PSV Eindhoven", 70, "psv"], ["Groningen", 40, "fc groningen"],
   ] },
-  { q: "Name a club Wesley Sneijder played for", sub: "Senior career", know: 0.5, a: [
-    ["Inter Milan", 250, "inter|internazionale"], ["Real Madrid", 150, "madrid|real"], ["Ajax", 140, ""], ["Galatasaray", 90, "gala"], ["Nice", 20, "ogc nice"], ["Al-Gharafa", 10, "gharafa|al gharafa"],
-  ] },
   { q: "Name a club Robin van Persie played for", sub: "Senior career", know: 0.6, a: [
     ["Arsenal", 260, ""], ["Manchester United", 220, "man utd|man united|manchester utd|united"], ["Feyenoord", 90, ""], ["Fenerbahçe", 60, "fenerbahce|fener"],
-  ] },
-  { q: "Name a club Carlos Tevez played for", sub: "Senior career", know: 0.6, a: [
-    ["Manchester City", 200, "man city|city"], ["Manchester United", 200, "man utd|man united|manchester utd|united"], ["Juventus", 108, "juve"], ["West Ham United", 98, "west ham|hammers"], ["Boca Juniors", 98, "boca"],
-    ["Corinthians", 29, ""], ["Shanghai Shenhua", 16, "shanghai|shenhua"],
   ] },
   { q: "Name a club Sergio Agüero played for", sub: "Senior career", know: 0.7, a: [
     ["Manchester City", 300, "man city|city"], ["Atlético Madrid", 150, "atletico|atleti|atletico de madrid"], ["Barcelona", 70, "barca|fc barcelona"], ["Independiente", 40, ""],
@@ -672,19 +650,9 @@ const PROMPTS = [
   { q: "Name a club Mesut Özil played for", sub: "Senior career", know: 0.6, a: [
     ["Arsenal", 260, ""], ["Real Madrid", 200, "madrid|real"], ["Werder Bremen", 70, "bremen|werder"], ["Schalke 04", 50, "schalke"], ["Fenerbahçe", 50, "fenerbahce|fener"], ["İstanbul Başakşehir", 15, "basaksehir|istanbul basaksehir"],
   ] },
-  { q: "Name a club Petr Čech played for", sub: "Senior career", know: 0.55, a: [
-    ["Chelsea", 300, ""], ["Arsenal", 130, ""], ["Rennes", 40, "stade rennais"], ["Sparta Prague", 30, "sparta|sparta praha"], ["Chmel Blšany", 5, "blsany|chmel blsany"],
-  ] },
   { q: "Name a club Edinson Cavani has played for", sub: "Senior career up to 2026", know: 0.55, a: [
     ["Paris Saint-Germain", 250, "psg|paris sg|paris"], ["Napoli", 160, ""], ["Manchester United", 120, "man utd|man united|manchester utd|united"], ["Boca Juniors", 60, "boca"], ["Palermo", 40, ""], ["Valencia", 40, ""],
     ["Danubio", 10, ""],
-  ] },
-  { q: "Name a club Radamel Falcao played for", sub: "Senior career · loans count", know: 0.5, a: [
-    ["Atlético Madrid", 200, "atletico|atleti|atletico de madrid"], ["Monaco", 134, "as monaco"], ["Porto", 99, "fc porto"], ["Manchester United", 66, "man utd|man united|manchester utd|united"], ["Chelsea", 47, ""],
-    ["Galatasaray", 30, "gala"], ["River Plate", 22, "river"], ["Rayo Vallecano", 15, "rayo"], ["Millonarios", 6, ""], ["Lanceros Boyacá", 1, "lanceros|lanceros boyaca"],
-  ] },
-  { q: "Name a club Gonzalo Higuaín played for", sub: "Senior career · loans count", know: 0.55, a: [
-    ["Real Madrid", 200, "madrid|real"], ["Juventus", 174, "juve"], ["Napoli", 162, ""], ["Chelsea", 42, ""], ["AC Milan", 42, "milan"], ["River Plate", 33, "river"], ["Inter Miami", 33, "miami"],
   ] },
   { q: "Name a club Mario Balotelli has played for", sub: "Senior career up to 2026 · loans count", know: 0.55, a: [
     ["Manchester City", 220, "man city|city"], ["Inter Milan", 150, "inter|internazionale"], ["AC Milan", 130, "milan"], ["Liverpool", 110, ""], ["Nice", 60, "ogc nice"], ["Marseille", 40, "olympique de marseille|om"],
@@ -716,89 +684,18 @@ const PROMPTS = [
     ["Liverpool", 250, ""], ["Barcelona", 200, "barca|fc barcelona"], ["Bayern Munich", 70, "bayern|fc bayern|bayern munchen"], ["Aston Villa", 70, "villa"], ["Inter Milan", 50, "inter|internazionale"], ["Vasco da Gama", 40, "vasco"],
     ["Espanyol", 25, ""], ["Al-Duhail", 10, "duhail|al duhail"],
   ] },
-  { q: "Name a club Dani Alves played for", sub: "Senior career", know: 0.5, a: [
-    ["Barcelona", 280, "barca|fc barcelona"], ["Sevilla", 130, ""], ["Juventus", 90, "juve"], ["Paris Saint-Germain", 90, "psg|paris sg|paris"], ["São Paulo", 40, "sao paulo"], ["Pumas UNAM", 25, "pumas|unam"], ["Bahia", 10, "ec bahia"],
-  ] },
-  { q: "Name a club Ruud van Nistelrooy played for", sub: "Senior career", know: 0.5, a: [
-    ["Manchester United", 280, "man utd|man united|manchester utd|united"], ["Real Madrid", 140, "madrid|real"], ["PSV Eindhoven", 110, "psv"], ["Hamburger SV", 40, "hamburg|hsv"], ["Málaga", 30, "malaga"],
-    ["Heerenveen", 25, "sc heerenveen"], ["Den Bosch", 8, "fc den bosch"],
-  ] },
-  { q: "Name a club Michael Owen played for", sub: "Senior career", know: 0.65, a: [
-    ["Liverpool", 300, ""], ["Real Madrid", 120, "madrid|real"], ["Newcastle United", 110, "newcastle"], ["Manchester United", 100, "man utd|man united|manchester utd|united"], ["Stoke City", 40, "stoke"],
-  ] },
-  { q: "Name a club Nicolas Anelka played for", sub: "Senior career · loans count", know: 0.5, a: [
-    ["Chelsea", 200, ""], ["Arsenal", 200, ""], ["Real Madrid", 65, "madrid|real"], ["Paris Saint-Germain", 45, "psg|paris sg|paris"], ["Manchester City", 37, "man city|city"], ["Liverpool", 28, ""],
-    ["Bolton Wanderers", 21, "bolton"], ["Fenerbahçe", 9, "fenerbahce|fener"], ["West Bromwich Albion", 7, "west brom|wba"], ["Juventus", 5, "juve"], ["Shanghai Shenhua", 3, "shanghai|shenhua"], ["Mumbai City", 1, "mumbai"],
-  ] },
-  { q: "Name a club Robbie Keane played for", sub: "Senior career · loans count", know: 0.45, a: [
-    ["Tottenham Hotspur", 280, "tottenham|spurs"], ["LA Galaxy", 120, "galaxy|los angeles galaxy"], ["Liverpool", 100, ""], ["Leeds United", 70, "leeds"], ["Coventry City", 40, "coventry"],
-    ["Wolverhampton Wanderers", 40, "wolves|wolverhampton"], ["Inter Milan", 40, "inter|internazionale"], ["West Ham United", 30, "west ham|hammers"], ["Celtic", 30, ""], ["Aston Villa", 25, "villa"], ["ATK", 8, "atletico de kolkata|kolkata"],
-  ] },
-  { q: "Name a club Peter Crouch played for", sub: "Senior career · loans count", know: 0.5, a: [
-    ["Liverpool", 200, ""], ["Stoke City", 170, "stoke"], ["Tottenham Hotspur", 91, "tottenham|spurs"], ["Portsmouth", 58, "pompey"], ["Southampton", 40, "saints"], ["Aston Villa", 31, "villa"],
-    ["Queens Park Rangers", 17, "qpr"], ["Burnley", 11, ""], ["Norwich City", 4, "norwich"], ["Dulwich Hamlet", 1, "dulwich"], ["IFK Hässleholm", 1, "hassleholm|ifk hassleholm"],
-  ] },
-  { q: "Name a club Franck Ribéry played for", sub: "Senior career", know: 0.5, a: [
-    ["Bayern Munich", 300, "bayern|fc bayern|bayern munchen"], ["Marseille", 110, "olympique de marseille|om"], ["Fiorentina", 50, ""], ["Galatasaray", 40, "gala"], ["Metz", 25, "fc metz"], ["Salernitana", 20, ""],
-    ["Brest", 10, "stade brestois"], ["Alès", 4, "ales|olympique ales"], ["Boulogne", 4, "us boulogne"],
-  ] },
-  { q: "Name a club Luís Figo played for", sub: "Senior career", know: 0.55, a: [
-    ["Real Madrid", 250, "madrid|real"], ["Barcelona", 230, "barca|fc barcelona"], ["Inter Milan", 90, "inter|internazionale"], ["Sporting CP", 70, "sporting|sporting lisbon"],
-  ] },
-  { q: "Name a club Clarence Seedorf played for", sub: "Senior career", know: 0.45, a: [
-    ["AC Milan", 250, "milan"], ["Real Madrid", 140, "madrid|real"], ["Ajax", 130, ""], ["Inter Milan", 70, "inter|internazionale"], ["Sampdoria", 30, "samp"], ["Botafogo", 20, ""],
-  ] },
-  { q: "Name a club Edgar Davids played for", sub: "Senior career · loans count", know: 0.4, a: [
-    ["Juventus", 220, "juve"], ["Ajax", 153, ""], ["Barcelona", 53, "barca|fc barcelona"], ["Tottenham Hotspur", 44, "tottenham|spurs"], ["AC Milan", 36, "milan"], ["Inter Milan", 28, "inter|internazionale"],
-    ["Crystal Palace", 8, "palace"], ["Barnet", 5, ""],
-  ] },
-  { q: "Name a club Henrikh Mkhitaryan has played for", sub: "Senior career up to 2026", know: 0.45, a: [
-    ["Borussia Dortmund", 200, "dortmund|bvb"], ["Manchester United", 134, "man utd|man united|manchester utd|united"], ["Arsenal", 105, ""], ["Inter Milan", 80, "inter|internazionale"], ["Roma", 57, "as roma"],
-    ["Shakhtar Donetsk", 23, "shakhtar"], ["Metalurh Donetsk", 1, "metalurh|metalurg donetsk"], ["Pyunik", 1, "pyunik yerevan"],
-  ] },
-  { q: "Name a club Emmanuel Adebayor played for", sub: "Senior career · loans count", know: 0.45, a: [
-    ["Arsenal", 220, ""], ["Tottenham Hotspur", 137, "tottenham|spurs"], ["Manchester City", 126, "man city|city"], ["Real Madrid", 53, "madrid|real"], ["Monaco", 35, "as monaco"], ["Crystal Palace", 27, "palace"],
-    ["Metz", 8, "fc metz"], ["İstanbul Başakşehir", 5, "basaksehir|istanbul basaksehir"], ["Kayserispor", 2, ""], ["Olimpia", 2, "club olimpia"],
-  ] },
-  { q: "Name a club Dimitar Berbatov played for", sub: "Senior career", know: 0.45, a: [
-    ["Manchester United", 250, "man utd|man united|manchester utd|united"], ["Tottenham Hotspur", 170, "tottenham|spurs"], ["Bayer Leverkusen", 90, "leverkusen|bayer"], ["Fulham", 70, ""], ["Monaco", 40, "as monaco"],
-    ["CSKA Sofia", 30, "cska"], ["PAOK", 15, "paok thessaloniki"], ["Kerala Blasters", 8, "kerala"],
-  ] },
   { q: "Name a club Paul Pogba has played for", sub: "Senior career up to 2026", know: 0.7, a: [
     ["Manchester United", 260, "man utd|man united|manchester utd|united"], ["Juventus", 240, "juve"], ["Monaco", 60, "as monaco"],
-  ] },
-  { q: "Name a club Raúl played for", sub: "Raúl González, senior career", know: 0.5, a: [
-    ["Real Madrid", 320, "madrid|real"], ["Schalke 04", 100, "schalke"], ["Al-Sadd", 30, "al sadd|sadd"], ["New York Cosmos", 20, "cosmos|ny cosmos"],
   ] },
   { q: "Name a club Xabi Alonso played for", sub: "Senior career · loans count", know: 0.55, a: [
     ["Liverpool", 250, ""], ["Real Madrid", 220, "madrid|real"], ["Bayern Munich", 130, "bayern|fc bayern|bayern munchen"], ["Real Sociedad", 70, "sociedad|la real"], ["Eibar", 10, "sd eibar"],
   ] },
-  { q: "Name a club Diego Costa played for", sub: "Senior career · loans count", know: 0.45, a: [
-    ["Chelsea", 230, ""], ["Atlético Madrid", 230, "atletico|atleti|atletico de madrid"], ["Wolverhampton Wanderers", 60, "wolves|wolverhampton"], ["Atlético Mineiro", 30, "atletico mineiro|galo"], ["Rayo Vallecano", 25, "rayo"],
-    ["Real Valladolid", 20, "valladolid"], ["Celta Vigo", 15, "celta"], ["Botafogo", 15, ""], ["Grêmio", 15, "gremio"], ["Braga", 10, "sc braga"], ["Albacete", 8, ""], ["Penafiel", 4, ""],
-  ] },
-  { q: "Name a club Kevin-Prince Boateng played for", sub: "Senior career · loans count", know: 0.35, a: [
-    ["AC Milan", 200, "milan"], ["Schalke 04", 48, "schalke"], ["Barcelona", 39, "barca|fc barcelona"], ["Eintracht Frankfurt", 31, "frankfurt|eintracht"], ["Tottenham Hotspur", 31, "tottenham|spurs"], ["Portsmouth", 23, "pompey"],
-    ["Hertha BSC", 23, "hertha|hertha berlin"], ["Fiorentina", 11, ""], ["Borussia Dortmund", 9, "dortmund|bvb"], ["Las Palmas", 7, "ud las palmas"], ["Beşiktaş", 5, "besiktas"], ["Sassuolo", 3, ""], ["Monza", 2, ""],
-    ["Genoa", 1, ""],
-  ] },
-  { q: "Name a club Juan Mata played for", sub: "Senior career · Real Madrid Castilla counts as Real Madrid", know: 0.45, a: [
-    ["Chelsea", 230, ""], ["Manchester United", 210, "man utd|man united|manchester utd|united"], ["Valencia", 110, ""], ["Galatasaray", 40, "gala"], ["Real Madrid", 30, "madrid|real|real madrid castilla|castilla"],
-    ["Vissel Kobe", 20, "kobe"], ["Western Sydney Wanderers", 15, "western sydney|wanderers"],
-  ] },
   { q: "Name a club Toni Kroos played for", sub: "Senior career · loans count", know: 0.7, a: [
     ["Real Madrid", 300, "madrid|real"], ["Bayern Munich", 200, "bayern|fc bayern|bayern munchen"], ["Bayer Leverkusen", 50, "leverkusen|bayer"],
-  ] },
-  { q: "Name a club Mario Götze has played for", sub: "Senior career up to 2026", know: 0.5, a: [
-    ["Borussia Dortmund", 250, "dortmund|bvb"], ["Bayern Munich", 200, "bayern|fc bayern|bayern munchen"], ["Eintracht Frankfurt", 80, "frankfurt|eintracht"], ["PSV Eindhoven", 60, "psv"],
   ] },
   { q: "Name a club İlkay Gündoğan has played for", sub: "Senior career up to 2026", know: 0.5, a: [
     ["Manchester City", 280, "man city|city"], ["Borussia Dortmund", 150, "dortmund|bvb"], ["Barcelona", 100, "barca|fc barcelona"], ["Galatasaray", 60, "gala"], ["1. FC Nürnberg", 20, "nurnberg|nuremberg|fc nurnberg"],
     ["VfL Bochum", 10, "bochum"],
-  ] },
-  { q: "Name a club Xherdan Shaqiri has played for", sub: "Senior career up to 2026", know: 0.45, a: [
-    ["Liverpool", 200, ""], ["Bayern Munich", 151, "bayern|fc bayern|bayern munchen"], ["Stoke City", 83, "stoke"], ["Basel", 61, "fc basel"], ["Inter Milan", 33, "inter|internazionale"], ["Chicago Fire", 18, "chicago"],
-    ["Lyon", 13, "olympique lyonnais|ol"],
   ] },
   { q: "Name a club Son Heung-min has played for", sub: "Senior career up to 2026", know: 0.7, a: [
     ["Tottenham Hotspur", 300, "tottenham|spurs"], ["Los Angeles FC", 100, "lafc|los angeles"], ["Bayer Leverkusen", 60, "leverkusen|bayer"], ["Hamburger SV", 50, "hamburg|hsv"],
@@ -814,41 +711,6 @@ const PROMPTS = [
   ] },
   { q: "Name a club Jordan Henderson has played for", sub: "Senior career up to 2026 · loans count", know: 0.45, a: [
     ["Liverpool", 300, ""], ["Sunderland", 100, ""], ["Al-Ettifaq", 60, "ettifaq|al ettifaq"], ["Ajax", 60, ""], ["Brentford", 50, ""], ["Coventry City", 10, "coventry"],
-  ] },
-  { q: "Name a club Rio Ferdinand played for", sub: "Senior career · loans count", know: 0.55, a: [
-    ["Manchester United", 300, "man utd|man united|manchester utd|united"], ["Leeds United", 120, "leeds"], ["West Ham United", 110, "west ham|hammers"], ["Queens Park Rangers", 40, "qpr"], ["Bournemouth", 10, "afc bournemouth"],
-  ] },
-  { q: "Name a club Ashley Cole played for", sub: "Senior career · loans count", know: 0.5, a: [
-    ["Chelsea", 250, ""], ["Arsenal", 230, ""], ["LA Galaxy", 60, "galaxy|los angeles galaxy"], ["Roma", 50, "as roma"], ["Derby County", 30, "derby"], ["Crystal Palace", 15, "palace"],
-  ] },
-  { q: "Name a club Joe Hart played for", sub: "Senior career · loans count", know: 0.4, a: [
-    ["Manchester City", 280, "man city|city"], ["Celtic", 90, ""], ["Burnley", 60, ""], ["West Ham United", 60, "west ham|hammers"], ["Torino", 60, ""], ["Tottenham Hotspur", 50, "tottenham|spurs"],
-    ["Birmingham City", 40, "birmingham"], ["Shrewsbury Town", 20, "shrewsbury"], ["Blackpool", 10, ""], ["Tranmere Rovers", 8, "tranmere"],
-  ] },
-  { q: "Name a club Jermain Defoe played for", sub: "Senior career · loans count", know: 0.45, a: [
-    ["Tottenham Hotspur", 250, "tottenham|spurs"], ["Sunderland", 120, ""], ["West Ham United", 100, "west ham|hammers"], ["Portsmouth", 80, "pompey"], ["Rangers", 60, "glasgow rangers"], ["Bournemouth", 50, "afc bournemouth"],
-    ["Toronto FC", 40, "toronto"],
-  ] },
-  { q: "Name a club Andy Carroll has played for", sub: "Senior career up to 2026 · loans count", know: 0.45, a: [
-    ["Newcastle United", 220, "newcastle"], ["Liverpool", 193, ""], ["West Ham United", 131, "west ham|hammers"], ["West Bromwich Albion", 22, "west brom|wba"], ["Reading", 22, ""], ["Bordeaux", 11, "girondins"],
-    ["Amiens", 8, "amiens sc"], ["Dagenham & Redbridge", 6, "dagenham"], ["Preston North End", 3, "preston"],
-  ] },
-  { q: "Name a club Daniel Sturridge played for", sub: "Senior career · loans count", know: 0.45, a: [
-    ["Liverpool", 270, ""], ["Chelsea", 150, ""], ["Manchester City", 90, "man city|city"], ["Bolton Wanderers", 40, "bolton"], ["West Bromwich Albion", 30, "west brom|wba"], ["Trabzonspor", 25, "trabzon"],
-    ["Perth Glory", 10, "perth"],
-  ] },
-  { q: "Name a club Danny Welbeck has played for", sub: "Senior career up to 2026 · loans count", know: 0.45, a: [
-    ["Manchester United", 220, "man utd|man united|manchester utd|united"], ["Arsenal", 180, ""], ["Brighton & Hove Albion", 150, "brighton"], ["Watford", 50, ""], ["Sunderland", 40, ""], ["Preston North End", 10, "preston"],
-  ] },
-  { q: "Name a club Emile Heskey played for", sub: "Senior career", know: 0.4, a: [
-    ["Liverpool", 250, ""], ["Leicester City", 141, "leicester"], ["Aston Villa", 80, "villa"], ["Birmingham City", 60, "birmingham"], ["Wigan Athletic", 51, "wigan"], ["Bolton Wanderers", 23, "bolton"], ["Newcastle Jets", 15, "jets"],
-  ] },
-  { q: "Name a club Pepe Reina played for", sub: "Senior career · loans count", know: 0.35, a: [
-    ["Liverpool", 250, ""], ["Napoli", 105, ""], ["Villarreal", 75, ""], ["Barcelona", 30, "barca|fc barcelona"], ["AC Milan", 22, "milan"], ["Lazio", 22, "ss lazio"], ["Bayern Munich", 15, "bayern|fc bayern|bayern munchen"],
-    ["Aston Villa", 15, "villa"], ["Como", 9, "como 1907"],
-  ] },
-  { q: "Name a club Edwin van der Sar played for", sub: "Senior career", know: 0.5, a: [
-    ["Manchester United", 260, "man utd|man united|manchester utd|united"], ["Ajax", 170, ""], ["Juventus", 80, "juve"], ["Fulham", 70, ""],
   ] },
   { q: "Name a club Thibaut Courtois has played for", sub: "Senior career up to 2026 · loans count", know: 0.6, a: [
     ["Real Madrid", 270, "madrid|real"], ["Chelsea", 200, ""], ["Atlético Madrid", 130, "atletico|atleti|atletico de madrid"], ["Genk", 40, "krc genk"],
@@ -867,10 +729,6 @@ const PROMPTS = [
     ["Arsenal", 250, ""], ["Chelsea", 180, ""], ["AC Milan", 120, "milan"], ["Montpellier", 60, "montpellier hsc"], ["Los Angeles FC", 50, "lafc|los angeles"], ["Lille", 30, "losc"], ["Tours", 15, "tours fc"],
     ["Grenoble", 10, "grenoble foot"], ["Istres", 4, "fc istres"],
   ] },
-  { q: "Name a club Rafael Benítez has managed", sub: "Senior club jobs up to 2026", know: 0.45, a: [
-    ["Liverpool", 250, ""], ["Valencia", 89, ""], ["Newcastle United", 79, "newcastle"], ["Chelsea", 69, ""], ["Real Madrid", 60, "madrid|real"], ["Napoli", 51, ""], ["Inter Milan", 34, "inter|internazionale"], ["Everton", 34, ""],
-    ["Celta Vigo", 10, "celta"], ["Panathinaikos", 7, "pao"], ["Tenerife", 5, "cd tenerife"], ["Dalian Yifang", 3, "dalian|dalian professional"], ["Osasuna", 2, ""], ["Real Valladolid", 2, "valladolid"], ["Extremadura", 1, "cf extremadura"],
-  ] },
   { q: "Name a club Thomas Tuchel has managed", sub: "Club sides only, up to 2026", know: 0.55, a: [
     ["Chelsea", 230, ""], ["Bayern Munich", 170, "bayern|fc bayern|bayern munchen"], ["Paris Saint-Germain", 170, "psg|paris sg|paris"], ["Borussia Dortmund", 150, "dortmund|bvb"], ["Mainz 05", 60, "mainz"], ["FC Augsburg", 5, "augsburg|augsburg ii"],
   ] },
@@ -878,39 +736,11 @@ const PROMPTS = [
     ["Arsenal", 200, ""], ["Aston Villa", 165, "villa"], ["Sevilla", 134, ""], ["Paris Saint-Germain", 80, "psg|paris sg|paris"], ["Villarreal", 57, ""], ["Valencia", 23, ""], ["Spartak Moscow", 5, "spartak"], ["Almería", 3, "almeria"],
     ["Lorca Deportiva", 1, "lorca"],
   ] },
-  { q: "Name a club Claudio Ranieri has managed", sub: "Club sides only", know: 0.4, a: [
-    ["Leicester City", 250, "leicester"], ["Chelsea", 115, ""], ["Roma", 62, "as roma"], ["Juventus", 36, "juve"], ["Valencia", 29, ""], ["Inter Milan", 22, "inter|internazionale"], ["Monaco", 15, "as monaco"], ["Napoli", 15, ""],
-    ["Fiorentina", 15, ""], ["Cagliari", 15, ""], ["Fulham", 13, ""], ["Watford", 10, ""], ["Atlético Madrid", 8, "atletico|atleti|atletico de madrid"], ["Parma", 5, ""], ["Sampdoria", 5, "samp"], ["Nantes", 3, "fc nantes"],
-    ["Campania Puteolana", 1, "puteolana"], ["Vigor Lamezia", 1, "lamezia"],
-  ] },
-  { q: "Name a club Massimiliano Allegri has managed", sub: "Club sides only, up to 2026", know: 0.4, a: [
-    ["Juventus", 250, "juve"], ["AC Milan", 200, "milan"], ["Cagliari", 50, ""], ["Sassuolo", 30, ""], ["Grosseto", 10, ""], ["SPAL", 8, ""], ["Aglianese", 3, ""],
-  ] },
-  { q: "Name a club Louis van Gaal has managed", sub: "Club sides only", know: 0.45, a: [
-    ["Manchester United", 220, "man utd|man united|manchester utd|united"], ["Barcelona", 154, "barca|fc barcelona"], ["Ajax", 154, ""], ["Bayern Munich", 75, "bayern|fc bayern|bayern munchen"], ["AZ Alkmaar", 16, "az"],
-  ] },
   { q: "Name a club Arsène Wenger has managed", sub: "Club sides only", know: 0.5, a: [
     ["Arsenal", 330, ""], ["Monaco", 90, "as monaco"], ["Nagoya Grampus", 40, "nagoya|nagoya grampus eight|grampus"], ["Nancy", 20, "as nancy|nancy lorraine"],
   ] },
-  { q: "Name a club Marcelo Bielsa has managed", sub: "Club sides only · counted if appointed", know: 0.3, a: [
-    ["Leeds United", 220, "leeds"], ["Athletic Bilbao", 75, "athletic club|bilbao|athletic"], ["Marseille", 54, "olympique de marseille|om"], ["Newell's Old Boys", 22, "newells|newells old boys"], ["Lille", 16, "losc"],
-    ["Lazio", 11, "ss lazio"], ["Espanyol", 6, ""], ["Vélez Sarsfield", 5, "velez|velez sarsfield"], ["Atlas", 2, ""], ["Club América", 2, "america"],
-  ] },
   { q: "Name a club Luis Enrique has managed", sub: "Club sides only, up to 2026 · Barcelona B counts as Barcelona", know: 0.5, a: [
     ["Paris Saint-Germain", 230, "psg|paris sg|paris"], ["Barcelona", 220, "barca|fc barcelona"], ["Roma", 70, "as roma"], ["Celta Vigo", 60, "celta"],
-  ] },
-  { q: "Name a club Harry Redknapp has managed", sub: "Club sides only", know: 0.4, a: [
-    ["Tottenham Hotspur", 220, "tottenham|spurs"], ["West Ham United", 138, "west ham|hammers"], ["Portsmouth", 124, "pompey"], ["Southampton", 28, "saints"], ["Queens Park Rangers", 21, "qpr"], ["Bournemouth", 15, "afc bournemouth"],
-    ["Birmingham City", 6, "birmingham"],
-  ] },
-  { q: "Name a club Sam Allardyce has managed", sub: "Club sides only, caretaker spells count", know: 0.4, a: [
-    ["Bolton Wanderers", 200, "bolton"], ["West Ham United", 92, "west ham|hammers"], ["Newcastle United", 57, "newcastle"], ["Sunderland", 48, ""], ["Everton", 48, ""], ["Crystal Palace", 38, "palace"],
-    ["Blackburn Rovers", 38, "blackburn"], ["West Bromwich Albion", 23, "west brom|wba"], ["Leeds United", 16, "leeds"], ["Blackpool", 3, ""], ["Notts County", 2, "notts"], ["Limerick", 1, "limerick fc"],
-    ["Preston North End", 1, "preston"],
-  ] },
-  { q: "Name a club David Moyes has managed", sub: "Club sides only, up to 2026", know: 0.5, a: [
-    ["Everton", 250, ""], ["West Ham United", 170, "west ham|hammers"], ["Manchester United", 150, "man utd|man united|manchester utd|united"], ["Real Sociedad", 50, "sociedad|la real"], ["Sunderland", 50, ""],
-    ["Preston North End", 30, "preston"],
   ] },
   { q: "Name a player from Brazil's 2002 World Cup-winning squad", sub: "Any of the 23", know: 0.7, a: [
     ["Ronaldo Nazário", 250, "ronaldo|r9|ronaldo nazario|nazario|brazilian ronaldo|o fenomeno"], ["Ronaldinho", 209, "dinho"], ["Rivaldo", 158, ""], ["Roberto Carlos", 146, "carlos"], ["Cafu", 122, ""], ["Kaká", 69, "kaka"],
@@ -1474,6 +1304,192 @@ const PROMPTS = [
   { q: "Name a manager who has won Ligue 1", sub: "2009–10 to 2025–26", know: 0.35, a: [
     ["Luis Enrique", 150, "enrique|lucho"], ["Thomas Tuchel", 86, "tuchel"], ["Carlo Ancelotti", 72, "ancelotti"], ["Laurent Blanc", 60, "blanc"], ["Mauricio Pochettino", 48, "pochettino|poch"], ["Unai Emery", 38, "emery"],
     ["Didier Deschamps", 38, "deschamps"], ["Christophe Galtier", 29, "galtier"], ["Leonardo Jardim", 21, "jardim"], ["Rudi Garcia", 14, "garcia"], ["René Girard", 2, "girard"],
+  ] },
+  { q: "Name a club Eden Hazard played for", sub: "Senior career", know: 0.7, a: [
+    ["Chelsea", 300, ""], ["Real Madrid", 200, "madrid|real"], ["Lille", 80, "losc"],
+  ] },
+  { q: "Name a club Andrés Iniesta played for", sub: "Senior career · Barcelona B counts as Barcelona", know: 0.6, a: [
+    ["Barcelona", 330, "barca|barcelona b|fc barcelona"], ["Vissel Kobe", 70, "kobe|vissel"], ["Emirates Club", 15, "emirates|emirates fc"],
+  ] },
+  { q: "Name a club Gianluigi Buffon played for", sub: "Senior career", know: 0.6, a: [
+    ["Juventus", 320, "juve"], ["Parma", 110, ""], ["Paris Saint-Germain", 90, "psg|paris sg|paris"],
+  ] },
+  { q: "Name a club Marcelo played for", sub: "Senior career · the Brazilian left-back", know: 0.55, a: [
+    ["Real Madrid", 330, "madrid|real"], ["Fluminense", 70, "flu"], ["Olympiacos", 40, "olympiakos"],
+  ] },
+  { q: "Name a club Raphaël Varane played for", sub: "Senior career", know: 0.55, a: [
+    ["Real Madrid", 280, "madrid|real"], ["Manchester United", 220, "man utd|man united|manchester utd|united"], ["Lens", 50, "rc lens"], ["Como", 25, "como 1907"],
+  ] },
+  { q: "Name a club Gerard Piqué played for", sub: "Senior career · loans count", know: 0.6, a: [
+    ["Barcelona", 330, "barca|fc barcelona"], ["Manchester United", 110, "man utd|man united|manchester utd|united"], ["Real Zaragoza", 25, "zaragoza"],
+  ] },
+  { q: "Name a club Jude Bellingham has played for", sub: "Senior career up to 2026", know: 0.75, a: [
+    ["Real Madrid", 300, "madrid|real"], ["Borussia Dortmund", 220, "dortmund|bvb"], ["Birmingham City", 80, "birmingham"],
+  ] },
+  { q: "Name a club Ousmane Dembélé has played for", sub: "Senior career up to 2026", know: 0.7, a: [
+    ["Paris Saint-Germain", 280, "psg|paris sg|paris"], ["Barcelona", 230, "barca|fc barcelona"], ["Borussia Dortmund", 120, "dortmund|bvb"], ["Rennes", 40, "stade rennais"],
+  ] },
+  { q: "Name a club Christian Pulisic has played for", sub: "Senior career up to 2026", know: 0.7, a: [
+    ["Chelsea", 270, ""], ["AC Milan", 240, "milan"], ["Borussia Dortmund", 130, "dortmund|bvb"],
+  ] },
+  { q: "Name a club Achraf Hakimi has played for", sub: "Senior career up to 2026 · loans count", know: 0.6, a: [
+    ["Paris Saint-Germain", 300, "psg|paris sg|paris"], ["Real Madrid", 140, "madrid|real"], ["Inter Milan", 90, "inter|internazionale"], ["Borussia Dortmund", 70, "dortmund|bvb"],
+  ] },
+  { q: "Name a club Kai Havertz has played for", sub: "Senior career up to 2026", know: 0.7, a: [
+    ["Arsenal", 280, ""], ["Chelsea", 260, ""], ["Bayer Leverkusen", 90, "leverkusen|bayer"],
+  ] },
+  { q: "Name a club Martin Ødegaard has played for", sub: "Senior career up to 2026 · loans count", know: 0.65, a: [
+    ["Arsenal", 300, ""], ["Real Madrid", 170, "madrid|real"], ["Real Sociedad", 50, "sociedad|la real"], ["Vitesse", 15, "vitesse arnhem"], ["Heerenveen", 12, "sc heerenveen"],
+    ["Strømsgodset", 8, "stromsgodset|godset"],
+  ] },
+  { q: "Name a club Alexander Isak has played for", sub: "Senior career up to 2026 · loans count", know: 0.65, a: [
+    ["Newcastle United", 270, "newcastle"], ["Liverpool", 220, ""], ["Real Sociedad", 70, "sociedad|la real"], ["Borussia Dortmund", 50, "dortmund|bvb"], ["AIK", 15, "aik fotboll|aik stockholm"],
+    ["Willem II", 10, "willem"],
+  ] },
+  { q: "Name a club Viktor Gyökeres has played for", sub: "Senior career up to 2026 · loans count", know: 0.6, a: [
+    ["Arsenal", 270, ""], ["Sporting CP", 200, "sporting|sporting lisbon"], ["Coventry City", 70, "coventry"], ["Brighton & Hove Albion", 25, "brighton"], ["Swansea City", 12, "swansea"],
+    ["St. Pauli", 8, "st pauli|sankt pauli|fc st pauli"], ["Brommapojkarna", 5, "if brommapojkarna|bp"],
+  ] },
+  { q: "Name a club Victor Osimhen has played for", sub: "Senior career up to 2026 · loans count", know: 0.55, a: [
+    ["Napoli", 300, ""], ["Galatasaray", 200, "gala"], ["Lille", 60, "losc"], ["VfL Wolfsburg", 20, "wolfsburg"], ["Charleroi", 12, "sporting charleroi"],
+  ] },
+  { q: "Name a club Khvicha Kvaratskhelia has played for", sub: "Senior career up to 2026 · loans count", know: 0.55, a: [
+    ["Napoli", 300, ""], ["Paris Saint-Germain", 260, "psg|paris sg|paris"], ["Rubin Kazan", 20, "rubin"], ["Dinamo Tbilisi", 12, "dinamo tbilisi"], ["Lokomotiv Moscow", 8, "lokomotiv|lokomotiv moskva"],
+    ["Dinamo Batumi", 6, "batumi"], ["Rustavi", 4, "fc rustavi|metalurgi rustavi"],
+  ] },
+  { q: "Name a club Julián Álvarez has played for", sub: "Senior career up to 2026", know: 0.65, a: [
+    ["Manchester City", 270, "man city|city"], ["Atlético Madrid", 250, "atletico|atleti|atletico de madrid"], ["River Plate", 110, "river"],
+  ] },
+  { q: "Name a club Enzo Fernández has played for", sub: "Senior career up to 2026 · loans count", know: 0.6, a: [
+    ["Chelsea", 300, ""], ["Manchester City", 140, "man city|city"], ["Benfica", 90, ""], ["River Plate", 80, "river"], ["Defensa y Justicia", 8, "defensa"],
+  ] },
+  { q: "Name a club Alexis Mac Allister has played for", sub: "Senior career up to 2026 · loans count", know: 0.55, a: [
+    ["Liverpool", 300, ""], ["Brighton & Hove Albion", 180, "brighton"], ["Boca Juniors", 40, "boca"], ["Argentinos Juniors", 20, "argentinos"],
+  ] },
+  { q: "Name a club Rodri has played for", sub: "Senior career up to 2026 · the Spanish midfielder", know: 0.6, a: [
+    ["Manchester City", 320, "man city|city"], ["Atlético Madrid", 120, "atletico|atleti|atletico de madrid"], ["Barcelona", 90, "barca|fc barcelona"], ["Villarreal", 60, ""],
+  ] },
+  { q: "Name a club Raphinha has played for", sub: "Senior career up to 2026", know: 0.55, a: [
+    ["Barcelona", 300, "barca|fc barcelona"], ["Leeds United", 160, "leeds"], ["Rennes", 30, "stade rennais"], ["Sporting CP", 25, "sporting|sporting lisbon"],
+    ["Vitória de Guimarães", 10, "vitoria|guimaraes|vitoria guimaraes"],
+  ] },
+  { q: "Name a club Luis Díaz has played for", sub: "Senior career up to 2026 · the Colombian winger", know: 0.55, a: [
+    ["Liverpool", 300, ""], ["Bayern Munich", 160, "bayern|fc bayern|bayern munchen"], ["Porto", 80, "fc porto"], ["Junior", 10, "atletico junior|junior barranquilla"], ["Barranquilla", 4, "barranquilla fc"],
+  ] },
+  { q: "Name a club Darwin Núñez has played for", sub: "Senior career up to 2026 · loans count", know: 0.55, a: [
+    ["Liverpool", 300, ""], ["Benfica", 120, ""], ["Al-Hilal", 70, "al hilal|hilal"], ["Almería", 15, "almeria"], ["Peñarol", 15, "penarol"], ["Al-Diriyah", 4, "al diriyah|diriyah"],
+  ] },
+  { q: "Name a club Leroy Sané has played for", sub: "Senior career up to 2026", know: 0.55, a: [
+    ["Manchester City", 260, "man city|city"], ["Bayern Munich", 240, "bayern|fc bayern|bayern munchen"], ["Schalke 04", 60, "schalke"], ["Galatasaray", 40, "gala"],
+  ] },
+  { q: "Name a club Harry Maguire has played for", sub: "Senior career up to 2026 · loans count", know: 0.6, a: [
+    ["Manchester United", 300, "man utd|man united|manchester utd|united"], ["Leicester City", 110, "leicester"], ["Hull City", 40, "hull"], ["Sheffield United", 30, "sheffield utd|sheff utd|blades"],
+    ["Wigan Athletic", 8, "wigan"],
+  ] },
+  { q: "Name a club Jordan Pickford has played for", sub: "Senior career up to 2026 · loans count", know: 0.5, a: [
+    ["Everton", 320, ""], ["Sunderland", 120, ""], ["Preston North End", 15, "preston"], ["Bradford City", 10, "bradford"], ["Carlisle United", 6, "carlisle"], ["Burton Albion", 5, "burton"],
+    ["Darlington", 4, ""], ["Alfreton Town", 2, "alfreton"],
+  ] },
+  { q: "Name a club Gabriel Jesus has played for", sub: "Senior career up to 2026", know: 0.6, a: [
+    ["Manchester City", 270, "man city|city"], ["Arsenal", 250, ""], ["Palmeiras", 50, ""], ["Barcelona", 40, "barca|fc barcelona"],
+  ] },
+  { q: "Name a club Richarlison has played for", sub: "Senior career up to 2026", know: 0.55, a: [
+    ["Tottenham Hotspur", 270, "tottenham|spurs"], ["Everton", 200, ""], ["Watford", 50, ""], ["Fluminense", 20, "flu"], ["América Mineiro", 6, "america mineiro|america mg"],
+  ] },
+  { q: "Name a club João Félix has played for", sub: "Senior career up to 2026 · loans count", know: 0.6, a: [
+    ["Atlético Madrid", 250, "atletico|atleti|atletico de madrid"], ["Chelsea", 200, ""], ["Barcelona", 120, "barca|fc barcelona"], ["Benfica", 100, ""], ["Al-Nassr", 60, "al nassr|nassr"],
+    ["AC Milan", 50, "milan"],
+  ] },
+  { q: "Name a club Álvaro Morata has played for", sub: "Senior career up to 2026 · loans count", know: 0.55, a: [
+    ["Chelsea", 220, ""], ["Real Madrid", 180, "madrid|real"], ["Juventus", 150, "juve"], ["Atlético Madrid", 140, "atletico|atleti|atletico de madrid"], ["AC Milan", 50, "milan"],
+    ["Galatasaray", 20, "gala"], ["Como", 12, "como 1907"], ["Leganés", 4, "leganes|cd leganes"],
+  ] },
+  { q: "Name a club Pierre-Emerick Aubameyang has played for", sub: "Senior career up to 2026 · loans count", know: 0.55, a: [
+    ["Arsenal", 260, ""], ["Borussia Dortmund", 200, "dortmund|bvb"], ["Barcelona", 70, "barca|fc barcelona"], ["Chelsea", 70, ""], ["Marseille", 40, "olympique de marseille|om"],
+    ["Saint-Étienne", 25, "saint etienne|st etienne|asse"], ["AC Milan", 10, "milan"], ["Monaco", 8, "as monaco"], ["Lille", 6, "losc"], ["Al-Qadsiah", 6, "al qadsiah|qadsiah|al qadisiyah"],
+    ["Deportivo La Coruña", 5, "deportivo|depor|deportivo de la coruna|la coruna"], ["Dijon", 3, "dijon fco"],
+  ] },
+  { q: "Name a club David de Gea has played for", sub: "Senior career up to 2026", know: 0.6, a: [
+    ["Manchester United", 330, "man utd|man united|manchester utd|united"], ["Atlético Madrid", 90, "atletico|atleti|atletico de madrid"], ["Fiorentina", 50, "viola"],
+  ] },
+  { q: "Name a club Christian Eriksen has played for", sub: "Senior career up to 2026", know: 0.55, a: [
+    ["Tottenham Hotspur", 250, "tottenham|spurs"], ["Manchester United", 160, "man utd|man united|manchester utd|united"], ["Inter Milan", 90, "inter|internazionale"], ["Ajax", 70, ""],
+    ["Brentford", 40, ""], ["VfL Wolfsburg", 15, "wolfsburg"],
+  ] },
+  { q: "Name a club Memphis Depay has played for", sub: "Senior career up to 2026", know: 0.5, a: [
+    ["Manchester United", 220, "man utd|man united|manchester utd|united"], ["Barcelona", 180, "barca|fc barcelona"], ["Lyon", 110, "olympique lyonnais|ol"], ["PSV Eindhoven", 70, "psv"],
+    ["Atlético Madrid", 40, "atletico|atleti|atletico de madrid"], ["Corinthians", 30, ""],
+  ] },
+  { q: "Name a club Antony has played for", sub: "Senior career up to 2026 · the Brazilian winger", know: 0.55, a: [
+    ["Manchester United", 300, "man utd|man united|manchester utd|united"], ["Ajax", 140, ""], ["Real Betis", 70, "betis"], ["São Paulo", 20, "sao paulo"],
+  ] },
+  { q: "Name a club Timo Werner has played for", sub: "Senior career up to 2026 · loans count", know: 0.55, a: [
+    ["Chelsea", 250, ""], ["RB Leipzig", 200, "leipzig"], ["Tottenham Hotspur", 80, "tottenham|spurs"], ["VfB Stuttgart", 30, "stuttgart"], ["San Jose Earthquakes", 20, "san jose|earthquakes|quakes"],
+  ] },
+  { q: "Name a club Mason Mount has played for", sub: "Senior career up to 2026 · loans count", know: 0.6, a: [
+    ["Chelsea", 300, ""], ["Manchester United", 200, "man utd|man united|manchester utd|united"], ["Derby County", 40, "derby"], ["Vitesse", 15, "vitesse arnhem"],
+  ] },
+  { q: "Name a club Kingsley Coman has played for", sub: "Senior career up to 2026 · loans count", know: 0.5, a: [
+    ["Bayern Munich", 300, "bayern|fc bayern|bayern munchen"], ["Paris Saint-Germain", 70, "psg|paris sg|paris"], ["Juventus", 60, "juve"], ["Al-Nassr", 50, "al nassr|nassr"],
+  ] },
+  { q: "Name a club Rafael Leão has played for", sub: "Senior career up to 2026", know: 0.55, a: [
+    ["AC Milan", 330, "milan"], ["Lille", 50, "losc"], ["Sporting CP", 40, "sporting|sporting lisbon"], ["Galatasaray", 30, "gala"],
+  ] },
+  { q: "Name a club Paulo Dybala has played for", sub: "Senior career up to 2026", know: 0.6, a: [
+    ["Juventus", 300, "juve"], ["Roma", 200, "as roma"], ["Palermo", 50, ""], ["Instituto", 8, "instituto de cordoba"],
+  ] },
+  { q: "Name a club Weston McKennie has played for", sub: "Senior career up to 2026 · loans count", know: 0.45, a: [
+    ["Juventus", 300, "juve"], ["Schalke 04", 100, "schalke"], ["Leeds United", 50, "leeds"],
+  ] },
+  { q: "Name a club Tyler Adams has played for", sub: "Senior career up to 2026", know: 0.4, a: [
+    ["Bournemouth", 200, "afc bournemouth"], ["Leeds United", 149, "leeds"], ["RB Leipzig", 119, "leipzig"], ["New York Red Bulls", 68, "red bulls|ny red bulls|nyrb|new york red bulls ii"],
+  ] },
+  { q: "Name a club N'Golo Kanté has played for", sub: "Senior career up to 2026", know: 0.65, a: [
+    ["Chelsea", 300, ""], ["Leicester City", 160, "leicester"], ["Al-Ittihad", 50, "al ittihad|ittihad"], ["Fenerbahçe", 25, "fenerbahce|fener"], ["Caen", 15, "sm caen|stade malherbe"],
+    ["Boulogne", 5, "us boulogne"],
+  ] },
+  { q: "Name a club Antoine Griezmann has played for", sub: "Senior career up to 2026", know: 0.7, a: [
+    ["Atlético Madrid", 320, "atletico|atleti|atletico de madrid"], ["Barcelona", 160, "barca|fc barcelona"], ["Real Sociedad", 60, "sociedad|la real"], ["Orlando City", 40, "orlando"],
+  ] },
+  { q: "Name a club Sergio Ramos has played for", sub: "Senior career up to 2026", know: 0.75, a: [
+    ["Real Madrid", 330, "madrid|real"], ["Sevilla", 90, ""], ["Paris Saint-Germain", 90, "psg|paris sg|paris"], ["Monterrey", 25, "rayados|cf monterrey"],
+  ] },
+  { q: "Name a club James Rodríguez has played for", sub: "Senior career up to 2026 · loans count", know: 0.55, a: [
+    ["Real Madrid", 270, "madrid|real"], ["Bayern Munich", 110, "bayern|fc bayern|bayern munchen"], ["Everton", 100, ""], ["Monaco", 70, "as monaco"], ["Porto", 60, "fc porto"],
+    ["São Paulo", 20, "sao paulo"], ["Olympiacos", 12, "olympiakos"], ["Rayo Vallecano", 12, "rayo"], ["Minnesota United", 12, "minnesota|mnufc|loons"], ["León", 8, "leon|club leon"],
+    ["Al-Rayyan", 6, "al rayyan|rayyan"], ["Atlético Nacional", 6, "nacional|atletico nacional"], ["Banfield", 3, ""], ["Envigado", 2, ""],
+  ] },
+  { q: "Name a club Marcus Rashford has played for", sub: "Senior career up to 2026 · loans count", know: 0.75, a: [
+    ["Manchester United", 330, "man utd|man united|manchester utd|united"], ["Barcelona", 130, "barca|fc barcelona"], ["Aston Villa", 80, "villa"],
+  ] },
+  { q: "Name a club Jack Grealish has played for", sub: "Senior career up to 2026 · loans count", know: 0.7, a: [
+    ["Manchester City", 270, "man city|city"], ["Aston Villa", 250, "villa"], ["Everton", 70, ""], ["Notts County", 10, "notts"],
+  ] },
+  { q: "Name a club Jesse Lingard has played for", sub: "Senior career up to 2026 · loans count", know: 0.5, a: [
+    ["Manchester United", 330, "man utd|man united|manchester utd|united"], ["West Ham United", 80, "west ham|hammers"], ["Nottingham Forest", 50, "forest|nottm forest"], ["FC Seoul", 40, "seoul"],
+    ["Corinthians", 15, ""], ["Derby County", 8, "derby"], ["Brighton & Hove Albion", 6, "brighton"], ["Birmingham City", 6, "birmingham"], ["Leicester City", 4, "leicester"],
+  ] },
+  { q: "Name a club Jürgen Klopp has managed", sub: "Club sides only, up to 2026", know: 0.75, a: [
+    ["Liverpool", 330, ""], ["Borussia Dortmund", 200, "dortmund|bvb"], ["Mainz 05", 50, "mainz"],
+  ] },
+  { q: "Name a club Vincent Kompany played for or managed", sub: "Senior career and club jobs, up to 2026", know: 0.55, a: [
+    ["Manchester City", 300, "man city|city"], ["Bayern Munich", 170, "bayern|fc bayern|bayern munchen"], ["Burnley", 90, ""], ["Anderlecht", 50, "rsc anderlecht"], ["Hamburger SV", 15, "hamburg|hsv"],
+  ] },
+  { q: "Name a club Erik ten Hag has managed", sub: "Club sides only, up to 2026 · reserve sides count", know: 0.55, a: [
+    ["Manchester United", 300, "man utd|man united|manchester utd|united"], ["Ajax", 200, ""], ["Bayer Leverkusen", 50, "leverkusen|bayer"], ["FC Utrecht", 20, "utrecht"],
+    ["Go Ahead Eagles", 8, "go ahead|gae"], ["Bayern Munich II", 6, "bayern|bayern ii|bayern munich ii|bayern reserves"],
+  ] },
+  { q: "Name a club Ange Postecoglou has managed", sub: "Club sides only, up to 2026", know: 0.5, a: [
+    ["Tottenham Hotspur", 300, "tottenham|spurs"], ["Celtic", 160, ""], ["Nottingham Forest", 60, "forest|nottm forest"], ["Al-Nassr", 30, "al nassr|nassr"],
+    ["Yokohama F. Marinos", 25, "yokohama|yokohama f marinos|marinos"], ["Melbourne Victory", 8, "victory"], ["Brisbane Roar", 8, "brisbane|roar"], ["South Melbourne", 5, ""],
+    ["Panachaiki", 2, ""], ["Whittlesea Zebras", 1, "whittlesea"], ["Western Suburbs", 1, "wests"],
+  ] },
+  { q: "Name a club Rúben Amorim has managed", sub: "Club sides only, up to 2026 · Braga B counts as Braga", know: 0.55, a: [
+    ["Manchester United", 300, "man utd|man united|manchester utd|united"], ["Sporting CP", 170, "sporting|sporting lisbon"], ["AC Milan", 90, "milan"], ["Braga", 30, "sc braga|braga b"],
+    ["Casa Pia", 8, ""],
+  ] },
+  { q: "Name a club Enzo Maresca has managed", sub: "Head coach jobs only, up to 2026", know: 0.5, a: [
+    ["Chelsea", 300, ""], ["Manchester City", 180, "man city|city"], ["Leicester City", 80, "leicester"], ["Parma", 15, ""],
   ] },
 ];
 
