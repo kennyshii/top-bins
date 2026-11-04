@@ -151,6 +151,7 @@ svg { display: block; width: 100%; height: auto; overflow: visible; }
     </ul>
     <div class="row">
       <button class="btn" id="go" type="button">KICK OFF ▶</button>
+      <button class="btn ghost" id="unl" type="button">UNLIMITED ∞</button>
       <button class="btn ghost" id="seeToday" type="button" hidden>TODAY'S RESULT</button>
     </div>
     <p class="logbook" id="introLog"></p>
@@ -1596,8 +1597,9 @@ const store = {
 const unseen = () => { const had = new Set(store.load().seen || []); return PROMPTS.filter((p) => !had.has(p.id)); };
 
 function deal() {
-  const old = (store.load().seen || []).map((id) => byId.get(id)).filter(Boolean);
-  const fresh = shuffled(unseen()), out = [];
+  const s = store.load(), run = liveRun(s), held = new Set(run ? run.set : []);
+  const old = (s.seen || []).map((id) => byId.get(id)).filter((p) => p && !held.has(p.id));
+  const fresh = shuffled(unseen().filter((p) => !held.has(p.id))), out = [];
   const take = (list, cap) => {
     for (const p of list) {
       if (out.length >= 7) return;
@@ -1637,6 +1639,7 @@ function introLog() {
   const done = !!todayDone();
   $("#go").textContent = done ? "PLAY UNLIMITED ∞" : run && run.results.length ? `RESUME ${run.results.length}/7 ▶` : "KICK OFF ▶";
   $("#seeToday").hidden = !done;
+  $("#unl").hidden = done;
 }
 
 function show(which) {
@@ -1912,12 +1915,14 @@ function renderResults(g) {
     <div class="row">
       <button class="btn" id="copy" type="button">COPY RESULT</button>
       <button class="btn ghost" id="again" type="button">PLAY UNLIMITED ∞</button>
+      <button class="btn ghost" id="menu" type="button">MENU</button>
     </div>
     <textarea id="copyBox" readonly hidden aria-label="Result to copy"></textarea>
     ${st && st.played ? `<p class="logbook">LOGBOOK · STREAK ${st.streak} · PLAYED ${st.played} · AVG ${Math.round(st.sum / st.played)} · BEST ${st.best}</p>` : ""}
     <p class="note">Rarity is an estimate of how often each answer comes up and how many people could answer the prompt at all. It is not a live count of players. Answers cover results up to the years shown on each prompt.</p>`;
   show("done");
   $("#again").addEventListener("click", () => start("unlimited"));
+  $("#menu").addEventListener("click", () => { introLog(); show("intro"); });
   $("#copy").addEventListener("click", async (e) => {
     const text = shareText(g);
     try { await navigator.clipboard.writeText(text); e.target.textContent = "COPIED"; }
@@ -1926,6 +1931,7 @@ function renderResults(g) {
 }
 
 $("#go").addEventListener("click", () => start(todayDone() ? "unlimited" : "daily"));
+$("#unl").addEventListener("click", () => start("unlimited"));
 $("#seeToday").addEventListener("click", () => {
   const d = todayDone();
   if (!d) return;
