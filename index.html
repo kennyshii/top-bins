@@ -3439,9 +3439,9 @@ const pitch = (() => {
   const flip = (p) => ({ ...p, lh: [-p.rh[0], p.rh[1], p.rh[2]], rh: [-p.lh[0], p.lh[1], p.lh[2]], lf: [-p.rf[0], p.rf[1], p.rf[2]], rf: [-p.lf[0], p.lf[1], p.lf[2]] });
   const kReady = (o = {}) => {
     const b = 0.5 - 0.5 * Math.cos(clk * 9.5), [ph, m] = o.step || [0, 0];
-    return pose({ al: KA, p: 3.4 + b * 0.9, lf: [-6.6, -Math.max(0, Math.sin(ph)) * 2.2 * m, 1], rf: [6.6, -Math.max(0, -Math.sin(ph)) * 2.2 * m, 1], lh: [-13.5, 9 + b, 2], rh: [13.5, 9 + b, 2], look: 0.2 });
+    return pose({ al: KA, p: 3.6 + b * 0.9, lf: [-7.2, -Math.max(0, Math.sin(ph)) * 2.2 * m, 1], rf: [7.2, -Math.max(0, -Math.sin(ph)) * 2.2 * m, 1], lh: [-23.5, 10.5 + b * 0.6, 2], rh: [23.5, 10.5 + b * 0.6, 2], look: 0.2 });
   };
-  const K_SET = pose({ al: KA, p: 5.8, lf: [-7.8, 0, 1], rf: [7.8, 0, 1], lh: [-12.5, 6.5, 2], rh: [12.5, 6.5, 2], look: 0.15 });
+  const K_SET = pose({ al: KA, p: 5.8, lf: [-8.2, 0, 1], rf: [8.2, 0, 1], lh: [-23, 8.5, 2], rh: [23, 8.5, 2], look: 0.15 });
   const K_FLY = pose({ al: KA, lh: [-4.2, -33, 1], rh: [4.2, -33, 1], lf: [-3.4, 0, 1], rf: [5.6, -6, 1], look: -0.6, mouth: "o" });
   const K_LIE = pose({ al: KA, lh: [-5, -32, 1], rh: [5, -32, 1], lf: [-4.6, -2.5, 1], rf: [3.4, -7, 1], look: -0.2 });
   const K_UP = pose({ al: KA, p: 0.5, lh: [-11, -27, 1], rh: [11, -27, 1], mouth: "o" });
