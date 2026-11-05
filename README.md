@@ -9,6 +9,8 @@ A daily soccer trivia game. Each prompt asks you to name something, like a Ballo
 - You never see the same prompt twice: each game is dealt from prompts you haven't played yet, and an unfinished daily game picks up where you left off
 - Small typos are fixed automatically, and close or ambiguous answers get suggestions
 - Every result plays its own pixel-art animation: tap-in, off the post, a 30-yard free kick, a Panenka or top bins
+- Play as one of 10 stars (Messi, Ronaldo, Mbappé, Yamal, Haaland, Bellingham, Neymar, Palmer, Vinícius Jr or Son). Each one earns +10 on their favorite finish and celebrates goals their own way, from Ronaldo's SIUUU to Haaland's zen pose
+- Sound for the crowd, whistles, shots, the net and every celebration, all generated in the browser, with a mute button
 - Scores, streaks and today's result are saved in your browser
 
 ## Running it
