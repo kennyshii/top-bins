@@ -2,7 +2,7 @@
 
 A daily soccer trivia game. Each prompt asks you to name something, like a Ballon d'Or winner, a club that has won La Liga or a player from a World Cup-winning squad. The rarer your correct answer, the better the finish, from a tap-in all the way up to top bins.
 
-**Play:** https://kennyshii.github.io/top-bins/
+**Play:** https://topbinz.io
 
 - 7 prompts a day with 25 seconds each, plus an unlimited mode
 - 300 prompts covering players, clubs, countries, managers, finals and trophies
