@@ -1628,21 +1628,21 @@ const oneIn = (share) => Math.max(2, Math.round(1 / share)).toLocaleString("en-U
 const BOOST = 10;
 const BIG = new Set(["topbins", "panenka", "screamer"]);
 const PLAYERS = [
-  { id: "messi", name: "Messi", tag: "MESSI", shirt: "MESSI", no: 10, tall: 0.93, boost: "topbins", why: "bends it into the top corner", cel: ["shirt", "sky"], celName: "shirt held up to the crowd on the big ones, fingers to the sky on the rest", beard: true,
+  { id: "messi", foot: "L", name: "Messi", tag: "MESSI", shirt: "MESSI", no: 10, tall: 0.93, boost: "topbins", why: "bends it into the top corner", cel: ["shirt", "sky"], celName: "shirt held up to the crowd on the big ones, fingers to the sky on the rest", beard: true,
     kit: { h: "#3b2414", h2: "#5a3a22", s: "#e3ad84", w: "#f4f8ff", v: "#75aadb", r: "#1b2438", n: "#1b2438", k: "#f4f8ff", b: "#ffd36b" } },
   { id: "ronaldo", name: "Ronaldo", tag: "RONALDO", shirt: "RONALDO", no: 7, tall: 1.03, boost: "screamer", why: "free-kick specialist", cel: ["siu", "calma"], celName: "SIUUU on the big ones, CALMA on the rest",
     kit: { h: "#17100b", h2: "#3a2a1c", s: "#d29a6c", w: "#c8102e", r: "#ffd36b", n: "#0b6b3a", k: "#c8102e", b: "#4de3ff" } },
   { id: "mbappe", name: "Mbappé", tag: "MBAPPE", shirt: "MBAPPE", no: 10, tall: 1.01, boost: "tapin", why: "too quick, always gets in behind", cel: ["folded"], celName: "arms folded across the chest",
     kit: { h: "#120c08", s: "#7a4a2c", w: "#1d2b5c", r: "#f4f8ff", n: "#f4f8ff", k: "#c8102e", b: "#ff5d8f" } },
-  { id: "yamal", name: "Yamal", tag: "YAMAL", shirt: "YAMAL", no: 10, tall: 0.99, boost: "post", why: "in off the post, like Euro 2024", cel: ["y304"], celName: "304 on his fingers",
+  { id: "yamal", foot: "L", name: "Yamal", tag: "YAMAL", shirt: "YAMAL", no: 10, tall: 0.99, boost: "post", why: "in off the post, like Euro 2024", cel: ["y304"], celName: "304 on his fingers",
     kit: { h: "#140d08", h2: "#3d2718", s: "#9a6038", w: "#1d4fa0", v: "#a5003c", r: "#ffd36b", n: "#13306b", k: "#13306b", b: "#ffd36b" } },
-  { id: "haaland", name: "Haaland", tag: "HAALAND", shirt: "HAALAND", no: 9, tall: 1.07, boost: "tapin", why: "lives in the six-yard box", cel: ["zen"], celName: "the zen meditation pose",
+  { id: "haaland", foot: "L", name: "Haaland", tag: "HAALAND", shirt: "HAALAND", no: 9, tall: 1.07, boost: "tapin", why: "lives in the six-yard box", cel: ["zen"], celName: "the zen meditation pose",
     kit: { h: "#d9b65c", h2: "#f2dc94", s: "#f2c7a0", w: "#6cabdd", r: "#1b2438", n: "#f4f8ff", k: "#6cabdd", b: "#ffd36b" } },
   { id: "bellingham", name: "Bellingham", tag: "JUDE", shirt: "BELLINGHAM", no: 10, tall: 1.03, boost: "screamer", why: "overhead kicks and late screamers", cel: ["arms"], celName: "arms spread wide",
     kit: { h: "#120c08", s: "#8f5a36", w: "#f4f8ff", r: "#1d2b5c", n: "#1d2b5c", k: "#f4f8ff", b: "#ff5d8f" } },
   { id: "neymar", name: "Neymar", tag: "NEYMAR", shirt: "NEYMAR JR", no: 10, tall: 0.97, boost: "panenka", why: "pure flair, loves a chip", cel: ["ears"], celName: "hands cupped to his ears, fingers wiggling",
     kit: { h: "#2a1c10", h2: "#e3c27a", s: "#c99066", w: "#ffd21f", r: "#0b6b3a", n: "#1d4fa0", k: "#f4f8ff", b: "#4de3ff" } },
-  { id: "palmer", name: "Palmer", tag: "PALMER", shirt: "PALMER", no: 10, tall: 1.01, boost: "panenka", why: "ice cold from the spot", cel: ["cold"], celName: "the cold shiver, rubbing his arms",
+  { id: "palmer", foot: "L", name: "Palmer", tag: "PALMER", shirt: "PALMER", no: 10, tall: 1.01, boost: "panenka", why: "ice cold from the spot", cel: ["cold"], celName: "the cold shiver, rubbing his arms",
     kit: { h: "#9a6a3a", h2: "#b8864f", s: "#efc6a2", w: "#034694", r: "#f4f8ff", n: "#034694", k: "#f4f8ff", b: "#ffd36b" } },
   { id: "vini", name: "Vinícius Jr", tag: "VINI JR", shirt: "VINI JR", no: 7, tall: 0.98, boost: "post", why: "cuts inside and finds the far post", cel: ["dance"], celName: "a samba dance at the corner flag",
     kit: { h: "#0c0806", h2: "#3a2a1e", s: "#5c3820", w: "#f4f8ff", r: "#c9a227", n: "#f4f8ff", k: "#f4f8ff", b: "#ff5d8f" } },
@@ -2464,13 +2464,11 @@ const pitch = (() => {
 
   function star(ctx, pl, ps, S, X, Y) {
     const C = colsOf(pl), sc = S * (pl.tall || 1), back = (ps.view === "back") !== (ps.sx < 0);
-    const kx = sc * Math.max(0.28, Math.abs(ps.sx)) * (ps.f ? -1 : 1);
+    const kx = sc * Math.max(0.55, Math.abs(ps.sx)) * (ps.f ? -1 : 1);
     const w = Math.ceil(64 * Math.abs(kx)) + 6, h = Math.ceil(128 * sc) + 6, bx = Math.round(w / 2), by = Math.round(h - 3 - 8 * sc);
     const sb = sheet(w, h), Q = { buf: sb.u, w, h, ox: bx + ps.dx * kx, oy: by + ps.dy * sc, S: sc, kx };
-    const pd = ps.p, ln = ps.lean, hipY = -22 + pd, chY = -44 + pd, hx = ln + ps.tilt, hy = -55.5 + pd;
-    const sh = [[-7.4 + ln, chY], [7.4 + ln, chY]], hips = [[-3.4 + ln * 0.3, hipY], [3.4 + ln * 0.3, hipY]];
-    const arms = [ps.lh, ps.rh].map((t, i) => ik(sh[i][0], sh[i][1], ln + t[0], chY + t[1], 9, 8.5, t[2]));
-    const legs = [ps.lf, ps.rf].map((t, i) => (t.length > 3 ? [t[3], t[4], t[0], t[1] - 2.3] : ik(hips[i][0], hips[i][1], t[0], t[1] - 2.3, 10.5, 9.6, t[2])));
+    const J = rig(ps), br = ps.br || 0, { ln, hipY, hips, legs } = J, chY = J.chY - br, hx = J.hx, hy = J.hy - br * 1.1;
+    const sh = J.sh.map(([x, y]) => [x, y - br]), arms = J.arms.map(([a, b, c, d]) => [a, b - br, c, d - br]), behind = arms.map((_, i) => back && J.az[i] > 3.5);
     const shirt = C.v ? (x) => ((Math.floor((x - ln + 40) / 2.6) & 1) ? (x - ln > 3.5 ? C.vd : C.v) : (x - ln > 3.5 ? C.wd : C.w)) : (x) => (x - ln > 3.5 ? C.wd : C.w);
     const skin = (x) => (x - ln > 3.5 ? C.sd : C.s);
 
@@ -2479,11 +2477,20 @@ const pitch = (() => {
       cap(Q, x0, y0, kx0, ky0, 2.5, C.s);
       cap(Q, kx0, ky0, ax, ay, 2.05, C.s);
       cap(Q, lerp(kx0, ax, 0.35), lerp(ky0, ay, 0.35), ax, ay, 2.2, i ? C.kd : C.kk);
-      ell(Q, ax + (i ? 0.6 : -0.6), ay + 1.5, 2.8, 1.45, C.b);
+      const ux = ax - kx0, uy = ay - ky0, ul = Math.hypot(ux, uy) || 1, wt = clamp((ul - 2) / 4), bxn = (ux / ul) * wt, byn = lerp(1, uy / ul, wt), up = clamp(-byn);
+      ell(Q, ax + (i ? 0.6 : -0.6) + bxn * 1.5, ay + byn * 1.5, lerp(2.8, 1.9, up), lerp(1.45, 2.4, up), C.b);
       cap(Q, x0, y0, lerp(x0, kx0, 0.45), lerp(y0, ky0, 0.45), 3, i ? C.nd : C.n);
     });
+    const arm = (i) => {
+      const [ex, ey, wx, wy] = arms[i], [x0, y0] = sh[i], mx = lerp(x0, ex, 0.55), my = lerp(y0, ey, 0.55);
+      cap(Q, x0, y0, ex, ey, 2, C.s);
+      if (!ps.bare) { cap(Q, x0, y0, mx, my, 2.4, shirt); cap(Q, lerp(x0, ex, 0.52), lerp(y0, ey, 0.52), mx, my, 2.45, C.r); }
+      cap(Q, ex, ey, wx, wy, 1.8, i ? C.sd : C.s);
+      if (ps.flat) ell(Q, wx, wy, 2.6, 1.3, C.S); else ell(Q, wx, wy, 2, 2, C.S);
+    };
+    arms.forEach((_, i) => { if (behind[i]) arm(i); });
     poly(Q, [[-6.9 + ln * 0.3, hipY - 5.4], [6.9 + ln * 0.3, hipY - 5.4], [7.2 + ln * 0.3, hipY + 1.4], [-7.2 + ln * 0.3, hipY + 1.4]], (x) => (x - ln * 0.3 > 3 ? C.nd : C.n));
-    poly(Q, [[-8.2 + ln, chY - 2.3], [8.2 + ln, chY - 2.3], [6.9 + ln * 0.6, hipY - 4], [-6.9 + ln * 0.6, hipY - 4]], ps.bare ? skin : shirt);
+    poly(Q, [[sh[0][0] - 0.8, sh[0][1] - 2.3], [sh[1][0] + 0.8, sh[1][1] - 2.3], [6.9 + ln * 0.6, hipY - 4], [-6.9 + ln * 0.6, hipY - 4]], ps.bare ? skin : shirt);
     for (const [x, y] of sh) ell(Q, x, y + 0.2, 2.7, 2.5, ps.bare ? skin : shirt);
     if (ps.bare) {
       box(Q, ln - 4.6, chY + 5.2, 3.6, 0.5, C.sd); box(Q, ln + 1, chY + 5.2, 3.6, 0.5, C.sd);
@@ -2504,13 +2511,7 @@ const pitch = (() => {
       face(Q, hx, hy, C, ps);
       style.front(Q, hx, hy, C);
     }
-    arms.forEach(([ex, ey, wx, wy], i) => {
-      const [x0, y0] = sh[i], mx = lerp(x0, ex, 0.55), my = lerp(y0, ey, 0.55);
-      cap(Q, x0, y0, ex, ey, 2, C.s);
-      if (!ps.bare) { cap(Q, x0, y0, mx, my, 2.4, shirt); cap(Q, lerp(x0, ex, 0.52), lerp(y0, ey, 0.52), mx, my, 2.45, C.r); }
-      cap(Q, ex, ey, wx, wy, 1.8, i ? C.sd : C.s);
-      if (ps.flat) ell(Q, wx, wy, 2.6, 1.3, C.S); else ell(Q, wx, wy, 2, 2, C.S);
-    });
+    arms.forEach((_, i) => { if (!behind[i]) arm(i); });
     if (back && !ps.bare && Math.abs(ps.sx) > 0.55) { text(Q, pl.shirt, ln, chY + 3.4, 17.2, C.r, 0.62); text(Q, String(pl.no), ln, chY + 11.4, 13, C.r, 1.9); }
     for (const e of ps.ex || []) {
       const hand = e.hand === "r" ? arms[1] : arms[0], wx = hand[2], wy = hand[3];
@@ -2576,6 +2577,12 @@ const pitch = (() => {
   };
   const cubic = (p0, p1, p2, p3, u) => { const v = 1 - u; return [v * v * v * p0[0] + 3 * v * v * u * p1[0] + 3 * v * u * u * p2[0] + u * u * u * p3[0], v * v * v * p0[1] + 3 * v * v * u * p1[1] + 3 * v * u * u * p2[1] + u * u * u * p3[1]]; };
 
+  function sides() {
+    const s = who.foot ? -1 : 1;
+    L.stand = [Math.round(W / 2 - s * L.gw * 0.26), Math.round(gy(15.5))];
+    L.strike = [Math.round(W / 2 - s * (L.ss / 2 + 1.9 * L.ks)), Math.round(gy(12.6))];
+  }
+
   function resize() {
     P = 3;
     W = Math.ceil(innerWidth / P); H = Math.ceil(innerHeight / P);
@@ -2588,8 +2595,7 @@ const pitch = (() => {
       sg: Math.max(3, Math.round(gw * 0.028)), ss: Math.max(5, Math.round(gw * 0.052)), ps: ks, ps30: Math.max(ks + 1, Math.round(ks * 1.4)),
       bL: GL + Math.round(gw * 0.05), bR: GR - Math.round(gw * 0.05), bT: GT + Math.round(gh * 0.14), bB: GB - Math.round(gh * 0.16) };
     L.spot = [W / 2, Math.round(gy(12))];
-    L.stand = [Math.round(W / 2 - gw * 0.26), Math.round(gy(15.5))];
-    L.strike = [Math.round(W / 2 - L.ss / 2 - 2.5 * ks), Math.round(gy(12.6))];
+    sides();
     L.refPos = [Math.round(Math.min(W / 2 + gw * 1.02, W - 6 * ks)), Math.round(gy(17))];
     L.home = [W / 2, GB + ks - 7 * ks];
     const x0 = -MX, x1 = W + MX, y0 = -MY, y1 = H + MB, ww = x1 - x0;
@@ -2855,7 +2861,7 @@ const pitch = (() => {
       cam: C0(),
       ball: { x: L.spot[0], y: L.spot[1] - L.ss / 2, s: L.ss, sx: 0, sy: 0, layer: "front", rest: true },
       keeper: { p: "ready", x: W / 2, y: L.home[1], a: 0 },
-      shooter: { u: "stand", l: "stand", x: L.stand[0], y: L.stand[1], k: L.ps },
+      shooter: { pose: standAt({ f: !!who.foot }), x: L.stand[0], y: L.stand[1], k: L.ps },
       ref: { u: "stand", l: "stand", x: L.refPos[0], y: L.refPos[1], k: L.ks },
       fx: [], led: 0, crowd: 0, shake: 0, flash: 0, bars: 0, speed: 0, net: null, wob: null, jump: null, wall: null, tint: null, pulse: 0,
     };
@@ -2873,13 +2879,6 @@ const pitch = (() => {
   function jog(tm, t0, t1, from, to, k = L.ps, cad = 10, u = "stand", f = false) {
     const v = seg(tm, t0, t1), p = mix(from, to, v), step = Math.floor(tm * cad) % 2, moving = v > 0 && v < 1;
     return { u, l: moving ? (step ? "a" : "b") : "stand", x: p[0], y: p[1] - (moving && !step ? k * 0.4 : 0), gy: p[1], k, f };
-  }
-
-  function striker(tm, t0, t1, from = L.stand, to = L.strike, k = L.ps, cad = 10, f = false) {
-    if (tm < t1 - 0.07) return jog(tm, t0, t1 - 0.07, from, to, k, cad, "stand", f);
-    if (tm < t1) return { u: "out", l: "a", x: to[0], y: to[1], k, f };
-    if (tm < t1 + 0.34) return { u: "out", l: "plant", x: to[0], y: to[1], k, f };
-    return { u: "stand", l: "stand", x: to[0], y: to[1], k, f };
   }
 
   function kDive(tm, kp, t0, t1, t2, t3, reach) {
@@ -2920,7 +2919,8 @@ const pitch = (() => {
     const hand = [rf.x - 5 * ks - ss * 0.35, rf.y - (rf.l === "crouch" ? 5.5 : 7.5) * ks];
     if (tm < 1.45) st.ball = { x: hand[0], y: hand[1], s: ss, sx: 0, sy: 0, layer: "top" };
     else if (tm < 1.7) { const p = mix(hand, [spot[0], spot[1] - ss / 2], ease(seg(tm, 1.45, 1.7))); st.ball = { x: p[0], y: p[1], s: ss, sx: 0, sy: 0, layer: "top" }; }
-    st.shooter = tm < 1.9 ? null : jog(tm, 1.9, 3.15, [stand[0] - gw * 0.7, gy(25)], stand, L.ps, 7);
+    const f = !!who.foot, sd = f ? -1 : 1;
+    st.shooter = tm < 1.9 ? null : tm < 3.15 ? move(tm, 1.9, 3.15, [stand[0] - sd * gw * 0.7, gy(25)], stand, L.ps, { A: 0.25, rate: 2.4, f }) : { ...st.shooter, pose: blendPose(gait(0, 0, 0, { f }), standAt({ f }), ease(seg(tm, 3.15, 3.6))) };
     const F = { z: 1.45, x: W / 2 + gw * 0.3, y: spot[1] - gh * 0.35 }, F2 = { z: 1.32, x: W / 2 + gw * 0.12, y: spot[1] - gh * 0.45 };
     const sp = st.shooter, close = sp ? { z: 10.6 / L.ps, x: sp.x, y: (sp.gy ?? sp.y) - 10.5 * L.ps } : F2;
     st.cam = tm < 1.6 ? camTo(F, F2, ease(seg(tm, 0, 1.6))) : tm < 3.15 ? camTo(F2, close, ease(seg(tm, 1.75, 2.2))) : camTo(close, C0(), ease(seg(tm, 3.15, 3.8)));
@@ -2931,7 +2931,9 @@ const pitch = (() => {
   function respot(tm, from) {
     const st = base(), { ks, ss, spot, refPos, stand } = L;
     const fs = from.shooter ? [from.shooter.x, from.shooter.gy ?? from.shooter.y] : stand, fk = from.keeper || st.keeper;
-    if (Math.hypot(fs[0] - stand[0], fs[1] - stand[1]) > 2) st.shooter = jog(tm, 0, 0.95, fs, stand, L.ps, 7);
+    const f = !!who.foot, fp = from.shooter && (from.shooter.pose || legacy(from.shooter));
+    if (Math.hypot(fs[0] - stand[0], fs[1] - stand[1]) > 2) st.shooter = tm < 0.95 ? move(tm, 0, 0.95, fs, stand, L.ps, { A: 0.4, rate: 3, f }) : { ...st.shooter, pose: blendPose(gait(0, 0, 0, { f }), standAt({ f }), ease(seg(tm, 0.95, 1.1))) };
+    if (fp) st.shooter.pose = blendPose(fp, st.shooter.pose, ease(seg(tm, 0, 0.22)));
     if (fk.a && tm < 0.35) { const u = ease(seg(tm, 0, 0.35)); st.keeper = { p: "stretch", x: fk.x, y: lerp(fk.y, L.home[1], u), a: lerp(fk.a, 0, u) }; }
     else { const u = ease(seg(tm, fk.a ? 0.35 : 0, 1.0)), step = Math.floor(tm * 7) % 2; st.keeper = { p: "ready", x: lerp(fk.x, W / 2, u), y: L.home[1] - (u > 0 && u < 1 && step ? ks * 0.6 : 0), a: 0 }; }
     if (from.ref && Math.hypot(from.ref.x - refPos[0], (from.ref.gy ?? from.ref.y) - refPos[1]) > 2) st.ref = jog(tm, 0, 0.6, [from.ref.x, from.ref.gy ?? from.ref.y], refPos, ks, 8);
@@ -2947,13 +2949,13 @@ const pitch = (() => {
     topbins: { hit: 1.9, end: 3.7, cs: 2.15, warp: [[1.0, 1.1, 0.25], [1.62, 1.88, 0.22], [1.9, 1.95, 0.12]],
       sfx: [[1.05, "kick", 1.1], [1.06, "whoosh", 0.8], [1.58, "dive"], [1.9, "net", 1], [1.9, "cheer", 1, 1]], f(tm, m) {
       const st = shotBase(tm, m), { gw, gh, GR, GT, GB, ss, sg, spot, ps } = L;
-      st.shooter = striker(tm, 0.45, 1.05);
+      st.shooter = striker(tm, 0.45, 1.05, L.stand, L.strike, ps, { pw: 0.85, style: "curl" });
       if (tm > 2.15 && !m.cel) {
         const to = [W / 2 - gw * 0.6, gy(18)], mid = mix(L.strike, to, 0.7);
-        if (tm < 2.75) st.shooter = jog(tm, 2.15, 2.75, L.strike, mid, ps, 12, "up");
+        if (tm < 2.75) st.shooter = move(tm, 2.15, 2.75, L.strike, mid, ps, { A: 0.85, rate: 4, view: "front", arms: "up", mouth: "smile" });
         else {
           const u = easeOut(seg(tm, 2.75, 3.25)), p = mix(mid, to, u);
-          st.shooter = { u: "up", l: "crouch", x: p[0], y: p[1], k: ps };
+          st.shooter = { pose: pose({ p: 4, lf: FEET.crouch[0], rf: FEET.crouch[1], lh: ARMS.up[0], rh: ARMS.up[1], mouth: "shout" }), x: p[0], y: p[1], gy: p[1], k: ps };
           if (u < 1) st.fx.push({ type: "burst", x: p[0] + ps * 3, y: p[1], t: (tm - 2.75) % 0.25, n: 6, sp: gw * 0.08, life: 0.25, cols: ["#7ef0a6", "#e8f1ff"], grav: gh * 0.5, seed: 40 + Math.floor((tm - 2.75) / 0.25) });
         }
       }
@@ -2993,9 +2995,9 @@ const pitch = (() => {
     panenka: { hit: 2.1, end: 3.9, cs: 2.15, warp: [[1.15, 1.23, 0.12], [1.45, 1.85, 0.3]],
       sfx: [[1.0, "dive"], [1.15, "kick", 0.45], [2.1, "net", 0.5], [2.3, "cheer", 0.95, 1]], f(tm, m) {
       const st = shotBase(tm, m), { gw, gh, GT, GB, ss, sg, spot, ps, ks } = L, mid = mix(L.stand, L.strike, 0.5);
-      if (tm < 0.5) st.shooter = jog(tm, 0.05, 0.5, L.stand, mid, ps, 8);
-      else if (tm < 0.85) { const hop = tm > 0.6 && tm < 0.72 ? Math.sin(((tm - 0.6) / 0.12) * Math.PI) * ps * 1.1 : 0; st.shooter = { u: tm > 0.62 && tm < 0.7 ? "out" : "stand", l: "stand", x: mid[0], y: mid[1] - hop, gy: mid[1], k: ps }; }
-      else if (tm < 2.15) st.shooter = striker(tm, 0.85, 1.15, mid, L.strike);
+      const f = !!who.foot, stut = (t) => { const h = Math.sin(Math.PI * seg(t, 0.6, 0.74)), s0 = standAt({ f }); s0.lift = h * 2.4; s0.A = [[9 + h * 20, 0, 18], [9 + h * 20, 0, 18]]; return blendPose(gait(0, 0, 0, { f }), s0, ease(seg(t, 0.5, 0.62))); };
+      if (tm < 0.5) st.shooter = move(tm, 0.05, 0.5, L.stand, mid, ps, { A: 0.45, rate: 3.2, f });
+      else if (tm < 2.15 || m.cel) st.shooter = striker(tm, 0.85, 1.15, mid, L.strike, ps, { pw: 0.3, style: "chip", pre: stut });
       else if (tm < 2.45) st.shooter = { front: "stand", x: L.strike[0], y: L.strike[1], k: ps };
       else if (tm < 3.3) st.shooter = { front: "shh", x: L.strike[0], y: L.strike[1], k: ps };
       else st.shooter = { front: "wide", x: L.strike[0], y: L.strike[1] - (tm < 3.65 ? Math.abs(Math.sin((tm - 3.3) * 9)) * ps : 0), gy: L.strike[1], k: ps };
@@ -3041,8 +3043,9 @@ const pitch = (() => {
       sfx: [[2.15, "whistle", 0.2], [2.6, "kick", 1.4], [2.61, "whoosh", 0.45], [2.86, "dive"], [3.0, "net", 1.2], [3.0, "cheer", 1, 1]], f(tm, m) {
       const st = shotBase(tm, m), { gw, gh, GL, GT, GB, sg, ps30, ks } = L;
       const s30 = Math.round(ballSize(30)), B0 = [Math.round(W / 2 + gw * 0.08), Math.round(gy(30))];
-      const stand30 = [B0[0] + gw * 0.36, gy(33.5)], strike30 = [B0[0] + s30 / 2 + 2.5 * ps30, gy(30.6)];
-      st.shooter = tm < 2.95 ? striker(tm, 2.0, 2.6, stand30, strike30, ps30, 12, true) : jog(tm, 2.95, 4.0, strike30, [strike30[0] + gw * 0.9, gy(42)], ps30, 11, "up", true);
+      const sd = who.foot ? -1 : 1, stand30 = [B0[0] - sd * gw * 0.36, gy(33.5)], strike30 = [B0[0] - sd * (s30 / 2 + 1.9 * ps30), gy(30.6)], kick = striker(Math.min(tm, 2.95), 2.0, 2.6, stand30, strike30, ps30, { pw: 1 });
+      st.shooter = kick;
+      if (tm >= 2.95) { const r = move(tm, 2.95, 4.0, [kick.x, kick.y], [kick.x + gw * 0.9, gy(42)], ps30, { A: 0.85, rate: 4.2, view: "front", arms: "up", mouth: "shout" }); r.pose = blendPose(kick.pose, r.pose, ease(seg(tm, 2.95, 3.15))); st.shooter = r; }
       const kw = Math.max(1, Math.round(ks * 1.1)), wy = Math.round(gy(20)), wx = lerp(B0[0], GL + gw * 0.15, 0.38), sp = 8 * kw;
       const enter = [[-W * 0.4, gy(23)], [-W * 0.3, gy(21)], [W * 1.3, gy(21)], [W * 1.4, gy(23)]], exit = [[-W * 0.4, gy(24)], [-W * 0.3, gy(22)], [W * 1.3, gy(22)], [W * 1.4, gy(24)]];
       st.wall = [-1.5, -0.5, 0.5, 1.5].map((o, i) => {
@@ -3103,9 +3106,12 @@ const pitch = (() => {
     post: { hit: 1.0, end: 2.9, cs: 1.45, warp: [[0.88, 1.12, 0.3]],
       sfx: [[0.62, "kick", 1], [0.74, "dive"], [1.0, "clang"], [1.0, "ooh"], [1.32, "net", 0.5], [1.34, "cheer", 0.75, 1]], f(tm, m) {
       const st = shotBase(tm, m), { gw, gh, GL, GR, GT, GB, ss, sg, spot, ps } = L;
-      st.shooter = striker(tm, 0.08, 0.62);
-      if (tm > 1.12 && tm < 1.55) st.shooter = { ...st.shooter, u: "head" };
-      else if (tm >= 1.55) st.shooter = { ...st.shooter, u: "up", y: L.strike[1] - (tm < 2.5 ? Math.abs(Math.sin((tm - 1.55) * 9.9)) * ps * 1.2 : 0), gy: L.strike[1] };
+      st.shooter = striker(tm, 0.08, 0.62, L.stand, L.strike, ps, { pw: 0.8 });
+      if (tm > 1.08) {
+        const f = !!who.foot, up = react("up", { f, mouth: "shout" });
+        up.lift = tm < 2.5 ? Math.abs(Math.sin((tm - 1.55) * 9.9)) * 4.8 : 0;
+        st.shooter.pose = blendPose(blendPose(st.shooter.pose, react("head", { f }), ease(seg(tm, 1.08, 1.28))), up, ease(seg(tm, 1.55, 1.7)));
+      }
       const S = [spot[0], spot[1] - ss / 2], Pp = [GR - sg * 0.5 - 1, GT + gh * 0.42], Q = [W / 2 + gw * 0.12, L.bB - gh * 0.1];
       if (tm >= 0.62 && tm < 1.0) { const u = seg(tm, 0.62, 1.0), p = quad(S, [W / 2 + gw * 0.28, GT - gh * 0.05], Pp, u); st.ball = { x: p[0], y: p[1], s: lerp(ss, sg * 1.05, u), sx: tm * 40, sy: 0, gy: lerp(spot[1], GB, u), layer: "front" }; }
       else if (tm >= 1.0) { const p = mix(Pp, Q, easeOut(seg(tm, 1.0, 1.32))); st.ball = { x: p[0], y: tm < 1.32 ? p[1] : dropY(tm - 1.32, Q[1], L.bB - sg * 0.45, 0.12), s: sg, sx: -tm * 40, sy: 0, layer: tm < 1.03 ? "front" : "net" }; }
@@ -3127,8 +3133,7 @@ const pitch = (() => {
     } },
     tapin: { hit: 1.55, end: 2.6, cs: 1.85, sfx: [[0.5, "dive"], [0.6, "kick", 0.55], [1.85, "net", 0.3], [1.85, "cheer", 0.4, 1]], f(tm, m) {
       const st = shotBase(tm, m), { gw, gh, GR, GB, ss, sg, spot, ps } = L;
-      st.shooter = striker(tm, 0.12, 0.6, L.stand, L.strike, ps, 7);
-      if (tm > 1.75 && tm < 2.25) st.shooter = { ...st.shooter, u: "out" };
+      st.shooter = striker(tm, 0.12, 0.6, L.stand, L.strike, ps, { pw: 0.25 });
       const S = [spot[0], spot[1] - ss / 2], E = [GR - gw * 0.17, GB - sg * 0.5], N = [L.bR - gw * 0.1, L.bB - sg * 0.45];
       if (tm >= 0.6 && tm < 1.55) { const u = easeOut(seg(tm, 0.6, 1.55)), p = mix(S, E, u); st.ball = { x: p[0], y: p[1], s: lerp(ss, sg, u), sx: -u * 26, sy: u * 30, roll: true, layer: "front" }; }
       else if (tm >= 1.55) { const u = easeOut(seg(tm, 1.55, 1.95)), p = mix(E, N, u); st.ball = { x: p[0], y: p[1], s: sg * 0.92, sx: -26 - u * 6, sy: 30 + u * 6, layer: "net" }; }
@@ -3139,8 +3144,9 @@ const pitch = (() => {
     } },
     rowz: { hit: 1.35, end: 2.9, sfx: [[0.62, "kick", 1.1], [1.3, "aww", 0, 1], [1.35, "bounce", 0.6]], f(tm, m) {
       const st = shotBase(tm, m), { gw, gh, ss, sg, spot, yS, yP, ps } = L;
-      st.shooter = striker(tm, 0.08, 0.62);
-      if (tm > 1.0) st.shooter = tm < 2.05 ? { ...st.shooter, u: "head" } : jog(tm, 2.05, 2.85, L.strike, [L.strike[0] - gw * 0.18, gy(16)], ps, 4, "head");
+      const f = !!who.foot, s0 = striker(Math.min(tm, 2.05), 0.08, 0.62, L.stand, L.strike, ps, { pw: 1, style: "sky" }), held = blendPose(s0.pose, react("head", { f }), ease(seg(tm, 0.98, 1.22)));
+      st.shooter = { ...s0, pose: held };
+      if (tm >= 2.05) { const r = move(tm, 2.05, 2.85, [s0.x, s0.y], [s0.x - (f ? -1 : 1) * gw * 0.18, gy(16)], ps, { A: 0.05, rate: 2, view: "front", arms: "head", look: 0.6 }); r.pose = blendPose(held, r.pose, ease(seg(tm, 2.05, 2.3))); st.shooter = r; }
       const S = [spot[0], spot[1] - ss / 2], Ld = [W / 2 + gw * 0.36, yS + (yP - yS) * 0.42], C = [W / 2 + gw * 0.16, Ld[1] - (spot[1] - Ld[1]) * 0.75];
       if (tm >= 0.62 && tm < 1.35) { const u = seg(tm, 0.62, 1.35), p = quad(S, C, Ld, easeOut(u)); st.ball = { x: p[0], y: p[1], s: lerp(ss, sg * 0.75, u), sx: tm * 30, sy: tm * 30, gy: lerp(spot[1], yP, u), layer: "front" }; }
       else if (tm >= 1.35) { const a = tm - 1.35, held = a > 0.7; st.ball = { x: Ld[0] + Math.min(a, 0.7) * gw * 0.05, y: held ? Ld[1] - L.ks * (2 + (Math.floor(tm * 4) % 2)) : Ld[1] - Math.abs(Math.sin(a * 9)) * gh * 0.12 * Math.exp(-a * 3), s: sg * 0.75, sx: 0, sy: 0, layer: "front" }; }
@@ -3157,122 +3163,253 @@ const pitch = (() => {
 
   const POSE0 = { view: "front", sx: 1, dx: 0, dy: 0, p: 0, lean: 0, tilt: 0, look: 0, lh: [-8.6, 16.5, 1], rh: [8.6, 16.5, 1], lf: [-3.6, 0, 1], rf: [3.6, 0, 1], mouth: "flat", eyes: "open" };
   const pose = (o) => ({ ...POSE0, ...o });
-  const happy = pose({ mouth: "smile" });
+  const TAU = Math.PI * 2, DEG = Math.PI / 180;
+  const NL = [[1, 0, 8], [1, 0, 8]], NA = [[9, 0, 15], [9, 0, 15]];
+  const happy = pose({ L: NL, A: NA, mouth: "smile" });
+  let clk = 0;
+
+  function fk(ax, ay, s, a, l1, l2, dz, leg, yaw = 0) {
+    const ab = a[0] * DEG, fl = a[1] * DEG, bd = a[2] * DEG, cb = Math.cos(ab);
+    const d1 = [s * Math.sin(ab), cb * Math.cos(fl), cb * Math.sin(fl)], rr = d1[2] - 0.35 * d1[1];
+    const f = [-rr * d1[0], -0.35 - rr * d1[1], 1 - rr * d1[2]], n = Math.hypot(f[0], f[1], f[2]) || 1, sg = ((leg ? -1 : 1) * Math.sin(bd)) / n, cs = Math.cos(bd);
+    const d2 = d1.map((v, i) => v * cs + f[i] * sg), cy = Math.cos(yaw), sy = Math.sin(yaw);
+    const rot = (d) => [d[0] * cy - d[2] * sy, d[1], d[0] * sy + d[2] * cy];
+    const e1 = rot(d1), e2 = rot(d2), jx = l1 * e1[0], jy = l1 * e1[1], jz = l1 * e1[2], ex = jx + l2 * e2[0], ey = jy + l2 * e2[1], ez = jz + l2 * e2[2];
+    return [ax + jx, ay + jy - dz * jz, ax + ex, ay + ey - dz * ez, ez, ay + ey];
+  }
+
+  function rig(ps) {
+    if (ps.R) return ps.R;
+    const back = (ps.view === "back") !== (ps.sx < 0), dz = back ? 0.3 : -0.3, ln = ps.lean, tw = (ps.tw || 0) * DEG;
+    let pd = ps.p, legs = null;
+    if (ps.L) {
+      const rel = ps.L.map((a, i) => fk(0, 0, i ? 1 : -1, a, 10.4, 9.3, dz, true));
+      pd = 19.7 - Math.max(rel[0][5], rel[1][5]) - (ps.lift || 0);
+      legs = rel.map((r, i) => { const ox = (i ? 3.4 : -3.4) + ln * 0.3, oy = pd - 22; return [r[0] + ox, r[1] + oy, r[2] + ox, r[3] + oy]; });
+    }
+    const hipY = -22 + pd, chY = -44 + pd, c = Math.cos(tw), s = Math.sin(tw);
+    const hips = [[-3.4 + ln * 0.3, hipY], [3.4 + ln * 0.3, hipY]], sh = [[-7.4 * c + ln, chY + dz * 7.4 * s], [7.4 * c + ln, chY - dz * 7.4 * s]];
+    if (!legs) legs = [ps.lf, ps.rf].map((t, i) => (t.length > 3 ? [t[3], t[4], t[0], t[1] - 2.3] : ik(hips[i][0], hips[i][1], t[0], t[1] - 2.3, 10.5, 9.6, t[2])));
+    const az = [0, 0], arms = ps.A
+      ? ps.A.map((a, i) => { const r = fk(sh[i][0], sh[i][1], i ? 1 : -1, a, 9, 8.5, dz, false, tw); az[i] = r[4]; return r.slice(0, 4); })
+      : [ps.lh, ps.rh].map((t, i) => (t.length > 3 ? [ln + t[3], chY + t[4], ln + t[0], chY + t[1]] : ik(sh[i][0], sh[i][1], ln + t[0], chY + t[1], 9, 8.5, t[2])));
+    return { pd, ln, hipY, chY, hx: ln + ps.tilt, hy: -55.5 + pd, sh, hips, arms, legs, az };
+  }
+
+  const isBack = (q) => (q.view === "back") !== (q.sx < 0);
   function blendPose(a, b, u) {
-    const o = { ...(u < 0.5 ? a : b) };
-    for (const k of ["sx", "dx", "dy", "p", "lean", "tilt", "look"]) o[k] = lerp(a[k], b[k], u);
-    for (const k of ["lh", "rh", "lf", "rf"]) o[k] = [lerp(a[k][0], b[k][0], u), lerp(a[k][1], b[k][1], u), u < 0.5 ? a[k][2] : b[k][2], ...(u < 0.5 ? a[k] : b[k]).slice(3)];
+    if (u <= 0) return a;
+    if (u >= 1) return b;
+    const o = { ...(u < 0.5 ? a : b) }, ra = rig(a), rb = rig(b), mx = (p, q) => p.map((v, i) => lerp(v, q[i], u));
+    for (const k of ["sx", "dx", "dy", "p", "lean", "tilt", "look", "tw", "br", "lift"]) o[k] = lerp(a[k] || 0, b[k] || 0, u);
+    if (isBack(a) !== isBack(b)) o.sx = (u < 0.5 ? a.sx : b.sx) * Math.abs(Math.cos(Math.PI * u));
+    const bone = (p0, p1, q0, q1, at, w) => {
+      const ax = p1[0] - p0[0], ay = p1[1] - p0[1], bx = q1[0] - q0[0], by = q1[1] - q0[1], a0 = Math.atan2(ay, ax);
+      let d = Math.atan2(by, bx) - a0;
+      d -= TAU * Math.round(d / TAU);
+      const an = a0 + d * w, r = lerp(Math.hypot(ax, ay), Math.hypot(bx, by), w);
+      return [at[0] + Math.cos(an) * r, at[1] + Math.sin(an) * r];
+    };
+    const limb = (A0, la, B0, lb, lag) => { const P = mx(A0, B0), J = bone(A0, la, B0, lb, P, u), E = bone(la.slice(0, 2), la.slice(2), lb.slice(0, 2), lb.slice(2), J, u ** lag); return [J[0], J[1], E[0], E[1]]; };
+    const sh = ra.sh.map((p, i) => mx(p, rb.sh[i])), hips = ra.hips.map((p, i) => mx(p, rb.hips[i]));
+    o.R = { pd: lerp(ra.pd, rb.pd, u), ln: lerp(ra.ln, rb.ln, u), hipY: lerp(ra.hipY, rb.hipY, u), chY: lerp(ra.chY, rb.chY, u), hx: lerp(ra.hx, rb.hx, u), hy: lerp(ra.hy, rb.hy, u), sh, hips,
+      arms: ra.arms.map((l, i) => limb(ra.sh[i], l, rb.sh[i], rb.arms[i], 1.4)), legs: ra.legs.map((l, i) => limb(ra.hips[i], l, rb.hips[i], rb.legs[i], 1.15)), az: mx(ra.az, rb.az) };
     return o;
   }
+
   const ARMS = { stand: [[-8.6, 16.5, 1], [8.6, 16.5, 1]], out: [[-15, 8, 2], [15, 8, 2]], up: [[-10.5, -15, 1], [10.5, -15, 1]], head: [[-3.4, -17.5, 1], [3.4, -17.5, 1]], point: [[-8.6, 16.5, 1], [10, -16, 1]] };
   const FEET = { stand: [[-3.6, 0, 1], [3.6, 0, 1]], a: [[-3.4, -5, 1], [3.8, 0, 1]], b: [[-3.8, 0, 1], [3.4, -5, 1]], plant: [[-3.8, 0, 1], [5.6, -7, 2]], crouch: [[-5.2, 0, 1], [5.2, 0, 1]] };
   const legacy = (p) => { const u = ARMS[p.u] || ARMS.stand, l = FEET[p.l] || FEET.stand; return pose({ view: p.front ? "front" : "back", lh: u[0], rh: u[1], lf: l[0], rf: l[1], p: p.l === "crouch" ? 4 : 0, f: p.f }); };
-  function run(c) {
-    const s = Math.sin(c * 12), up = Math.max(0, s), dn = Math.max(0, -s);
-    return pose({ dy: -Math.abs(s) * 1.4, lf: [-3.4, -up * 6.5, 1], rf: [3.4, -dn * 6.5, 1], lh: [-8 - dn * 1.5, 15 - dn * 7, 2], rh: [8 + up * 1.5, 15 - up * 7, 2], mouth: "smile" });
+
+  function gait(ph, A, m = 1, o = {}) {
+    const Lg = [], Ar = [];
+    for (let i = 0; i < 2; i++) {
+      const q = ph + i * Math.PI, w = (((q % TAU) + TAU) % TAU) / Math.PI, c = Math.cos(q);
+      const sw = w >= 1 ? Math.sin(Math.PI * Math.pow(w - 1, 0.8)) : 0, st = w < 1 ? Math.sin(Math.PI * w) : 0;
+      Lg.push([1 + m * lerp(1, 2.5, A), m * (lerp(2, 7, A) + lerp(20, 32, A) * c), 8 + m * (lerp(46, 104, A) * sw + lerp(8, 24, A) * st)]);
+      Ar.push([9 + m * lerp(0, 3, A), m * (lerp(3, 10, A) - lerp(20, 40, A) * c), 15 + m * (lerp(6, 62, A) + lerp(4, 18, A) * Math.max(0, -c))]);
+    }
+    const ps = pose({ view: o.view || "back", L: Lg, A: Ar, lean: -m * lerp(1.2, 0.7, A) * Math.sin(ph), tw: m * lerp(5, 12, A) * Math.cos(ph), lift: m * A * 1.6 * Math.max(0, Math.cos(2 * ph)) ** 2, tilt: m * lerp(0.4, 0.25, A) * Math.sin(ph), mouth: o.mouth || "flat", look: o.look || 0, f: o.f });
+    if (o.arms) { const t = ARMS[o.arms], bob = Math.sin(2 * ph) * 1.2 * m; ps.A = null; ps.lh = [t[0][0], t[0][1] + bob, t[0][2]]; ps.rh = [t[1][0], t[1][1] + bob, t[1][2]]; }
+    return ps;
   }
-  const runIn = (c, a, T, to = [a.x1, a.y1]) => {
-    const u = seg(c, 0, T), x = lerp(a.x0, to[0], ease(u)), y = lerp(a.y0, to[1], ease(u));
-    return { pose: u < 1 ? run(c) : happy, x, y, gy: y, k: a.k };
+  const standAt = (o = {}) => { const ps = gait(0, 0, 0, o); ps.lean = Math.sin(clk * 0.8) * 0.55; ps.tilt = Math.sin(clk * 0.8 + 0.7) * 0.3; ps.A = [[9.5, Math.sin(clk * 0.8) * 2.5, 16], [9.5, -Math.sin(clk * 0.8) * 2.5, 16]]; return ps; };
+  const react = (arms, o = {}) => pose({ view: o.view || "back", L: NL, lh: ARMS[arms][0], rh: ARMS[arms][1], f: o.f, mouth: o.mouth || "flat", look: o.look || 0 });
+
+  function move(tm, t0, t1, from, to, k, o = {}) {
+    const u = seg(tm, t0, t1), e = ease(u), n = Math.max(1, Math.round((t1 - t0) * (o.rate || 2.6)));
+    return { pose: gait(Math.PI * n * e, o.A ?? 0.45, clamp(5.4 * u * (1 - u)), o), x: lerp(from[0], to[0], e), y: lerp(from[1], to[1], e), gy: lerp(from[1], to[1], e), k, f: o.f };
+  }
+
+  function track(keys, t) {
+    const n = keys.length;
+    if (t <= keys[0][0]) return keys[0].slice(1);
+    if (t >= keys[n - 1][0]) return keys[n - 1].slice(1);
+    let i = 0;
+    while (keys[i + 1][0] < t) i++;
+    const k0 = keys[Math.max(0, i - 1)], k1 = keys[i], k2 = keys[i + 1], k3 = keys[Math.min(n - 1, i + 2)], dt = k2[0] - k1[0], u = (t - k1[0]) / dt, u2 = u * u, u3 = u2 * u;
+    return k1.slice(1).map((p1, j) => {
+      const p2 = k2[j + 1], m1 = ((p2 - k0[j + 1]) / (k2[0] - k0[0])) * dt, m2 = ((k3[j + 1] - p1) / (k3[0] - k1[0])) * dt;
+      return (2 * u3 - 3 * u2 + 1) * p1 + (u3 - 2 * u2 + u) * m1 + (3 * u2 - 2 * u3) * p2 + (u3 - u2) * m2;
+    });
+  }
+  const KICKS = {
+    soft: [
+      [-0.46, -0.6, 0, 0, 0, 2, 3, 18, 2, 5, 70, 10, 5, 30, 10, 5, 30],
+      [-0.34, 0, -5, 0, 0.3, 2, -18, 30, 2, 20, 10, 10, 18, 34, 10, -16, 26],
+      [-0.24, 0.7, 0, 0, 0, 2, 3, 70, 2, 3, 20, 12, 4, 30, 10, 4, 28],
+      [-0.12, -0.4, 6, 0, 0.2, 0, 18, 12, 6, -22, 45, 24, 6, 28, 12, 14, 32],
+      [-0.05, -1, -8, -0.4, 0, 0, 10, 20, 10, -20, 72, 24, 8, 26, 14, -12, 26],
+      [0, -1.4, 2, -0.6, 0, 0, 4, 22, 18, 16, 20, 24, 10, 22, 13, 12, 30],
+      [0.12, -1, 8, -0.4, 0, 0, 0, 14, 10, 38, 10, 22, 12, 24, 10, 16, 32],
+      [0.3, 0.2, 2, -0.2, 0, 2, -4, 16, 4, 8, 14, 16, 4, 20, 9, 6, 22],
+      [0.62, 0, 0, 0, 0, 1, 0, 8, 1, 0, 8, 9, 0, 15, 9, 0, 15],
+    ],
+    drive: [
+      [-0.46, -0.8, 0, -0.2, 0, 2, 5, 24, 2, 6, 96, 11, 8, 58, 11, 8, 58],
+      [-0.34, 0, -8, 0, 0.8, 2, -26, 40, 2, 28, 12, 12, 30, 70, 12, -28, 50],
+      [-0.24, 0.9, 0, 0, 0, 2, 4, 100, 2, 4, 26, 16, 6, 60, 12, 6, 55],
+      [-0.12, -0.6, 10, 0, 0.6, 0, 26, 14, 5, -32, 60, 45, 10, 35, 16, 22, 55],
+      [-0.05, -1.8, -16, -0.4, 0, 0, 14, 26, 8, -36, 112, 62, 12, 34, 24, -28, 30],
+      [0, -2.4, 4, -0.6, 0, 0, 4, 28, 14, 24, 30, 70, 14, 30, 18, 22, 38],
+      [0.12, -1.6, 16, -0.3, 0.6, 0, -6, 16, 10, 72, 8, 62, 24, 32, 10, 36, 46],
+      [0.3, 0.6, 6, 0, 0, 2, -22, 48, 4, 18, 26, 40, 10, 26, 12, 14, 30],
+      [0.62, 0, 0, 0, 0, 1, 0, 8, 1, 0, 8, 9, 0, 15, 9, 0, 15],
+    ],
+  };
+  function kickPose(tc, pw, style, f) {
+    const a = track(KICKS.soft, tc), b = track(KICKS.drive, tc), v = a.map((x, i) => lerp(x, b[i], pw)), bell = (c, w) => Math.exp(-(((tc - c) / w) ** 2));
+    if (style === "curl") { v[7] -= 28 * bell(0.14, 0.12); v[1] += 8 * bell(0.12, 0.15); }
+    if (style === "chip") { v[8] += 14 * bell(0.14, 0.12); v[9] -= 6 * bell(0.1, 0.1); v[0] *= 0.5; }
+    if (style === "sky") { v[8] += 18 * bell(0.15, 0.14); v[10] += 14 * bell(0.14, 0.2); v[13] += 26 * bell(0.14, 0.2); }
+    return pose({ view: "back", lean: v[0], tw: v[1], tilt: v[2], lift: v[3], L: [v.slice(4, 7), v.slice(7, 10)], A: [v.slice(10, 13), v.slice(13, 16)], f });
+  }
+
+  function striker(tm, t0, t1, from = L.stand, to = L.strike, k = L.ps, o = {}) {
+    const f = !!who.foot, tc = tm - t1, u = seg(tm, t0, t1 - 0.04), e = (u * u * (3 - 2 * u) + u) / 2;
+    const dx = to[0] - from[0], dy = to[1] - from[1], dl = Math.hypot(dx, dy) || 1, dr = easeOut(seg(tm, t1, t1 + 0.35)) * 2.5 * (k / 4);
+    const x = lerp(from[0], to[0], e) + (dx / dl) * dr, y = lerp(from[1], to[1], e) + (dy / dl) * dr;
+    const pre = o.pre ? o.pre(tm) : standAt({ f }), kp = kickPose(Math.min(tc, 0.7), o.pw ?? 0.8, o.style, f);
+    let ps;
+    if (t1 - t0 > 0.56) {
+      const g = gait(Math.PI / 2 + ((tc + 0.46) * Math.PI) / 0.22, 0.75, ease(seg(tm, t0, t0 + 0.14)), { f });
+      ps = blendPose(blendPose(pre, g, ease(seg(tm, t0 - 0.02, t0 + 0.1))), kp, ease(seg(tc, -0.54, -0.44)));
+    } else ps = blendPose(pre, kp, ease(seg(tm, t0, t0 + 0.12)));
+    if (tc > 0.62) ps = blendPose(ps, standAt({ f }), ease(seg(tc, 0.62, 0.95)));
+    return { pose: ps, x, y, gy: y, k, f };
+  }
+
+  const runIn = (c, a, T, to = [a.x1, a.y1], A = 0.6) => {
+    const u = seg(c, 0, T), e = ease(u), x = lerp(a.x0, to[0], e), y = lerp(a.y0, to[1], e), n = Math.max(2, Math.round(T * 4.4));
+    return { pose: gait(Math.PI * n * e, A, clamp(5.4 * u * (1 - u)), { view: "front", mouth: "smile" }), x, y, gy: y, k: a.k };
+  };
+  const go = (c, a, T, ps, d = 0.34, to, A) => {
+    const r = runIn(c, a, T, to, A), w = inOut(seg(c, T - 0.1, T - 0.1 + d));
+    return w > 0 ? { ...r, pose: blendPose(r.pose, ps, w) } : r;
   };
   const at = (a, ps, x = a.x1, y = a.y1) => ({ pose: ps, x, y, gy: y, k: a.k });
   const say = (text, a, t, life, col) => ({ type: "say", text, x: a.x1, y: a.y1 - a.k * 17.8, t, life, k: Math.min(a.k, 9.5 / (P * a.z)), col });
   const flagPos = () => [W / 2 + L.gw * 2.8, L.GB];
+  const bump = (c, t0, t1, n = 1) => Math.sin(Math.PI * n * seg(c, t0, t1)) ** 2;
 
   const CEL = {
     siu: { len: 2.9, title: "THE SIUUU", sfx: [[0.7, "whoosh", 0.35], [1.15, "siu", 0, 1]], f(c, a, st) {
-      if (c < 0.55) return runIn(c, a, 0.55);
-      const crouch = pose({ p: 5, lf: [-5, 0, 1], rf: [5, 0, 1], lh: [-11, 9, 2], rh: [11, 9, 2] });
-      if (c < 0.7) return at(a, blendPose(happy, crouch, seg(c, 0.55, 0.7)));
-      if (c < 1.15) { const u = seg(c, 0.7, 1.15); return at(a, pose({ sx: Math.cos(u * Math.PI * 2), dy: -Math.sin(Math.PI * u) * 22, lh: [-10, -16, 1], rh: [10, -16, 1], lf: [-3.4, -6, 1], rf: [3.4, -6, 1], mouth: "o" })); }
-      const land = pose({ p: 3, lf: [-7.8, 0, 1], rf: [7.8, 0, 1], lh: [-19, 16, 1], rh: [19, 16, 1], mouth: "shout", look: -0.4 });
+      const crouch = pose({ p: 6, lf: [-5.2, 0, 1], rf: [5.2, 0, 1], A: [[18, -46, 26], [18, -46, 26]], look: 0.3, mouth: "smile" });
+      const air = (u) => {
+        const dn = inOut(seg(u, 0.45, 1)), sp = ease(seg(u, 0.55, 1));
+        return pose({ sx: Math.cos(TAU * inOut(u)), dy: -88 * u * (1 - u), lh: [lerp(-10, -19, dn), lerp(-19, 14, dn), 1], rh: [lerp(10, 19, dn), lerp(-19, 14, dn), 1], lf: [lerp(-3.4, -8, sp), lerp(-5, -1.2, sp), 1], rf: [lerp(3.4, 8, sp), lerp(-5, -1.2, sp), 1], mouth: "o" });
+      };
+      if (c < 0.72) return go(c, a, 0.55, crouch, 0.27);
+      if (c < 1.16) { const u = seg(c, 0.72, 1.16); return at(a, blendPose(crouch, air(u), ease(seg(u, 0, 0.16)))); }
+      const land = pose({ p: 3, lf: [-8.2, 0, 1], rf: [8.2, 0, 1], lh: [-19, 16, 1], rh: [19, 16, 1], mouth: "shout", look: -0.4 }), sq = pose({ ...land, p: 6.8, lh: [-17.5, 18.5, 1], rh: [17.5, 18.5, 1] });
       if (c > 1.2) st.fx.push(say("SIUUU!", a, c - 1.2, 1.6));
-      return at(a, c < 1.25 ? blendPose(crouch, land, seg(c, 1.15, 1.25)) : land);
+      const d = c - 1.16;
+      return at(a, d < 0.09 ? blendPose(air(1), sq, easeOut(d / 0.09)) : blendPose(sq, land, inOut(seg(d, 0.09, 0.42))));
     } },
     calma: { len: 2.6, title: "CALMA, CALMA", sfx: [[0.6, "hush", 0, 1]], f(c, a, st) {
-      if (c < 0.5) return runIn(c, a, 0.5);
-      const b = 0.5 + 0.5 * Math.sin(c * 9);
+      const b = 0.5 - 0.5 * Math.cos(TAU * 1.25 * Math.max(0, c - 0.62)), sw = Math.sin(c * 1.7) * 0.9;
       st.fx.push(say("CALMA", a, c - 0.75, 1.4, "#e8f1ff"));
-      return at(a, blendPose(happy, pose({ lh: [-12.5, 10 + b * 4.5, 1], rh: [12.5, 10 + b * 4.5, 1], flat: true, p: 0.5 + b, mouth: Math.floor(c * 6) % 2 ? "o" : "flat" }), seg(c, 0.5, 0.7)));
+      return go(c, a, 0.5, pose({ lh: [-12.5, 9.5 + b * 5, 1], rh: [12.5, 9.5 + b * 5, 1], flat: true, p: 0.5 + b * 1.4, lean: sw, tilt: -sw * 0.3, look: 0.2 + b * 0.3, mouth: b > 0.55 ? "o" : "flat" }), 0.4);
     } },
-    shirt: { len: 3.0, dx: 4, title: "SHIRT TO THE CROWD", sfx: [[0.6, "cheer", 0.6, 1], [1.7, "card"]], f(c, a, st) {
-      if (c < 0.5) return runIn(c, a, 0.5);
+    shirt: { len: 3.0, dx: 4, stay: true, title: "SHIRT TO THE CROWD", sfx: [[0.6, "cheer", 0.6, 1], [1.7, "card"]], f(c, a, st) {
       const r0 = a.ref ? [a.ref.x, a.ref.gy ?? a.ref.y] : L.refPos, rt = [a.x1 + 9 * a.k, a.y1 - a.k];
       if (c >= 0.95) st.ref = c < 1.6 ? jog(c, 0.95, 1.6, r0, rt, L.ks, 8) : { u: "point", l: "stand", x: rt[0], y: rt[1], k: L.ks };
       if (c >= 1.7) st.fx.push({ type: "card", x: rt[0] + 5 * L.ks, y: rt[1] - 19.5 * L.ks, k: L.ks });
-      const bob = Math.sin(c * 7) * 1.5;
-      return at(a, blendPose(happy, pose({ bare: true, lh: [-11.5, -1.5 + bob, 1], rh: [11.5, -1.5 + bob, 1], mouth: "shout", ex: [{ k: "heldShirt" }] }), seg(c, 0.5, 0.8)));
+      const grab = pose({ lh: [3.6, 15.5, 2], rh: [-3.6, 15.5, 2], look: 0.5 }), lift = pose({ lh: [-3.2, -25, 1], rh: [3.2, -25, 1], look: -0.2 }), off = pose({ ...lift, bare: true, ex: [{ k: "heldShirt" }] });
+      const show = pose({ bare: true, lh: [-11.5, -1.5 + Math.sin(c * 2.6) * 0.8, 1], rh: [11.5, -1.5 + Math.sin(c * 2.6) * 0.8, 1], lean: Math.sin(c * 1.3) * 1.2, mouth: "shout", ex: [{ k: "heldShirt" }] });
+      if (c < 0.72) return go(c, a, 0.5, grab, 0.3);
+      if (c < 0.98) return at(a, blendPose(grab, c < 0.84 ? lift : off, inOut(seg(c, 0.72, 0.95))));
+      return at(a, blendPose(off, show, inOut(seg(c, 0.98, 1.32))));
     } },
     sky: { len: 2.4, title: "FINGERS TO THE SKY", sfx: [], f(c, a, st) {
-      if (c < 0.5) return runIn(c, a, 0.5);
-      st.fx.push({ type: "sparkle", x: a.x1, y: a.y1 - a.k * 18, t: c, r: a.k * 5 });
-      return at(a, blendPose(happy, pose({ lh: [-6, -22, 1], rh: [6, -22, 1], look: -1, mouth: "smile", ex: [{ k: "point", hand: "l" }, { k: "point", hand: "r" }] }), seg(c, 0.5, 0.85)));
+      const pu = bump(c, 1.0, 1.9, 2) * 2.2, sw = Math.sin(c * 1.4);
+      if (c > 0.5 && c < 2.4) st.fx.push({ type: "sparkle", x: a.x1, y: a.y1 - a.k * 18, t: c, r: a.k * 5 });
+      return go(c, a, 0.5, pose({ lh: [-6, -22 - pu, 1], rh: [6, -22 - pu, 1], look: -1, lean: sw * 0.8, tilt: sw * 0.5, p: pu * 0.3, mouth: "smile", ex: [{ k: "point", hand: "l" }, { k: "point", hand: "r" }] }), 0.42);
     } },
     folded: { len: 2.6, title: "ARMS FOLDED", sfx: [[0.75, "cheer", 0.5]], f(c, a) {
-      if (c < 0.5) return runIn(c, a, 0.5);
-      return at(a, blendPose(happy, pose({ lh: [4.6, 9.4, 2], rh: [-4.6, 7.8, 2], mouth: "smile", tilt: 0.5 + Math.sin(c * 2.2) * 0.4, look: -0.3 }), seg(c, 0.5, 0.8)));
+      return go(c, a, 0.5, pose({ lh: [4.6, 9.4, 2], rh: [-4.6, 7.8, 2], mouth: "smile", tilt: 0.6 + Math.sin(c * 1.6) * 0.5, lean: Math.sin(c * 0.9) * 0.7, look: -0.3 }), 0.45);
     } },
     y304: { len: 3.0, title: "304", sfx: [[0.8, "blip", 0], [1.2, "blip", 1], [1.6, "blip", 2], [2.0, "cheer", 0.7]], f(c, a, st) {
-      if (c < 0.5) return runIn(c, a, 0.5);
       ["3", "0", "4"].forEach((d, i) => st.fx.push(say(d, a, c - 0.8 - i * 0.4, 0.38, "#e8f1ff")));
       st.fx.push(say("304", a, c - 2.0, 1.0));
-      const n = c < 1.2 ? 3 : c < 1.6 ? 0 : 4;
-      const ex = n ? [{ k: "fingers", hand: n === 3 ? "l" : "r", n, ang: 0 }] : [{ k: "ring", hand: "l" }, { k: "ring", hand: "r" }];
-      return at(a, blendPose(happy, pose({ lh: [3.6, 1, 2], rh: [-3.6, 2, 2], mouth: "smile", ex }), seg(c, 0.5, 0.75)));
+      const three = pose({ lh: [-6.5, -9, 1], rh: [7.5, 12, 2], mouth: "smile", ex: [{ k: "fingers", hand: "l", n: 3, ang: 0 }] });
+      const zero = pose({ lh: [-3, 1.5, 2], rh: [3, 1.5, 2], mouth: "o", ex: [{ k: "ring", hand: "l" }, { k: "ring", hand: "r" }] });
+      const four = pose({ lh: [-7.5, 12, 2], rh: [6.5, -9, 1], mouth: "smile", ex: [{ k: "fingers", hand: "r", n: 4, ang: 0 }] });
+      return go(c, a, 0.5, c < 1.5 ? blendPose(three, zero, inOut(seg(c, 1.12, 1.3))) : blendPose(zero, four, inOut(seg(c, 1.52, 1.7))), 0.35);
     } },
-    zen: { len: 3.2, title: "ZEN MODE", sfx: [[0.85, "gong", 0, 1]], f(c, a, st) {
-      if (c < 0.5) return runIn(c, a, 0.5);
-      const sit = pose({ p: 13.5, lf: [-2.4, -1.2, 1, -12.6, -5.6], rf: [2.4, -1.8, 1, 12.6, -5.6], lh: [-10.5, 18.5, 1], rh: [10.5, 18.5, 1], eyes: "closed", ex: [{ k: "ring", hand: "l" }, { k: "ring", hand: "r" }] });
-      for (let i = 0; i < 3; i++) { const t = c - 0.9 - i * 0.5; if (t > 0) st.fx.push({ type: "ring", x: a.x1, y: a.y1, t: t % 1.5, r: a.k * 10, life: 1.2, ground: true }); }
-      return at(a, blendPose(happy, sit, seg(c, 0.5, 0.85)));
+    zen: { len: 3.2, stay: true, title: "ZEN MODE", sfx: [[0.85, "gong", 0, 1]], f(c, a, st) {
+      const squat = pose({ p: 9, lf: [-5.6, 0, 1], rf: [5.6, 0, 1], lh: [-9, 5, 2], rh: [9, 5, 2], look: 0.5 });
+      const sit = pose({ p: 13.5, lf: [-2.4, -1.2, 1, -12.6, -5.6], rf: [2.4, -1.8, 1, 12.6, -5.6], lh: [-10.5, 18.5, 1], rh: [10.5, 18.5, 1], eyes: "closed", br: 0.5 + Math.sin(c * 1.7) * 0.5, ex: [{ k: "ring", hand: "l" }, { k: "ring", hand: "r" }] });
+      for (let i = 0; i < 3; i++) { const t = c - 0.9 - i * 0.5; if (t > 0 && c < 3.2) st.fx.push({ type: "ring", x: a.x1, y: a.y1, t: t % 1.5, r: a.k * 10, life: 1.2, ground: true }); }
+      if (c < 0.74) return go(c, a, 0.5, squat, 0.3);
+      return at(a, blendPose(squat, sit, inOut(seg(c, 0.74, 1.1))));
     } },
     arms: { len: 2.8, title: "ARMS SPREAD WIDE", sfx: [[0.75, "hey", 0, 1]], f(c, a) {
-      if (c < 0.6) return runIn(c, a, 0.6);
-      return at(a, blendPose(happy, pose({ lh: [-27, -1, 1], rh: [27, -1, 1], look: -0.9 }), seg(c, 0.6, 0.95)));
+      const fl = Math.sin(c * 1.8) * 1.2, sw = Math.sin(c * 0.9);
+      return go(c, a, 0.6, pose({ lh: [-27, -1 + fl, 1], rh: [27, -1 + Math.sin(c * 1.8 + 0.6) * 1.2, 1], look: -0.9, lean: sw * 0.8, tilt: sw * 0.4, mouth: "smile" }), 0.5);
     } },
     ears: { len: 2.9, title: "CAN'T HEAR YOU", sfx: [[0.7, "louder", 0, 1]], f(c, a) {
-      if (c < 0.5) return runIn(c, a, 0.5);
-      const sway = Math.sin(c * 5) * 1.3, ph = c * 16;
-      return at(a, blendPose(happy, pose({ lh: [-7.9, -11.6, 1], rh: [7.9, -11.6, 1], lean: sway, tilt: sway * 0.3, mouth: "grin", ex: [{ k: "fingers", hand: "l", n: 4, ang: -0.55, amp: 0.5, ph }, { k: "fingers", hand: "r", n: 4, ang: 0.55, amp: 0.5, ph: ph + 1.5 }] }), seg(c, 0.5, 0.8)));
+      const sw = Math.sin(c * 5) * 1.3, ph = c * 16;
+      return go(c, a, 0.5, pose({ lh: [-7.9, -11.6, 1], rh: [7.9, -11.6, 1], lean: sw, tilt: sw * 0.3, p: 0.6 + Math.abs(Math.sin(c * 5)) * 0.8, mouth: "grin", ex: [{ k: "fingers", hand: "l", n: 4, ang: -0.55, amp: 0.5, ph }, { k: "fingers", hand: "r", n: 4, ang: 0.55, amp: 0.5, ph: ph + 1.5 }] }), 0.36);
     } },
     cold: { len: 3.0, title: "COLD PALMER", sfx: [[0.55, "shiver", 0, 1]], f(c, a, st) {
-      if (c < 0.5) return runIn(c, a, 0.5);
-      const rub = Math.sin(c * 13), jit = Math.floor(c * 22) % 2 ? 0.45 : -0.45;
-      st.fx.push({ type: "snow", x: a.x1, y: a.y1 - a.k * 10, t: c, r: a.k * 10, k: a.k });
-      return at(a, blendPose(happy, pose({ lh: [5.4, 5.5 + rub * 3.2, 2], rh: [-5.4, 6.5 - rub * 3.2, 2], lf: [-2.3, 0, -1], rf: [2.3, 0, -1], p: 1.6, dx: jit, mouth: Math.floor(c * 12) % 2 ? "grin" : "flat", ex: [{ k: "puff", t: (c * 1.1) % 1 }] }), seg(c, 0.5, 0.75)));
+      const rub = Math.sin(c * 12), sh = Math.sin(c * 38) * 0.32;
+      if (c < 3.0) st.fx.push({ type: "snow", x: a.x1, y: a.y1 - a.k * 10, t: c, r: a.k * 10, k: a.k });
+      return go(c, a, 0.5, pose({ lh: [5.4, 5.5 + rub * 3.2, 2], rh: [-5.4, 6.5 - rub * 3.2, 2], lf: [-2.3, 0, -1], rf: [2.3, 0, -1], p: 1.8, dx: sh, br: 1.1, look: 0.3, mouth: Math.floor(c * 12) % 2 ? "grin" : "flat", ex: [{ k: "puff", t: (c * 1.1) % 1 }] }), 0.3);
     } },
     dance: { len: 4.2, dx: 2, title: "CORNER FLAG DANCE", sfx: [[1.15, "samba", 22, 1]], f(c, a, st) {
       const fl = flagPos(), to = [fl[0] - 4.5 * a.k, fl[1] + 1.5 * a.k];
       st.fx.push({ type: "flag", x: fl[0], y: fl[1], k: a.k, t: c, ground: true });
-      if (c < 1.1) return runIn(c, a, 1.1, to);
-      const s = Math.sin((c - 1.1) * 8.5), up = Math.max(0, s), dn = Math.max(0, -s);
-      return at(a, pose({ lh: [-9 - dn * 3, 6 - dn * 17 + up * 4, 1], rh: [9 + up * 3, 6 - up * 17 + dn * 4, 1], lf: [-4.2, -up * 4.5, 1], rf: [4.2, -dn * 4.5, 1], lean: s * 1.8, tilt: s * 0.5, dy: -Math.abs(s) * 1.4, mouth: "grin" }), to[0], to[1]);
+      const b = Math.max(0, c - 1.17), ph = b * Math.PI * 2, s = Math.sin(ph), bn = 0.5 - 0.5 * Math.cos(ph * 4), up = Math.max(0, s), dn = Math.max(0, -s), on = ease(seg(c, 1.05, 1.35));
+      const groove = pose({ lh: [-11 - s * 2, 4 - s * 7, 2], rh: [11 - s * 2, 4 + s * 7, 2], lf: [-4.4 + s * 1.2, -dn * 4, 1], rf: [4.4 + s * 1.2, -up * 4, 1], p: 0.6 + bn * 1.8 * on, lean: s * 2.2, tilt: s * 0.6, tw: -s * 12, mouth: "grin" });
+      return go(c, a, 1.1, groove, 0.36, to, 0.85);
     } },
     camera: { len: 2.7, title: "THE CAMERA CLICK", sfx: [[1.15, "click", 0, 1], [1.7, "click"]], f(c, a, st) {
-      if (c < 0.5) return runIn(c, a, 0.5);
-      const fx0 = a.x1 + (2.6 * a.k) / 4, fy0 = a.y1 - (55.5 * a.k) / 4;
+      const fx0 = a.x1 + (2.6 * a.k) / 4, fy0 = a.y1 - (55.5 * a.k) / 4, dip = Math.exp(-(((c - 1.15) / 0.05) ** 2)) + Math.exp(-(((c - 1.7) / 0.05) ** 2));
       for (const t of [1.15, 1.7]) if (c >= t) { st.fx.push({ type: "flashbulb", x: fx0, y: fy0, t: c - t, k: a.k }); st.flash = Math.max(st.flash, 0.3 * (1 - seg(c, t, t + 0.12))); }
-      return at(a, blendPose(happy, pose({ lh: [-0.6, -12, 1], rh: [5.6, -10.6, 1], mouth: "smile", ex: [{ k: "frame" }] }), seg(c, 0.5, 0.85)));
+      return go(c, a, 0.5, pose({ lh: [-0.6, -12, 1], rh: [5.6, -10.6 + dip * 1.1, 1], p: 1.2, lean: 0.6 + Math.sin(c * 1.2) * 0.5, tilt: 0.4, mouth: "smile", ex: [{ k: "frame" }] }), 0.42);
     } },
   };
 
   function starAt(p) {
-    const k = p.k, ground = p.gy ?? p.y;
+    const k = p.k, ground = p.gy ?? p.y, ps = p.pose || legacy(p), b = 0.32 * (1 - Math.cos(clk * 2.4));
     R(p.x - 4 * k, ground - k * 0.6, 8 * k, k, "rgba(0,0,0,0.35)");
     g.setTransform(1, 0, 0, 1, 0, 0);
-    star(g, who, p.pose || legacy(p), (k * cam.z) / 4, cam.ox + cam.z * p.x, cam.oy + cam.z * p.y);
+    star(g, who, { ...ps, br: (ps.br || 0) + b }, (k * cam.z) / 4, cam.ox + cam.z * p.x, cam.oy + cam.z * p.y);
     g.setTransform(cam.z, 0, 0, cam.z, cam.ox, cam.oy);
   }
 
   function celebrate(K, m, c) {
     if (!m.a) {
       const s0 = K.f(K.cs, m), sh = s0.shooter, k = sh.k, x0 = sh.x, y0 = sh.gy ?? sh.y;
-      m.a = { x0, y0, k, x1: x0 - 7 * k, y1: y0 + 3 * k, cam: s0.cam, ref: s0.ref, z: Math.max(0.5, Math.min(3, Math.min(250, innerHeight * 0.32) / (P * 16 * k))) };
+      m.a = { x0, y0, k, x1: x0 - 7 * k, y1: y0 + 3 * k, cam: s0.cam, ref: s0.ref, from: sh.pose || legacy(sh), z: Math.max(0.5, Math.min(3, Math.min(250, innerHeight * 0.32) / (P * 16 * k))) };
     }
-    const a = m.a, st = K.f(Math.min(K.end, K.cs + c), m);
-    st.shooter = m.cel.f(c, a, st);
+    const a = m.a, C = m.cel, st = K.f(Math.min(K.end, K.cs + c), m), r = C.f(c, a, st);
+    let ps = blendPose(a.from, r.pose, ease(seg(c, 0, 0.2)));
+    if (!C.stay) ps = blendPose(ps, standAt({ view: "front", mouth: "smile" }), inOut(seg(c, C.len - 0.3, C.len + 0.5)));
+    st.shooter = { ...r, pose: ps };
     const p = st.shooter, hw = W / (2 * a.z), hh = H / (2 * a.z);
-    const tx = Math.max(hw - MX, Math.min(W + MX - hw, p.x + (m.cel.dx || 0) * a.k)), ty = Math.max(hh - MY, Math.min(H + MB - hh, (p.gy ?? p.y) - 8 * a.k - (0.05 * H) / a.z));
+    const tx = Math.max(hw - MX, Math.min(W + MX - hw, p.x + (C.dx || 0) * a.k)), ty = Math.max(hh - MY, Math.min(H + MB - hh, (p.gy ?? p.y) - 8 * a.k - (0.05 * H) / a.z));
     st.cam = camTo(a.cam, { z: a.z, x: tx, y: ty }, ease(seg(c, 0, 0.6)));
     return st;
   }
@@ -3287,13 +3424,14 @@ const pitch = (() => {
 
   function stateAt(now) {
     const m = mode, s = Math.max(0, (now - m.t0) / 1000);
+    clk = now / 1000;
     if (m.type === "kick" && s >= KICK) mode = { type: "idle", t0: m.t0 + KICK * 1000 };
     else if (m.type === "respot" && s >= RESPOT) mode = { type: "idle", t0: m.t0 + RESPOT * 1000 };
     else if (m.type === "kick") { m.tm = s; return kickoff(s, m); }
     else if (m.type === "respot") { m.tm = s; return respot(s, m.from); }
     else if (m.type === "shot") {
       const K = KINDS[m.kind];
-      m.tm = Math.min(m.end, tauOf(K, s));
+      m.tm = m.cel ? tauOf(K, s) : Math.min(m.end, tauOf(K, s));
       return m.cel && m.tm >= K.cs ? celebrate(K, m, m.tm - K.cs) : K.f(Math.min(K.end, m.tm), m);
     }
     const lt = Math.max(0, (now - mode.t0) / 1000);
@@ -3352,7 +3490,7 @@ const pitch = (() => {
 
   function frame(now) {
     requestAnimationFrame(frame);
-    if (now - last < 30 || !L) return;
+    if (now - last < 15 || !L) return;
     last = now;
     const st = stateAt(now);
     cue(mode);
@@ -3390,7 +3528,7 @@ const pitch = (() => {
         mode = { type: "idle", t0: now };
       }
     },
-    setPlayer(pl) { who = pl; },
+    setPlayer(pl) { who = pl; if (L) sides(); },
     portrait(cv, pl) {
       const c = cv.getContext("2d");
       c.clearRect(0, 0, cv.width, cv.height);
