@@ -3,11 +3,11 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-<title>Panenka</title>
+<title>Topbinz</title>
 <meta name="description" content="A daily soccer trivia game. Name rare answers to score better finishes, from tap-ins all the way to top bins.">
 <meta name="theme-color" content="#050a14">
 <meta property="og:type" content="website">
-<meta property="og:title" content="Panenka">
+<meta property="og:title" content="Topbinz">
 <meta property="og:description" content="A daily soccer trivia game. Name rare answers to score better finishes, from tap-ins all the way to top bins.">
 <meta property="og:url" content="https://kennyshii.github.io/top-bins/">
 <meta property="og:image" content="https://kennyshii.github.io/top-bins/og.png">
@@ -162,7 +162,7 @@ svg { display: block; width: 100%; height: auto; overflow: visible; }
 
 <main class="col">
   <header class="top">
-    <a class="logo" id="home" href="./" aria-label="Panenka, back to the start screen">PANENKA</a>
+    <a class="logo" id="home" href="./" aria-label="Topbinz, back to the start screen">TOPBINZ</a>
     <div class="topR">
       <div class="tag" id="strikeTag">STRIKE #1</div>
       <button class="snd" id="snd" type="button" aria-pressed="true" aria-label="Sound" title="Sound on"><svg viewBox="0 0 11 10" shape-rendering="crispEdges" aria-hidden="true"><path d="M0 3h3v4H0zM3 2h1v6H3zM4 1h1v8H4z" fill="currentColor"/><path class="on" d="M7 3h1v4H7zM9 1h1v8H9z" fill="currentColor"/><path class="off" d="M7 3h1v1H7zM9 3h1v1H9zM8 4h1v2H8zM7 6h1v1H7zM9 6h1v1H9z" fill="currentColor"/></svg></button>
@@ -170,7 +170,7 @@ svg { display: block; width: 100%; height: auto; overflow: visible; }
   </header>
 
   <section class="hero" id="intro">
-    <h1>PANENKA</h1>
+    <h1>TOPBINZ</h1>
     <p class="kicker">THE DAILY STRIKE</p>
     <p class="rules">7 prompts · 25 seconds each · rarer answers, better finishes</p>
     <div class="pick">
@@ -2138,7 +2138,7 @@ function logSvg(results) {
 }
 
 function shareText(g) {
-  const head = g.mode === "daily" ? `PANENKA #${today.no}` : "PANENKA ∞";
+  const head = g.mode === "daily" ? `TOPBINZ #${today.no}` : "TOPBINZ ∞";
   return `${head} · ${g.total} pts · as ${playerById(g.pl).name}\n${g.results.map((r) => shotOf(r.pts).sq).join("")}\n${g.results.map((r, i) => `${i + 1}. ${r.i === null ? "—" : r.pts + (r.bonus || 0)}`).join("  ")}`;
 }
 
