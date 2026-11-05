@@ -37,7 +37,8 @@ body { margin: 0; }
 [hidden] { display: none !important; }
 html, body { height: 100%; }
 body { background: var(--void); color: var(--ink); font-family: var(--body); font-size: 21px; line-height: 1.25; overflow-x: hidden; }
-#world { position: fixed; inset: 0; width: 100%; height: 100%; image-rendering: pixelated; image-rendering: crisp-edges; z-index: 0; }
+#world, #tags { position: fixed; inset: 0; width: 100%; height: 100%; image-rendering: pixelated; image-rendering: crisp-edges; z-index: 0; }
+#tags { pointer-events: none; }
 .scan { position: fixed; inset: 0; pointer-events: none; z-index: 1; background: repeating-linear-gradient(to bottom, rgba(0, 0, 0, 0.16) 0 1px, transparent 1px 3px), radial-gradient(ellipse at center, transparent 55%, rgba(0, 0, 0, 0.45)); }
 
 .col { position: relative; z-index: 2; max-width: 480px; margin: 0 auto; padding-left: max(16px, env(safe-area-inset-left, 0px)); padding-right: max(16px, env(safe-area-inset-right, 0px)); padding-block: 18px 72px; display: flex; flex-direction: column; gap: 18px; }
@@ -156,6 +157,7 @@ svg { display: block; width: 100%; height: auto; overflow: visible; }
 </head>
 <body>
 <canvas id="world" aria-hidden="true"></canvas>
+<canvas id="tags" aria-hidden="true"></canvas>
 <div class="scan" aria-hidden="true"></div>
 
 <main class="col">
@@ -1620,7 +1622,7 @@ const SHOTS = [
   { min: 50, max: 69, name: "SCREAMER", kind: "screamer", color: "#ffd36b", sq: "🟨", line: "Thirty-yard free kick. Over the wall and on fire." },
   { min: 25, max: 49, name: "OFF THE POST", kind: "post", color: "#7ef0a6", sq: "🟩", line: "Clang. And in." },
   { min: 1, max: 24, name: "TAP-IN", kind: "tapin", color: "#4de3ff", sq: "🟦", line: "Everyone was scoring that one." },
-  { min: 0, max: 0, name: "ROW Z", kind: "rowz", color: "#7d93b8", sq: "⬛", line: "No answer. Into the stands." },
+  { min: 0, max: 0, name: "SAVED", kind: "saved", color: "#7d93b8", sq: "⬛", line: "No answer. Courtois got all eight arms to it." },
 ];
 const shotOf = (pts) => SHOTS.find((s) => pts >= s.min);
 const oneIn = (share) => Math.max(2, Math.round(1 / share)).toLocaleString("en-US");
@@ -1786,6 +1788,7 @@ const sfx = (() => {
     clang() { const t = t0(); [[620, 0.3, 1.5], [1520, 0.18, 1.0], [2490, 0.11, 0.6], [3810, 0.05, 0.35]].forEach(([f, gain, dur]) => tone({ t, f, f2: f * 0.985, dur, gain, a: 0.002 })); hit({ t, dur: 0.03, type: "highpass", f: 2000, gain: 0.3 }); },
     dive() { const t = t0(); hit({ t, dur: 0.28, f: 600, f2: 1800, gain: 0.1, a: 0.12 }); hit({ t: t + 0.32, dur: 0.14, type: "lowpass", f: 380, gain: 0.45 }); },
     bounce(p = 1) { tone({ f: 120, f2: 70, dur: 0.08, gain: 0.3 * p }); },
+    parry() { const t = t0(); tone({ t, f: 150, f2: 55, dur: 0.15, gain: 0.5 }); hit({ t, dur: 0.05, type: "highpass", f: 1400, gain: 0.5 }); hit({ t: t + 0.01, dur: 0.14, type: "lowpass", f: 650, gain: 0.4 }); },
     whistle(d = 0.5) { blast(t0(), d); },
     final() { const t = t0(); blast(t, 0.22); blast(t + 0.38, 0.22); blast(t + 0.76, 0.95); },
     card() { const t = t0(); blast(t, 0.14); blast(t + 0.22, 0.14); },
@@ -2265,11 +2268,7 @@ const pitch = (() => {
     plant: ["..ss...s...", "..kk.......", "..kk.......", ".bbb......."],
     crouch: [".ss.....ss.", "bbb.....bbb"],
   };
-  const KEEP = {
-    ready: ["....hhh....", "...hhhhh...", "...seses...", "....sss....", "..ggggggg..", ".ggggggggg.", "wg.gGGGg.gw", "w..ggggg..w", "...ggggg...", "...ddddd...", "..dd...dd..", "..kk...kk..", ".kk.....kk.", "bb.......bb"],
-    set: ["....hhh....", "...hhhhh...", "...seses...", "....sss....", "..ggggggg..", ".ggggggggg.", "wg.gGGGg.gw", "w..ggggg..w", "...ggggg...", "...ddddd...", ".ddd...ddd.", "kk.......kk", "bb.......bb"],
-    stretch: [".ww.....ww.", ".ww.....ww.", "..g.....g..", "..g.hhh.g..", "..gghhhgg..", "...gsssg...", "...ggggg...", "...gGGGg...", "...ggggg...", "...ddddd...", "...dd.dd...", "...kk.kk...", "...kk..kk..", "...bb..bb.."],
-  };
+
   const FRONT = {
     stand: ["....hhh....", "...hhhhh...", "...seses...", "....sss....", ".wwwwwwwww.", "wwwwwwwwwww", "ww.wwrww.ww", "ww.wwwww.ww", "s..wwwww..s", "s..wwwww..s", "...nnnnn...", "...nn.nn...", "...ss.ss...", "...kk.kk...", "...kk.kk...", "..bbb.bbb.."],
     wall: ["....hhh....", "...hhhhh...", "...seses...", "....sss....", ".wwwwwwwww.", "wwwwwwwwwww", "ww.wwrww.ww", "ww.wwwww.ww", ".ww.www.ww.", "...ssnss...", "...nnnnn...", "...nn.nn...", "...ss.ss...", "...kk.kk...", "...kk.kk...", "..bbb.bbb.."],
@@ -2283,6 +2282,7 @@ const pitch = (() => {
   const colsOf = (pl) => pl.cols || (pl.cols = (() => {
     const k = pl.kit, c = u32;
     return { s: c(k.s), sd: c(shade(k.s, 0.84)), S: c(shade(k.s, 0.7)), hi: c(shade(k.s, 1.18)), h: c(k.h), h2: c(k.h2 || shade(k.h, 1.4)), hd: c(shade(k.h, 0.62)), fade: c(blendHex(k.h, k.s, 0.45)),
+      g: k.g ? c(k.g) : 0, g2: k.g2 ? c(k.g2) : 0, ls: !!k.ls,
       w: c(k.w), wd: c(shade(k.w, 0.82)), v: k.v ? c(k.v) : 0, vd: k.v ? c(shade(k.v, 0.82)) : 0, r: c(k.r), n: c(k.n), nd: c(shade(k.n, 0.8)), kk: c(k.k), kd: c(shade(k.k, 0.84)), b: c(k.b),
       eye: c("#0b1220"), lip: c("#8a3a3a"), dark: c("#2a0f14"), white: c("#f4f8ff"), line: c("#050a14"), puff: c("#dfe9f5") };
   })());
@@ -2292,7 +2292,7 @@ const pitch = (() => {
     E: ["###", "#..", "##.", "#..", "###"], G: [".##", "#..", "#.#", "#.#", ".##"], H: ["#.#", "#.#", "###", "#.#", "#.#"], I: ["###", ".#.", ".#.", ".#.", "###"],
     J: ["..#", "..#", "..#", "#.#", ".#."], L: ["#..", "#..", "#..", "#..", "###"], M: ["#.#", "###", "###", "#.#", "#.#"], N: ["##.", "#.#", "#.#", "#.#", "#.#"],
     O: ["###", "#.#", "#.#", "#.#", "###"], P: ["##.", "#.#", "##.", "#..", "#.."], R: ["##.", "#.#", "##.", "#.#", "#.#"], S: [".##", "#..", ".#.", "..#", "##."],
-    V: ["#.#", "#.#", "#.#", "#.#", ".#."], Y: ["#.#", "#.#", ".#.", ".#.", ".#."], " ": ["..", "..", "..", "..", ".."],
+    T: ["###", ".#.", ".#.", ".#.", ".#."], U: ["#.#", "#.#", "#.#", "#.#", "###"], V: ["#.#", "#.#", "#.#", "#.#", ".#."], Y: ["#.#", "#.#", ".#.", ".#.", ".#."], " ": ["..", "..", "..", "..", ".."],
     0: ["###", "#.#", "#.#", "#.#", "###"], 1: [".#.", "##.", ".#.", ".#.", "###"], 2: ["##.", "..#", ".#.", "#..", "###"], 3: ["##.", "..#", ".#.", "..#", "##."],
     4: ["#.#", "#.#", "###", "..#", "..#"], 5: ["###", "#..", "##.", "..#", "##."], 6: [".##", "#..", "###", "#.#", "###"], 7: ["###", "..#", ".#.", ".#.", ".#."],
     8: ["###", "#.#", "###", "#.#", "###"], 9: ["###", "#.#", "###", "..#", "##."],
@@ -2350,11 +2350,11 @@ const pitch = (() => {
       return c;
     }, col);
   }
-  function text(Q, str, cx, cy, room, col, ideal) {
+  function text(Q, str, cx, cy, room, col, ideal, soft) {
     const glyphs = [...str].map((ch) => FONT[ch] || FONT[" "]), cols = glyphs.reduce((s, gl) => s + gl[0].length, 0) + glyphs.length - 1, fit = room * Math.abs(Q.kx);
     let f = Math.max(1, Math.floor(ideal * Q.S));
     while (f > 1 && cols * f > fit) f--;
-    if (cols * f > fit + 1) { box(Q, cx - room * 0.38, cy - 0.35, room * 0.76, 0.7, col); return; }
+    if (cols * f > fit + 1) { if (soft) return false; box(Q, cx - room * 0.38, cy - 0.35, room * 0.76, 0.7, col); return true; }
     let i = Math.round(Q.ox + cx * Q.kx - (cols * f) / 2);
     const j = Math.round(Q.oy + cy * Q.S - (5 * f) / 2);
     for (const gl of glyphs) {
@@ -2364,6 +2364,7 @@ const pitch = (() => {
       }));
       i += (gl[0].length + 1) * f;
     }
+    return true;
   }
   function outline(Q, col) {
     const { buf, w, h } = Q, src = buf.slice();
@@ -2444,6 +2445,11 @@ const pitch = (() => {
       },
       back(Q, hx, hy, C) { hairCap(Q, hx, hy, 6.8, 8, -0.4, 3.2, C.h); },
     },
+    courtois: {
+      beard(Q, hx, hy, C) { jaw(Q, hx, hy, 2.4, C.fade); },
+      front(Q, hx, hy, C) { hairCap(Q, hx, hy, 6.2, 7.3, 0, -1.2, C.fade, 4.2); hairCap(Q, hx, hy, 6.2, 8.6, -1.6, -3.8, strands(C.h, C.h2, 1.2)); ell(Q, hx - 0.4, hy - 8.9, 4.8, 1.8, C.h); },
+      back(Q, hx, hy, C) { hairCap(Q, hx, hy, 6.3, 7.4, 0, 2.2, C.fade); hairCap(Q, hx, hy, 6.3, 8.6, -1.4, -2.2, strands(C.h, C.h2, 1.2)); },
+    },
   };
 
   function face(Q, hx, hy, C, ps) {
@@ -2468,7 +2474,9 @@ const pitch = (() => {
     const w = Math.ceil(64 * Math.abs(kx)) + 6, h = Math.ceil(128 * sc) + 6, bx = Math.round(w / 2), by = Math.round(h - 3 - 8 * sc);
     const sb = sheet(w, h), Q = { buf: sb.u, w, h, ox: bx + ps.dx * kx, oy: by + ps.dy * sc, S: sc, kx };
     const J = rig(ps), br = ps.br || 0, { ln, hipY, hips, legs } = J, chY = J.chY - br, hx = J.hx, hy = J.hy - br * 1.1;
-    const sh = J.sh.map(([x, y]) => [x, y - br]), arms = J.arms.map(([a, b, c, d]) => [a, b - br, c, d - br]), behind = arms.map((_, i) => back && J.az[i] > 3.5);
+    const sh = J.sh.map(([x, y]) => [x, y - br]), arms = J.arms.map(([a, b, c, d]) => [a, b - br, c, d - br]), behind = arms.map((_, i) => back && J.az[i] > 3.5), al = ps.al || 1;
+    const more = (ps.more || []).map((t) => { const i = t[0] < 0 ? 0 : 1; return [i, ik(sh[i][0], sh[i][1], ln + t[0], chY + t[1], 9 * al, 8.5 * al, t[2])]; });
+    let tag = null;
     const shirt = C.v ? (x) => ((Math.floor((x - ln + 40) / 2.6) & 1) ? (x - ln > 3.5 ? C.vd : C.v) : (x - ln > 3.5 ? C.wd : C.w)) : (x) => (x - ln > 3.5 ? C.wd : C.w);
     const skin = (x) => (x - ln > 3.5 ? C.sd : C.s);
 
@@ -2481,12 +2489,16 @@ const pitch = (() => {
       ell(Q, ax + (i ? 0.6 : -0.6) + bxn * 1.5, ay + byn * 1.5, lerp(2.8, 1.9, up), lerp(1.45, 2.4, up), C.b);
       cap(Q, x0, y0, lerp(x0, kx0, 0.45), lerp(y0, ky0, 0.45), 3, i ? C.nd : C.n);
     });
-    const arm = (i) => {
-      const [ex, ey, wx, wy] = arms[i], [x0, y0] = sh[i], mx = lerp(x0, ex, 0.55), my = lerp(y0, ey, 0.55);
-      cap(Q, x0, y0, ex, ey, 2, C.s);
-      if (!ps.bare) { cap(Q, x0, y0, mx, my, 2.4, shirt); cap(Q, lerp(x0, ex, 0.52), lerp(y0, ey, 0.52), mx, my, 2.45, C.r); }
-      cap(Q, ex, ey, wx, wy, 1.8, i ? C.sd : C.s);
-      if (ps.flat) ell(Q, wx, wy, 2.6, 1.3, C.S); else ell(Q, wx, wy, 2, 2, C.S);
+    const arm = (i, A = arms[i]) => {
+      const [ex, ey, wx, wy] = A, [x0, y0] = sh[i], mx = lerp(x0, ex, 0.55), my = lerp(y0, ey, 0.55);
+      if (C.ls) { cap(Q, x0, y0, ex, ey, 2.35, shirt); cap(Q, ex, ey, wx, wy, 2.05, i ? C.wd : C.w); }
+      else {
+        cap(Q, x0, y0, ex, ey, 2, C.s);
+        if (!ps.bare) { cap(Q, x0, y0, mx, my, 2.4, shirt); cap(Q, lerp(x0, ex, 0.52), lerp(y0, ey, 0.52), mx, my, 2.45, C.r); }
+        cap(Q, ex, ey, wx, wy, 1.8, i ? C.sd : C.s);
+      }
+      if (C.g) { ell(Q, wx, wy, 2.9, 3, C.g); box(Q, wx - 1.7, wy - 0.4, 3.4, 0.9, C.g2); }
+      else if (ps.flat) ell(Q, wx, wy, 2.6, 1.3, C.S); else ell(Q, wx, wy, 2, 2, C.S);
     };
     arms.forEach((_, i) => { if (behind[i]) arm(i); });
     poly(Q, [[-6.9 + ln * 0.3, hipY - 5.4], [6.9 + ln * 0.3, hipY - 5.4], [7.2 + ln * 0.3, hipY + 1.4], [-7.2 + ln * 0.3, hipY + 1.4]], (x) => (x - ln * 0.3 > 3 ? C.nd : C.n));
@@ -2511,8 +2523,13 @@ const pitch = (() => {
       face(Q, hx, hy, C, ps);
       style.front(Q, hx, hy, C);
     }
+    for (const [i, A] of more) arm(i, A);
     arms.forEach((_, i) => { if (!behind[i]) arm(i); });
-    if (back && !ps.bare && Math.abs(ps.sx) > 0.55) { text(Q, pl.shirt, ln, chY + 3.4, 17.2, C.r, 0.62); text(Q, String(pl.no), ln, chY + 11.4, 13, C.r, 1.9); }
+    if (back && !ps.bare && Math.abs(ps.sx) > 0.55) {
+      const own = ctx === g && pl === who;
+      if (!text(Q, pl.shirt, ln, chY + 3.6, 11.6, C.r, 0.62, own)) tag = { s: pl.shirt, col: pl.kit.r, x: Q.ox + ln * Q.kx, y: Q.oy + (chY + 3.6) * Q.S, room: 11.6 * Math.abs(Q.kx), ideal: 0.62 * Q.S };
+      text(Q, String(pl.no), ln, chY + 11.4, 13, C.r, 1.9);
+    }
     for (const e of ps.ex || []) {
       const hand = e.hand === "r" ? arms[1] : arms[0], wx = hand[2], wy = hand[3];
       if (e.k === "point") cap(Q, wx, wy - 1.2, wx, wy - 4.8, 0.6, C.S);
@@ -2536,18 +2553,21 @@ const pitch = (() => {
     }
     outline(Q, C.line);
     sb.ctx.putImageData(sb.img, 0, 0);
-    ctx.drawImage(sb.cv, 0, 0, w, h, Math.round(X - bx), Math.round(Y - by), w, h);
+    if (ps.rot) { ctx.save(); ctx.translate(Math.round(X), Math.round(Y - ps.pv)); ctx.rotate(ps.rot); ctx.drawImage(sb.cv, 0, 0, w, h, -bx, Math.round(ps.pv) - by, w, h); ctx.restore(); }
+    else ctx.drawImage(sb.cv, 0, 0, w, h, Math.round(X - bx), Math.round(Y - by), w, h);
+    if (tag) tags.push({ ...tag, x: tag.x + Math.round(X - bx), y: tag.y + Math.round(Y - by) });
   }
 
   const WALL = [["#2b1d14", "#e0a77a"], ["#e0c068", "#f0c29a"], ["#1a120c", "#8d5a3b"], ["#b5562b", "#e8b48a"]].map(([h, s]) => ({ h, s, e: "#0b1220", w: "#4f7cff", r: "#e8f1ff", n: "#e8f1ff", k: "#4f7cff", b: "#0b1220" }));
   const PAL = {
     ref: { h: "#16100b", s: "#c98d63", w: "#c6ff3d", r: "#c6ff3d", n: "#0b1220", k: "#1b2438", b: "#0b1220" },
-    keeper: { h: "#1a120c", s: "#e8b48a", e: "#0b1220", g: "#ffd36b", G: "#d49a2e", d: "#1e2a40", k: "#ffd36b", b: "#0b1220", w: "#e8f1ff" },
   };
+  const KEEPER = { id: "courtois", name: "Courtois", shirt: "COURTOIS", no: 1, tall: 1.08, kit: { h: "#3b281b", h2: "#5a3d2a", s: "#efc4a2", w: "#6fdc8c", r: "#1d6b3c", n: "#58c878", k: "#6fdc8c", b: "#f4f8ff", g: "#15191f", g2: "#c6ff3d", ls: true } };
   const NETC = ["rgba(232,241,255,0.34)", "rgba(232,241,255,0.16)", "rgba(232,241,255,0.13)", "rgba(232,241,255,0.3)"];
   const KICK = 4.3, RESPOT = 1.1;
   let P = 4, W = 0, H = 0, MX = 0, MY = 0, MB = 0, L = null, bg = null, net = null, netPts = [], fans = [], stars = [], last = 0, lastSt = null;
-  let mode = { type: "empty", t0: 0 }, who = PLAYERS[0];
+  let mode = { type: "empty", t0: 0 }, who = PLAYERS[0], tags = [];
+  const tv = document.getElementById("tags"), tg = tv.getContext("2d");
   const cam = { z: 1, ox: 0, oy: 0 };
   const combos = {};
   const lerp = (a, b, u) => a + (b - a) * u;
@@ -2580,19 +2600,20 @@ const pitch = (() => {
   function sides() {
     const s = who.foot ? -1 : 1;
     L.stand = [Math.round(W / 2 - s * L.gw * 0.26), Math.round(gy(15.5))];
-    L.strike = [Math.round(W / 2 - s * (L.ss / 2 + 1.9 * L.ks)), Math.round(gy(12.6))];
+    L.strike = [Math.round(W / 2 - s * (L.ss / 2 + 1.9 * L.ps)), Math.round(gy(12.6))];
   }
 
   function resize() {
     P = 3;
     W = Math.ceil(innerWidth / P); H = Math.ceil(innerHeight / P);
     cv.width = W; cv.height = H;
+    tv.width = Math.round(innerWidth * (devicePixelRatio || 1)); tv.height = Math.round(innerHeight * (devicePixelRatio || 1));
     MX = Math.ceil(W * 1.5); MY = Math.ceil(H * 0.7); MB = Math.ceil(H * 1.2);
     const gw = Math.round(Math.min(W * 0.62, H * 0.92)), gh = Math.round(gw * 0.46);
     const GB = Math.round(H * 0.64), GT = GB - gh, GL = Math.round(W / 2 - gw / 2), GR = GL + gw;
     const yP = GT + Math.round(gh * 0.3), yS = Math.max(6, GT - Math.round(gh * 0.5)), ks = Math.max(1, Math.round((gh * 0.6) / 14));
     L = { gw, gh, GB, GT, GL, GR, yP, yS, ks, k: gw / 56, pt: Math.max(2, Math.round(gw * 0.018)), sp: Math.max(3, Math.round(gw / 26)),
-      sg: Math.max(3, Math.round(gw * 0.028)), ss: Math.max(5, Math.round(gw * 0.052)), ps: ks, ps30: Math.max(ks + 1, Math.round(ks * 1.4)),
+      sg: Math.max(3, Math.round(gw * 0.028)), ss: Math.max(5, Math.round(gw * 0.052)), ps: Math.max(ks, Math.round(H * 0.05) / 4), ps30: Math.max(ks + 1, Math.round(ks * 1.4), Math.round(H * 0.058) / 4),
       bL: GL + Math.round(gw * 0.05), bR: GR - Math.round(gw * 0.05), bT: GT + Math.round(gh * 0.14), bB: GB - Math.round(gh * 0.16) };
     L.spot = [W / 2, Math.round(gy(12))];
     sides();
@@ -2715,8 +2736,11 @@ const pitch = (() => {
   }
 
   function keeperDraw(kp) {
+    const ps = kp.pose || kReady(), b = 0.3 * (1 - Math.cos(clk * 2.1 + 1));
     R(kp.x - 4 * L.ks, L.GB + L.ks * 0.4, 8 * L.ks, L.ks, "rgba(0,0,0,0.3)");
-    sprite(KEEP[kp.p], PAL.keeper, kp.x, kp.y, L.ks, kp.a || 0, false);
+    g.setTransform(1, 0, 0, 1, 0, 0);
+    star(g, KEEPER, { ...ps, br: (ps.br || 0) + b, rot: kp.a || 0, pv: 7 * L.ks * cam.z }, (0.875 * L.ks * cam.z) / 4, cam.ox + cam.z * kp.x, cam.oy + cam.z * (kp.y + 7 * L.ks));
+    g.setTransform(cam.z, 0, 0, cam.z, cam.ox, cam.oy);
   }
 
   function ballAt(x, y, s, sx, sy) {
@@ -2870,6 +2894,7 @@ const pitch = (() => {
   function idle(lt) {
     const st = base(), c = lt % 2.6;
     st.keeper.x = W / 2 + Math.round(Math.sin(lt * 1.4) * L.gw * 0.05);
+    st.keeper.pose = kReady({ step: [lt * 5.6, reduce ? 0 : Math.abs(Math.cos(lt * 1.4))] });
     if (c < 0.25 && !reduce) st.keeper.y -= Math.sin((Math.PI * c) / 0.25) * L.ks * 1.2;
     return st;
   }
@@ -2882,18 +2907,20 @@ const pitch = (() => {
   }
 
   function kDive(tm, kp, t0, t1, t2, t3, reach) {
-    const ks = L.ks, home = [kp.x, kp.y], hk = 14 * ks;
+    const ks = L.ks, home = [kp.x, kp.y], low = ks * 0.5;
     if (tm < t0) return kp;
-    if (tm < t1) return { p: "set", x: home[0], y: home[1] + ks * 0.5, a: 0 };
-    const dx = reach[0] - home[0], dy = reach[1] - home[1], side = dx < 0 ? -1 : 1;
+    const from = kp.pose || kReady();
+    if (tm < t1) { const u = ease(seg(tm, t0, t1)); return { x: home[0], y: home[1] + low * u, a: 0, pose: blendPose(from, K_SET, u) }; }
+    const dx = reach[0] - home[0], dy = reach[1] - home[1], side = dx < 0 ? -1 : 1, fly = side < 0 ? flip(K_FLY) : K_FLY, lie = side < 0 ? flip(K_LIE) : K_LIE;
     const a = side * Math.min(Math.PI / 2, Math.atan2(Math.abs(dx), -dy));
-    const full = [reach[0] - Math.sin(a) * hk * 0.42, reach[1] + Math.cos(a) * hk * 0.42];
-    if (tm < t2) { const u = easeOut(seg(tm, t1, t2)); return { p: "stretch", x: lerp(home[0], full[0], u), y: lerp(home[1], full[1], u) - Math.sin(Math.PI * u) * hk * 0.1, a: a * easeOut(seg(tm, t1, lerp(t1, t2, 0.7))) }; }
-    const lie = [Math.max(L.GL - hk * 0.2, Math.min(L.GR + hk * 0.2, full[0] + side * hk * 0.1)), L.GB + ks - 4.5 * ks];
-    if (tm < t3) { const u = easeIn(seg(tm, t2, t3)); return { p: "stretch", x: lerp(full[0], lie[0], u), y: lerp(full[1], lie[1], u), a: lerp(a, (side * Math.PI) / 2, u) }; }
+    const full = [reach[0] - Math.sin(a) * 8.2 * ks, reach[1] + Math.cos(a) * 8.2 * ks];
+    if (tm < t2) { const u = easeOut(seg(tm, t1, t2)); return { x: lerp(home[0], full[0], u), y: lerp(home[1] + low, full[1], u) - Math.sin(Math.PI * u) * ks * 1.4, a: a * easeOut(seg(tm, t1, lerp(t1, t2, 0.7))), pose: blendPose(K_SET, fly, ease(seg(tm, t1, lerp(t1, t2, 0.45)))) }; }
+    const rest = [Math.max(L.GL - ks * 3, Math.min(L.GR + ks * 3, full[0] + side * ks * 1.4)), L.GB + ks - 2.3 * ks];
+    if (tm < t3) { const u = easeIn(seg(tm, t2, t3)); return { x: lerp(full[0], rest[0], u), y: lerp(full[1], rest[1], u), a: lerp(a, (side * Math.PI) / 2, u), pose: blendPose(fly, lie, u) }; }
     const bo = seg(tm, t3, t3 + 0.18);
-    return { p: "stretch", x: lie[0], y: lie[1] - (bo < 1 ? Math.sin(Math.PI * bo) * ks * 1.2 : 0), a: (side * Math.PI) / 2 };
+    return { x: rest[0], y: rest[1] - (bo < 1 ? Math.sin(Math.PI * bo) * ks * 1.2 : 0), a: (side * Math.PI) / 2, pose: lie };
   }
+
 
   function dropY(t, y0, y1, T = 0.2) {
     if (t < T) return lerp(y0, y1, easeIn(t / T));
@@ -2907,7 +2934,7 @@ const pitch = (() => {
   function kickoff(tm, m) {
     const st = base(), { ks, ss, spot, refPos, stand, gw, gh } = L;
     st.keeper.x = lerp(m.kx0, W / 2, ease(seg(tm, 0, 0.6)));
-    if (tm > 3.45 && tm < 3.85) { st.keeper.p = "stretch"; st.keeper.y -= Math.sin(Math.PI * seg(tm, 3.45, 3.85)) * ks * 2.5; }
+    if (tm > 3.4 && tm < 3.9) { const u = Math.sin(Math.PI * seg(tm, 3.4, 3.9)); st.keeper.pose = blendPose(kReady(), K_UP, u); st.keeper.y -= Math.sin(Math.PI * seg(tm, 3.45, 3.85)) * ks * 2.5; }
     const place = [spot[0] + ss / 2 + 4 * ks, spot[1] + 1], enter = [W / 2 + gw * 1.6 + 10 * ks, gy(13)];
     let rf;
     if (tm < 1.3) rf = jog(tm, 0.1, 1.3, enter, place, ks, 7);
@@ -2934,8 +2961,9 @@ const pitch = (() => {
     const f = !!who.foot, fp = from.shooter && (from.shooter.pose || legacy(from.shooter));
     if (Math.hypot(fs[0] - stand[0], fs[1] - stand[1]) > 2) st.shooter = tm < 0.95 ? move(tm, 0, 0.95, fs, stand, L.ps, { A: 0.4, rate: 3, f }) : { ...st.shooter, pose: blendPose(gait(0, 0, 0, { f }), standAt({ f }), ease(seg(tm, 0.95, 1.1))) };
     if (fp) st.shooter.pose = blendPose(fp, st.shooter.pose, ease(seg(tm, 0, 0.22)));
-    if (fk.a && tm < 0.35) { const u = ease(seg(tm, 0, 0.35)); st.keeper = { p: "stretch", x: fk.x, y: lerp(fk.y, L.home[1], u), a: lerp(fk.a, 0, u) }; }
-    else { const u = ease(seg(tm, fk.a ? 0.35 : 0, 1.0)), step = Math.floor(tm * 7) % 2; st.keeper = { p: "ready", x: lerp(fk.x, W / 2, u), y: L.home[1] - (u > 0 && u < 1 && step ? ks * 0.6 : 0), a: 0 }; }
+    const kp0 = fk.pose || kReady();
+    if (fk.a && tm < 0.35) { const u = ease(seg(tm, 0, 0.35)); st.keeper = { x: fk.x, y: lerp(fk.y, L.home[1], u), a: lerp(fk.a, 0, u), pose: blendPose(kp0, K_SET, u) }; }
+    else { const t0 = fk.a ? 0.35 : 0, v = seg(tm, t0, 1.0), u = ease(v); st.keeper = { x: lerp(fk.x, W / 2, u), y: L.home[1], a: 0, pose: blendPose(fk.a ? K_SET : kp0, kReady({ step: [tm * 14, clamp(5.4 * v * (1 - v))] }), ease(seg(tm, t0, t0 + 0.25))) }; }
     if (from.ref && Math.hypot(from.ref.x - refPos[0], (from.ref.gy ?? from.ref.y) - refPos[1]) > 2) st.ref = jog(tm, 0, 0.6, [from.ref.x, from.ref.gy ?? from.ref.y], refPos, ks, 8);
     st.ref.u = tm > 0.05 && tm < 0.4 ? "out" : "stand";
     const hand = [refPos[0] - 5 * ks - ss * 0.35, refPos[1] - 7.5 * ks], S = [spot[0], spot[1] - ss / 2];
@@ -3003,11 +3031,11 @@ const pitch = (() => {
       else st.shooter = { front: "wide", x: L.strike[0], y: L.strike[1] - (tm < 3.65 ? Math.abs(Math.sin((tm - 3.3) * 9)) * ps : 0), gy: L.strike[1], k: ps };
       if (tm < 0.95) {
         const c = tm % 0.45, settle = 1 - seg(tm, 0.8, 0.95);
-        st.keeper = { p: c < 0.22 && tm < 0.8 ? "stretch" : "ready", x: W / 2 + Math.sin(tm * 9) * gw * 0.06 * settle, y: L.home[1] - Math.sin((Math.PI * c) / 0.45) * ks * 1.6 * settle, a: 0 };
+        st.keeper = { x: W / 2 + Math.sin(tm * 9) * gw * 0.06 * settle, y: L.home[1] - Math.sin((Math.PI * c) / 0.45) * ks * 1.6 * settle, a: 0, pose: blendPose(kReady(), K_WAVE(tm), (0.5 - 0.5 * Math.cos((TAU * tm) / 0.45)) * settle) };
       } else {
         st.keeper = kDive(tm, { p: "ready", x: W / 2, y: L.home[1], a: 0 }, 0.95, 1.0, 1.25, 1.45, [L.GR - gw * 0.06, GB - gh * 0.28]);
         if (tm > 1.45) st.keeper.x += easeOut(seg(tm, 1.45, 1.7)) * gw * 0.06;
-        if (tm > 2.3 && tm < 3.0) st.keeper.y -= (Math.floor(tm * 7) % 2) * ks;
+        if (tm > 2.3 && tm < 3.0) st.keeper.y -= Math.abs(Math.sin((tm - 2.3) * 11)) * ks * 0.9;
         if (tm > 1.45) st.fx.push({ type: "burst", x: st.keeper.x, y: GB, t: tm - 1.45, n: 12, sp: gw * 0.12, life: 0.45, cols: ["#7ef0a6", "#2f6b4c", "#e8f1ff"], grav: gh * 0.8, seed: 17, ground: true });
         if (tm > 1.5 && tm < 2.15) st.fx.push({ type: "huh", x: st.keeper.x + gw * 0.04, y: st.keeper.y - ks * 11, t: tm });
       }
@@ -3142,21 +3170,37 @@ const pitch = (() => {
       if (tm >= 1.85) { const a = tm - 1.85; st.net = { x: N[0], y: N[1] - gh * 0.04, a: 0.9 * L.k * Math.exp(-a * 3), after: a, w: 14, r2: (gw * 0.1) ** 2 }; st.crowd = 0.25; }
       return st;
     } },
-    rowz: { hit: 1.35, end: 2.9, sfx: [[0.62, "kick", 1.1], [1.3, "aww", 0, 1], [1.35, "bounce", 0.6]], f(tm, m) {
-      const st = shotBase(tm, m), { gw, gh, ss, sg, spot, yS, yP, ps } = L;
-      const f = !!who.foot, s0 = striker(Math.min(tm, 2.05), 0.08, 0.62, L.stand, L.strike, ps, { pw: 1, style: "sky" }), held = blendPose(s0.pose, react("head", { f }), ease(seg(tm, 0.98, 1.22)));
+    saved: { hit: 0.92, end: 3.4, warp: [[0.86, 1.25, 0.3]], sfx: [[0.62, "kick", 1.1], [0.63, "whoosh", 0.5], [0.76, "whoosh", 0.3], [0.92, "parry"], [0.93, "ooh", 0, 1], [1.45, "applause", 2.2], [1.75, "bounce", 0.4]], f(tm, m) {
+      const st = shotBase(tm, m), { gw, gh, GT, ss, sg, spot, yS, yP, ps, ks } = L, f = !!who.foot, sd = f ? -1 : 1;
+      const sink = pose({ view: "back", p: 11, lf: [-5.6, 0, 1], rf: [5.6, 0, 1], lh: ARMS.head[0], rh: ARMS.head[1], f }), up = react("head", { f });
+      const s0 = striker(Math.min(tm, 2.3), 0.08, 0.62, L.stand, L.strike, ps, { pw: 1 }), held = blendPose(blendPose(s0.pose, sink, inOut(seg(tm, 1.0, 1.3))), up, inOut(seg(tm, 2.0, 2.3)));
       st.shooter = { ...s0, pose: held };
-      if (tm >= 2.05) { const r = move(tm, 2.05, 2.85, [s0.x, s0.y], [s0.x - (f ? -1 : 1) * gw * 0.18, gy(16)], ps, { A: 0.05, rate: 2, view: "front", arms: "head", look: 0.6 }); r.pose = blendPose(held, r.pose, ease(seg(tm, 2.05, 2.3))); st.shooter = r; }
-      const S = [spot[0], spot[1] - ss / 2], Ld = [W / 2 + gw * 0.36, yS + (yP - yS) * 0.42], C = [W / 2 + gw * 0.16, Ld[1] - (spot[1] - Ld[1]) * 0.75];
-      if (tm >= 0.62 && tm < 1.35) { const u = seg(tm, 0.62, 1.35), p = quad(S, C, Ld, easeOut(u)); st.ball = { x: p[0], y: p[1], s: lerp(ss, sg * 0.75, u), sx: tm * 30, sy: tm * 30, gy: lerp(spot[1], yP, u), layer: "front" }; }
-      else if (tm >= 1.35) { const a = tm - 1.35, held = a > 0.7; st.ball = { x: Ld[0] + Math.min(a, 0.7) * gw * 0.05, y: held ? Ld[1] - L.ks * (2 + (Math.floor(tm * 4) % 2)) : Ld[1] - Math.abs(Math.sin(a * 9)) * gh * 0.12 * Math.exp(-a * 3), s: sg * 0.75, sx: 0, sy: 0, layer: "front" }; }
-      if (tm > 1.45 && tm < 2.3) st.keeper = { p: "stretch", x: st.keeper.x, y: L.home[1] - Math.abs(Math.sin((tm - 1.45) * 7.4)) * L.ks * 2.2, a: 0 };
-      const F = { z: 1.28, x: lerp(W / 2, Ld[0], 0.55), y: Ld[1] + (yP - yS) * 0.5 };
-      st.cam = tm < 0.72 ? C0() : tm < 1.3 ? camTo(C0(), F, ease(seg(tm, 0.72, 1.3))) : tm < 2.0 ? F : camTo(F, C0(), ease(seg(tm, 2.0, 2.65)));
-      if (tm >= 1.35) {
-        st.jump = { x: Ld[0], y: Ld[1], t: tm - 1.35 }; st.crowd = 0.3; st.led = 3;
-        st.fx.push({ type: "burst", x: Ld[0], y: Ld[1], t: tm - 1.35, n: 16, sp: gw * 0.14, life: 0.6, cols: ["#ffffff", "#fff7d6"], grav: 0, seed: 31 });
+      if (tm >= 2.3) { const r = move(tm, 2.3, 3.1, [s0.x, s0.y], [s0.x - sd * gw * 0.18, gy(16)], ps, { A: 0.05, rate: 2, view: "front", arms: "head", look: 0.6 }); r.pose = blendPose(held, r.pose, ease(seg(tm, 2.3, 2.55))); st.shooter = r; }
+      const S = [spot[0], spot[1] - ss / 2], B = [W / 2 - gw * 0.095, GT + gh * 0.45], Ld = [W / 2 - gw * 0.42, yS + (yP - yS) * 0.55];
+      if (tm >= 0.62 && tm < 0.92) { const u = seg(tm, 0.62, 0.92), p = quad(S, [lerp(S[0], B[0], 0.5), B[1] - gh * 0.1], B, u); st.ball = { x: p[0], y: p[1], s: lerp(ss, sg * 1.05, u), sx: tm * 70, sy: tm * 20, gy: lerp(spot[1], L.GB, u), layer: "front" }; }
+      else if (tm >= 0.92 && tm < 1.75) { const u = easeOut(seg(tm, 0.92, 1.75)), p = quad(B, [B[0] - gw * 0.14, GT - gh * 1.1], Ld, u); st.ball = { x: p[0], y: p[1], s: lerp(sg, sg * 0.7, u), sx: -tm * 90, sy: tm * 40, layer: u < 0.3 ? "front" : "net" }; }
+      else if (tm >= 1.75) st.ball = null;
+      const kx = W / 2, ky = L.home[1], fan = ease(seg(tm, 0.82, 0.9)) * (1 - ease(seg(tm, 1.9, 2.08)));
+      let kp = kReady();
+      if (tm >= 0.6) kp = blendPose(kp, K_SET, ease(seg(tm, 0.6, 0.72)));
+      if (tm >= 0.72) kp = blendPose(kp, kStar(0), ease(seg(tm, 0.72, 0.82)));
+      if (tm >= 0.82) kp = kStar(fan);
+      if (tm >= 2.08) kp = blendPose(kStar(0), K_ROAR, ease(seg(tm, 2.08, 2.3)));
+      if (tm >= 2.9) kp = blendPose(K_ROAR, kReady(), ease(seg(tm, 2.9, 3.3)));
+      st.keeper = { x: kx, y: ky - Math.sin(Math.PI * seg(tm, 0.74, 0.92)) * ks * 1.3 - (tm > 2.15 && tm < 2.6 ? Math.abs(Math.sin((tm - 2.15) * 7)) * ks * 0.7 : 0), a: 0, pose: kp };
+      const F = { z: 2, x: W / 2, y: GT + gh * 0.4 };
+      st.cam = tm < 0.66 ? C0() : tm < 0.86 ? camTo(C0(), F, ease(seg(tm, 0.66, 0.86))) : tm < 2.05 ? F : camTo(F, C0(), ease(seg(tm, 2.05, 2.75)));
+      st.bars = seg(tm, 0.8, 0.9) - seg(tm, 1.55, 1.75);
+      st.speed = 0.7 * (seg(tm, 0.84, 0.9) - seg(tm, 1.0, 1.2));
+      if (tm >= 0.92) {
+        const a = tm - 0.92;
+        st.flash = 0.35 * (1 - seg(a, 0, 0.06));
+        st.shake = a < 0.15 ? 1.2 : 0;
+        st.fx.push({ type: "burst", x: B[0], y: B[1], t: a, n: 22, sp: gw * 0.4, life: 0.6, cols: ["#ffffff", "#c6ff3d", "#6fdc8c"], grav: gh * 0.6, seed: 41 });
+        st.fx.push({ type: "say", text: "SAVED!", x: W / 2, y: GT + gh * 0.28, t: a - 0.05, life: 1.9, k: 9.5 / (P * F.z), col: "#6fdc8c" });
+        st.crowd = 0.45; st.led = 3;
       }
+      if (tm >= 1.75 && tm < 3.2) st.jump = { x: Ld[0], y: Ld[1], t: tm - 1.75 };
       return st;
     } },
   };
@@ -3190,9 +3234,9 @@ const pitch = (() => {
     const hipY = -22 + pd, chY = -44 + pd, c = Math.cos(tw), s = Math.sin(tw);
     const hips = [[-3.4 + ln * 0.3, hipY], [3.4 + ln * 0.3, hipY]], sh = [[-7.4 * c + ln, chY + dz * 7.4 * s], [7.4 * c + ln, chY - dz * 7.4 * s]];
     if (!legs) legs = [ps.lf, ps.rf].map((t, i) => (t.length > 3 ? [t[3], t[4], t[0], t[1] - 2.3] : ik(hips[i][0], hips[i][1], t[0], t[1] - 2.3, 10.5, 9.6, t[2])));
-    const az = [0, 0], arms = ps.A
-      ? ps.A.map((a, i) => { const r = fk(sh[i][0], sh[i][1], i ? 1 : -1, a, 9, 8.5, dz, false, tw); az[i] = r[4]; return r.slice(0, 4); })
-      : [ps.lh, ps.rh].map((t, i) => (t.length > 3 ? [ln + t[3], chY + t[4], ln + t[0], chY + t[1]] : ik(sh[i][0], sh[i][1], ln + t[0], chY + t[1], 9, 8.5, t[2])));
+    const az = [0, 0], al = ps.al || 1, arms = ps.A
+      ? ps.A.map((a, i) => { const r = fk(sh[i][0], sh[i][1], i ? 1 : -1, a, 9 * al, 8.5 * al, dz, false, tw); az[i] = r[4]; return r.slice(0, 4); })
+      : [ps.lh, ps.rh].map((t, i) => (t.length > 3 ? [ln + t[3], chY + t[4], ln + t[0], chY + t[1]] : ik(sh[i][0], sh[i][1], ln + t[0], chY + t[1], 9 * al, 8.5 * al, t[2])));
     return { pd, ln, hipY, chY, hx: ln + ps.tilt, hy: -55.5 + pd, sh, hips, arms, legs, az };
   }
 
@@ -3391,6 +3435,46 @@ const pitch = (() => {
     } },
   };
 
+  const KA = 1.22;
+  const flip = (p) => ({ ...p, lh: [-p.rh[0], p.rh[1], p.rh[2]], rh: [-p.lh[0], p.lh[1], p.lh[2]], lf: [-p.rf[0], p.rf[1], p.rf[2]], rf: [-p.lf[0], p.lf[1], p.lf[2]] });
+  const kReady = (o = {}) => {
+    const b = 0.5 - 0.5 * Math.cos(clk * 9.5), [ph, m] = o.step || [0, 0];
+    return pose({ al: KA, p: 3.4 + b * 0.9, lf: [-6.6, -Math.max(0, Math.sin(ph)) * 2.2 * m, 1], rf: [6.6, -Math.max(0, -Math.sin(ph)) * 2.2 * m, 1], lh: [-13.5, 9 + b, 2], rh: [13.5, 9 + b, 2], look: 0.2 });
+  };
+  const K_SET = pose({ al: KA, p: 5.8, lf: [-7.8, 0, 1], rf: [7.8, 0, 1], lh: [-12.5, 6.5, 2], rh: [12.5, 6.5, 2], look: 0.15 });
+  const K_FLY = pose({ al: KA, lh: [-4.2, -33, 1], rh: [4.2, -33, 1], lf: [-3.4, 0, 1], rf: [5.6, -6, 1], look: -0.6, mouth: "o" });
+  const K_LIE = pose({ al: KA, lh: [-5, -32, 1], rh: [5, -32, 1], lf: [-4.6, -2.5, 1], rf: [3.4, -7, 1], look: -0.2 });
+  const K_UP = pose({ al: KA, p: 0.5, lh: [-11, -27, 1], rh: [11, -27, 1], mouth: "o" });
+  const K_ROAR = pose({ al: KA, p: 2.6, lf: [-7.4, 0, 1], rf: [7.4, 0, 1], lh: [-10.5, -25, 1], rh: [14, 5, 2], mouth: "shout", look: -0.3 });
+  const K_WAVE = (t) => pose({ al: KA, p: 2, lf: [-7, 0, 1], rf: [7, 0, 1], lh: [-16 + Math.sin(t * 14) * 2, -14 + Math.cos(t * 14) * 4, 1], rh: [16 - Math.sin(t * 14) * 2, -14 - Math.cos(t * 14) * 4, 1], mouth: "shout" });
+  const STAR = [[-15, -21, 1], [-19.5, -10, 1], [-20.5, 1, 1], [-17, 12, 2]];
+  const kStar = (fan) => {
+    const more = [];
+    if (fan > 0.02) for (const s of [-1, 1]) for (let i = 1; i < 4; i++) {
+      const u = ease(clamp(fan * 1.5 - (i - 1) * 0.25)), t0 = STAR[0], t1 = STAR[i], a0 = Math.atan2(t0[1], t0[0] + 7.4), a1 = Math.atan2(t1[1], t1[0] + 7.4), r = lerp(Math.hypot(t0[0] + 7.4, t0[1]), Math.hypot(t1[0] + 7.4, t1[1]), u), an = lerp(a0, a1, u);
+      more.push([-s * (Math.cos(an) * r - 7.4), Math.sin(an) * r, t1[2]]);
+    }
+    return pose({ al: KA, p: 4, lf: [-13, 0, 1], rf: [12, -2.5, 1], lh: STAR[0], rh: [-STAR[0][0], STAR[0][1], 1], more: more.length ? more : null, mouth: "o", look: -0.2 });
+  };
+
+  function drawTags(st) {
+    tg.clearRect(0, 0, tv.width, tv.height);
+    if (!tags.length || st.flash > 0.3) return;
+    const k = tv.width / W, bh = st.bars > 0.01 ? Math.round(H * 0.09 * st.bars) : 0;
+    for (const t of tags) {
+      if (bh && (t.y < bh || t.y > H - bh)) continue;
+      const glyphs = [...t.s].map((ch) => FONT[ch] || FONT[" "]), cols = glyphs.reduce((n, gl) => n + gl[0].length, 0) + glyphs.length - 1;
+      const fp = Math.max(1, Math.min(Math.floor((t.room * k) / cols), Math.floor(t.ideal * k)));
+      let x = Math.round(t.x * k - (cols * fp) / 2);
+      const y = Math.round(t.y * k - 2.5 * fp);
+      tg.fillStyle = t.col;
+      for (const gl of glyphs) {
+        gl.forEach((row, r) => { for (let c = 0; c < row.length; c++) if (row[c] === "#") tg.fillRect(x + c * fp, y + r * fp, fp, fp); });
+        x += (gl[0].length + 1) * fp;
+      }
+    }
+  }
+
   function starAt(p) {
     const k = p.k, ground = p.gy ?? p.y, ps = p.pose || legacy(p), b = 0.32 * (1 - Math.cos(clk * 2.4));
     R(p.x - 4 * k, ground - k * 0.6, 8 * k, k, "rgba(0,0,0,0.35)");
@@ -3439,6 +3523,7 @@ const pitch = (() => {
   }
 
   function render(st, t) {
+    tags = [];
     const sh = st.shake && !reduce ? [Math.round((Math.random() * 2 - 1) * st.shake), Math.round((Math.random() * 2 - 1) * st.shake)] : [0, 0];
     const z = st.cam.z, ox = Math.round(W / 2 - z * st.cam.x) + sh[0], oy = Math.round(H / 2 - z * st.cam.y) + sh[1];
     cam.z = z; cam.ox = ox; cam.oy = oy;
@@ -3486,6 +3571,7 @@ const pitch = (() => {
     if (st.pulse > 0.01) for (let i = 0; i < 6; i++) { const a = st.pulse * 0.3 * (1 - i / 6), w = Math.round(Math.max(W, H) * 0.012 * (i + 1)); g.fillStyle = `rgba(255,40,90,${a.toFixed(3)})`; g.fillRect(0, 0, W, w); g.fillRect(0, H - w, W, w); g.fillRect(0, 0, w, H); g.fillRect(W - w, 0, w, H); }
     if (st.bars > 0.01) { const bh = Math.round(H * 0.09 * st.bars); R(0, 0, W, bh, "#000000"); R(0, H - bh, W, bh, "#000000"); }
     if (st.flash > 0.01) { g.fillStyle = `rgba(255,255,255,${Math.min(1, st.flash).toFixed(2)})`; g.fillRect(0, 0, W, H); }
+    drawTags(st);
   }
 
   function frame(now) {
