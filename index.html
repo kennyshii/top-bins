@@ -173,6 +173,13 @@ svg { display: block; width: 100%; height: auto; overflow: visible; }
 .mode:focus-visible { outline: 2px dashed var(--gold); outline-offset: 3px; }
 #party, #league { display: flex; flex-direction: column; gap: 14px; padding-top: 2vh; min-height: calc(100svh - 110px); }
 .rgap { flex: 1; min-height: 36svh; }
+.side { display: flex; flex-direction: column; gap: 14px; min-width: 0; }
+@media (min-width: 900px) {
+  #party { position: fixed; top: 96px; bottom: 24px; left: 24px; right: 24px; display: grid; grid-template-columns: minmax(280px, 360px) 1fr minmax(300px, 380px); gap: 24px; min-height: 0; padding: 0; align-items: start; }
+  #party .side.l { grid-column: 1; }
+  #party .side.r { grid-column: 3; max-height: 100%; overflow-y: auto; scrollbar-width: thin; }
+  #party .rgap { display: none; }
+}
 .lgap { min-height: 44svh; }
 #party .panel, #party .card, #party .how { background: #0f0b2a; border-color: #4a3a8c; box-shadow: 0 0 0 2px #050a14, 0 0 22px rgba(255, 93, 143, 0.12); }
 #party .card.rondo { margin-top: 0; }
@@ -3864,8 +3871,8 @@ const pitch = (() => {
   if (document.fonts) document.fonts.ready.then(() => { sceneBg = {}; });
 
   function rondoGeo() {
-    const cx = W / 2, cy = Math.round(H * 0.59), rx = Math.min(W * 0.4, H * 0.46), ry = Math.min(H * 0.13, rx * 0.5);
-    return { cx, cy, rx, ry, S: Math.max(0.36, (H * 0.115) / 64), hz: Math.round(cy - ry - H * 0.2) };
+    const wide = innerWidth >= 900, cx = W / 2, cy = Math.round(H * (wide ? 0.56 : 0.59)), rx = Math.min(W * 0.4, H * 0.46, wide ? ((W - (2 * 430) / P) / 2) * 0.86 : W), ry = Math.min(H * (wide ? 0.17 : 0.13), rx * 0.55);
+    return { cx, cy, rx, ry, S: Math.max(0.36, (H * (wide ? 0.15 : 0.115)) / 64), hz: Math.round(cy - ry - H * 0.2) };
   }
 
   function rondoBack() {
@@ -4153,11 +4160,11 @@ function drawRondo(msg = "", pending = "") {
   pitch.rondo(rondo.st);
   const st = rondo.st, box = el.party, typed = $("#rAns") && !$("#rAns").disabled ? $("#rAns").value : "";
   if (!st) {
-    box.innerHTML = `
+    box.innerHTML = `<div class="side l">
       <p class="kicker">LIVE WITH FRIENDS</p>
       <h2 class="title">RONDO</h2>
-      <p class="rules">One prompt, one ball. Name an answer nobody has used yet to pass it on. The ball is ticking, and whoever holds it when it blows is out. Last one standing wins.</p>
-      <div class="panel">${nickField("rNick")}</div>
+      <p class="rules">One prompt, one ball. Name an answer nobody has used yet to pass it on. The ball is ticking, and whoever holds it when it blows is out. Last one standing wins.</p></div>
+      <div class="side r"><div class="panel">${nickField("rNick")}</div>
       <div class="panel">
         <p class="h2"><span>START A ROOM</span><b>2–10 PLAYERS</b></p>
         <button class="btn" id="rNew" type="button">CREATE ROOM ▶</button>
@@ -4166,7 +4173,7 @@ function drawRondo(msg = "", pending = "") {
         <p class="fb">${esc(msg)}</p>
       </div>
       <ul class="how"><li><span>★</span>A rare answer (Panenka or better) is a through ball: it skips the next player.</li><li><span>★</span>Each round brings a new prompt. Answers can't be repeated within a round.</li></ul>
-      <div class="row"><button class="btn ghost" id="rBack" type="button">◀ MENU</button></div>`;
+      <div class="row"><button class="btn ghost" id="rBack" type="button">◀ MENU</button></div></div>`;
     const name = () => setNick($("#rNick").value) || setNick(player().tag);
     $("#rNew").onclick = async (e) => { name(); e.target.disabled = true; const r = await api("/room/new", {}); e.target.disabled = false; if (r.code) joinRondo(r.code); else drawRondo("Couldn't reach the server. Try again."); };
     $("#rJoin").onclick = () => { name(); joinRondo($("#rCode").value); };
@@ -4189,9 +4196,8 @@ function drawRondo(msg = "", pending = "") {
   } else {
     const out = st.players.find((p) => p.id === st.out), left = P ? P.answers.map((a, i) => [a, i]).filter(([, i]) => !st.used.includes(i)).sort((x, y) => y[0].share - x[0].share).slice(0, 3).map(([a]) => a.name) : [];
     head = `<p class="kicker">RONDO · ROUND ${st.round}</p>`;
-    body = `<div class="card rondo"><h2 class="q">${P ? esc(P.q) : "…"}</h2><p class="sub">${P ? esc(P.sub || "") : ""}</p></div>
-      <div class="rgap"></div>
-      <div class="card rondo dock">
+    head += `<div class="card rondo"><h2 class="q">${P ? esc(P.q) : "…"}</h2><p class="sub">${P ? esc(P.sub || "") : ""}</p></div>`;
+    body = `<div class="card rondo dock">
         <p class="turn ${st.heat ? "hot" + st.heat : ""}">${st.phase === "ready" ? "GET READY…" : st.phase === "pop" ? `${out ? esc(out.name) : "Someone"} WAS HOLDING IT. OUT!` : mine ? "YOUR BALL! NAME ONE AND PASS IT" : `${holder ? esc(holder.name) : "…"} HAS THE BALL`}</p>
         <form class="ans" id="rForm" autocomplete="off"><input class="field big" id="rAns" placeholder="${mine ? "type an answer…" : "wait for the ball…"}" ${mine ? "" : "disabled"} spellcheck="false" autocapitalize="characters" enterkeyhint="go"><button class="btn" type="submit" ${mine ? "" : "disabled"}>PASS</button></form>
         <div class="sugg" id="rSugg"></div>
@@ -4200,7 +4206,7 @@ function drawRondo(msg = "", pending = "") {
         <div class="used">${st.log.slice().reverse().map((l) => `<span class="${l.skip ? "thru" : ""}">${esc(l.name)}<small>${esc(names[l.by] || "")}${l.skip ? " · THROUGH BALL" : ""}</small></span>`).join("")}</div>
       </div>`;
   }
-  box.innerHTML = `${head}${body}${st.phase === "lobby" || st.phase === "over" ? `<div class="rgap"></div>` : ""}<div class="row"><button class="btn ghost" id="rLeave" type="button">LEAVE ROOM</button></div>`;
+  box.innerHTML = `<div class="side l">${head}</div><div class="rgap"></div><div class="side r">${body}<div class="row"><button class="btn ghost" id="rLeave" type="button">LEAVE ROOM</button></div></div>`;
   $("#rLeave").onclick = () => { leaveRondo(); drawRondo(); };
   const roster = $("#rRoster");
   if (roster) for (const p of st.players) {
