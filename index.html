@@ -3,11 +3,11 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-<title>Topbinz</title>
+<title>TopBinz</title>
 <meta name="description" content="A daily soccer trivia game. Name rare answers to score better finishes, from tap-ins all the way to top bins.">
 <meta name="theme-color" content="#050a14">
 <meta property="og:type" content="website">
-<meta property="og:title" content="Topbinz">
+<meta property="og:title" content="TopBinz">
 <meta property="og:description" content="A daily soccer trivia game. Name rare answers to score better finishes, from tap-ins all the way to top bins.">
 <meta property="og:url" content="https://topbinz.io/">
 <meta property="og:image" content="https://topbinz.io/og.png">
@@ -150,6 +150,16 @@ svg { display: block; width: 100%; height: auto; overflow: visible; }
 .box .pa.miss { color: var(--mute); }
 .box .pa small { font-family: var(--display); font-size: 10px; letter-spacing: 2px; }
 .box .ps { grid-area: s; font-size: 30px; font-variant-numeric: tabular-nums; align-self: center; }
+.box .all { grid-column: 2 / -1; }
+.box .all summary { font-family: var(--display); font-size: 9px; letter-spacing: 2px; color: var(--cyan); cursor: pointer; list-style: none; padding: 4px 0; }
+.box .all summary::-webkit-details-marker { display: none; }
+.box .all summary::before { content: "▸ "; }
+.box .all[open] summary::before { content: "▾ "; }
+.alist { display: grid; grid-template-columns: repeat(auto-fill, minmax(140px, 1fr)); gap: 2px 12px; padding: 4px 0 2px; }
+.alist span { display: flex; justify-content: space-between; gap: 8px; font-size: 18px; color: var(--mute); border-bottom: 1px dotted rgba(125, 147, 184, 0.2); }
+.alist span b { font-weight: 400; color: var(--ink); min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.alist span i { font-style: normal; font-variant-numeric: tabular-nums; }
+.alist span.mine b { color: var(--gold); }
 .box .cut { grid-area: c; font-size: 16px; color: rgba(125, 147, 184, 0.85); }
 .logbook { margin: 0; font-family: var(--display); font-size: 10px; letter-spacing: 2px; color: var(--mute); line-height: 1.8; white-space: pre-line; }
 .note { margin: 0; font-size: 16px; color: rgba(125, 147, 184, 0.75); }
@@ -225,7 +235,7 @@ svg { display: block; width: 100%; height: auto; overflow: visible; }
 
 <main class="col">
   <header class="top">
-    <a class="logo" id="home" href="./" aria-label="Topbinz, back to the start screen">TOPBINZ</a>
+    <a class="logo" id="home" href="./" aria-label="TopBinz, back to the start screen">TOPBINZ</a>
     <div class="topR">
       <div class="tag" id="strikeTag">STRIKE #1</div>
       <button class="snd" id="snd" type="button" aria-pressed="true" aria-label="Sound" title="Sound on"><svg viewBox="0 0 11 10" shape-rendering="crispEdges" aria-hidden="true"><path d="M0 3h3v4H0zM3 2h1v6H3zM4 1h1v8H4z" fill="currentColor"/><path class="on" d="M7 3h1v4H7zM9 1h1v8H9z" fill="currentColor"/><path class="off" d="M7 3h1v1H7zM9 3h1v1H9zM8 4h1v2H8zM7 6h1v1H7zM9 6h1v1H9z" fill="currentColor"/></svg></button>
@@ -1994,6 +2004,7 @@ function start(mode) {
     if (mode === "daily") { s.run = { date: today.key, pool: POOL, set: game.set, results: [], total: 0 }; store.save(s); }
   }
   pitch.setPlayer(pl);
+  if (mode === "daily" && myLeagues().length) runSend("start", { pl: pl.id, set: game.set });
   if (game.round >= 7) return finish();
   show("play");
   el.card.hidden = true;
@@ -2015,6 +2026,7 @@ function clearSugg() { pending = null; el.sugg.hidden = true; el.sugg.textConten
 function ask(how) {
   const p = cur();
   markSeen(p.id);
+  if (game.mode === "daily") runSend("open", { k: game.round });
   clearTimeout(advanceTimer);
   if (how === "respot") pitch.respot(); else if (how === "idle") pitch.idle();
   phase = "ask";
@@ -2052,6 +2064,7 @@ function resolve(i, typed, fixed, gave) {
   const ans = i === null ? null : p.answers[i];
   const pts = ans ? ans.pts : 0, shot = shotOf(pts), pl = playerById(game.pl);
   const bonus = ans && pl.boost === shot.kind ? BOOST : 0;
+  if (game.mode === "daily") runSend("answer", { k: game.round, typed: typed || "", i });
   game.results.push({ p: game.set[game.round], i, typed, pts, bonus, pl: pl.id });
   game.total += pts + bonus;
   if (game.mode === "daily") { const s = store.load(), run = liveRun(s); if (run) { run.results = game.results; run.total = game.total; store.save(s); } }
@@ -2259,7 +2272,8 @@ function renderResults(g) {
         const p = byId.get(r.p), a = r.i === null ? null : p.answers[r.i], s = shotOf(r.pts);
         return `<div class="it"><span class="n">${k + 1}</span><span class="pq">${esc(p.q.toUpperCase())}</span><span class="ps" style="color:${s.color}">${r.i === null ? "0" : "+" + (r.pts + (r.bonus || 0))}</span>
           <span class="pa ${a ? "" : "miss"}">${a ? esc(a.name) : "No answer"} <small style="color:${s.color}">${s.name}</small></span>
-          <span class="cut">${a ? `About 1 in ${oneIn(a.share)} players say this. ` : ""}${r.bonus ? `Includes a +${r.bonus} ${esc(playerById(r.pl).name)} boost. ` : ""}Most said: ${esc(p.top.name)}. Deepest cut: ${esc(p.deep.name)}.</span></div>`;
+          <span class="cut">${a ? `About 1 in ${oneIn(a.share)} players say this. ` : ""}${r.bonus ? `Includes a +${r.bonus} ${esc(playerById(r.pl).name)} boost. ` : ""}Most said: ${esc(p.top.name)}. Deepest cut: ${esc(p.deep.name)}.</span>
+          <details class="all"><summary>SEE ALL ${p.answers.length} ANSWERS</summary><div class="alist">${p.answers.map((x, j) => [x, j]).sort((u, v) => v[0].share - u[0].share).map(([x, j]) => { const xs = shotOf(x.pts); return `<span class="${j === r.i ? "mine" : ""}"><b>${esc(x.name)}</b><i style="color:${xs.color}">${x.pts}</i></span>`; }).join("")}</div></details></div>`;
       }).join("")}</div>
     </div>
     <div class="row">
@@ -3888,11 +3902,10 @@ const api = (path, body) => fetch(API + path, body ? { method: "POST", headers: 
 const face = (host, id, cls = "") => { const cv = document.createElement("canvas"); cv.width = 28; cv.height = 28; cv.className = cls; pitch.portrait(cv, playerById(id)); host.appendChild(cv); return cv; };
 const nickField = (id) => `<label class="lab" for="${id}">YOUR NAME</label><input class="field" id="${id}" maxlength="16" autocomplete="off" spellcheck="false" placeholder="Name your friends will see" value="${esc(nick() || player().tag)}">`;
 const shareLink = async (btn, url, text) => {
-  try { if (navigator.share && matchMedia("(pointer: coarse)").matches) { await navigator.share({ title: "Topbinz", text, url }); return; } } catch { return; }
+  try { if (navigator.share && matchMedia("(pointer: coarse)").matches) { await navigator.share({ title: "TopBinz", text, url }); return; } } catch { return; }
   try { await navigator.clipboard.writeText(url); btn.textContent = "LINK COPIED"; } catch { prompt("Copy this link", url); }
 };
 
-const RONDO = PROMPTS.filter((p) => p.answers.length >= 16);
 const rondo = { ws: null, code: null, st: null, prev: null, tries: 0, sugg: null };
 
 function openRondo(code) {
@@ -3918,7 +3931,7 @@ function joinRondo(code) {
   const ws = new WebSocket(`${API.replace("https", "wss")}/room/${code}/ws`);
   rondo.ws = ws;
   ws.onopen = () => { rondo.tries = 0; ws.send(JSON.stringify({ t: "hello", id: me(), name: nick(), pl: player().id })); };
-  ws.onmessage = (e) => { const m = JSON.parse(e.data); if (m.t === "full") { leaveRondo(); drawRondo("That room is full."); return; } if (m.t === "state") { rondo.prev = rondo.st; rondo.st = m; rondoSounds(); drawRondo(); } };
+  ws.onmessage = (e) => { const m = JSON.parse(e.data); if (m.t === "nope") { const fb = $("#rFb"); if (fb) fb.textContent = m.why === "used" ? "Already used. Try another." : "Not a valid answer. Try another."; sfx.play("buzz"); return; } if (m.t === "full") { leaveRondo(); drawRondo("That room is full."); return; } if (m.t === "state") { rondo.prev = rondo.st; rondo.st = m; rondoSounds(); drawRondo(); } };
   ws.onclose = () => { if (rondo.ws !== ws) return; if (rondo.tries++ < 5 && !el.party.hidden) setTimeout(() => rondo.ws === ws && joinRondo(code), 1500); else { leaveRondo(); drawRondo("Lost the connection to the room."); } };
   drawRondo();
 }
@@ -3993,9 +4006,9 @@ function drawRondo(msg = "", pending = "") {
     d.insertAdjacentHTML("beforeend", `<b>${esc(p.name)}${p.id === you ? " (YOU)" : ""}</b><small>${p.id === st.host ? "HOST" : p.on ? "" : "AWAY"}</small>`);
     roster.appendChild(d);
   }
-  if ($("#rStart")) $("#rStart").onclick = () => rondo.ws && rondo.ws.send(JSON.stringify({ t: "start", prompts: shuffle(RONDO.map((p) => p.id)) }));
+  if ($("#rStart")) $("#rStart").onclick = () => rondo.ws && rondo.ws.send(JSON.stringify({ t: "start" }));
   if ($("#rAgain")) $("#rAgain").onclick = () => rondo.ws && rondo.ws.send(JSON.stringify({ t: "again" }));
-  if ($("#rInvite")) $("#rInvite").onclick = (e) => shareLink(e.target, `${location.origin}${location.pathname}?room=${rondo.code}`, "Join my Topbinz Rondo room");
+  if ($("#rInvite")) $("#rInvite").onclick = (e) => shareLink(e.target, `${location.origin}${location.pathname}?room=${rondo.code}`, "Join my TopBinz Rondo room");
   const ring = $("#rRing");
   if (ring) {
     const live = st.players, n = live.length, R = 40;
@@ -4020,7 +4033,7 @@ function drawRondo(msg = "", pending = "") {
     const input = $("#rAns"), fb = $("#rFb"), sg = $("#rSugg");
     input.value = typed;
     input.focus({ preventScroll: true });
-    const send = (i) => { const a = P.answers[i]; rondo.ws.send(JSON.stringify({ t: "answer", i, pts: a.pts, name: a.name })); input.value = ""; };
+    const send = (i) => { rondo.ws.send(JSON.stringify({ t: "answer", i, typed: input.value })); input.value = ""; };
     form.onsubmit = (e) => {
       e.preventDefault();
       const m = match(P, input.value);
@@ -4040,20 +4053,27 @@ function drawRondo(msg = "", pending = "") {
   }
 }
 
-const shuffle = (list) => { const a = list.slice(); for (let i = a.length - 1; i > 0; i--) { const j = Math.floor(Math.random() * (i + 1)); [a[i], a[j]] = [a[j], a[i]]; } return a; };
 
 const league = { id: null, data: null, busy: false };
 const myLeagues = () => store.load().leagues || [];
 const saveLeagues = (list) => { const s = store.load(); s.leagues = list; store.save(s); };
 
+let runChain = Promise.resolve();
+function runSend(op, body) {
+  if (!myLeagues().length) return;
+  const payload = { pid: me(), date: today.key, ...body };
+  runChain = runChain.then(() => api(`/run/${op}`, payload)).catch(() => {});
+}
+
 async function postScores() {
+  await runChain;
   const d = todayDone(), list = myLeagues();
   if (!d || !list.length) return;
   const s = store.load(), posted = s.posted || {};
   for (const l of list) {
     if (posted[l.id] === today.key) continue;
-    const r = await api(`/league/${l.id}/score`, { pid: me(), name: nick() || player().tag, pl: d.pl || player().id, date: today.key, score: d.total });
-    if (!r.error) { const t = store.load(); t.posted = { ...(t.posted || {}), [l.id]: today.key }; store.save(t); }
+    const r = await api(`/league/${l.id}/score`, { pid: me(), name: nick() || player().tag, pl: d.pl || player().id, date: today.key });
+    if (!r.error && !r.note) { const t = store.load(); t.posted = { ...(t.posted || {}), [l.id]: today.key }; store.save(t); }
   }
 }
 
@@ -4098,7 +4118,7 @@ function drawLeague(msg = "") {
       <div class="panel"><p class="h2"><span>THIS WEEK</span><b>${fmtDay(S.week.start)} – ${fmtDay(S.week.end)}</b></p>
         <div class="table">${rows.map((r, i) => `<div class="tr${r.pid === me() ? " me" : ""}" data-pl="${M[r.pid] ? M[r.pid].pl : "messi"}"><span class="pos">${r.pts ? i + 1 : "–"}</span><span class="who"><b>${esc(nm(r.pid))}</b><small>${(tr[r.pid] && tr[r.pid].ballon) ? `BALLON D'OR ×${tr[r.pid].ballon}` : ""}${(tr[r.pid] && tr[r.pid].superBallon) ? ` · SUPER ×${tr[r.pid].superBallon}` : ""}</small></span><span class="tdy">${played.has(r.pid) ? `${played.get(r.pid).score}<small>TODAY</small>` : `<small>NOT YET</small>`}</span><span class="pts">${r.pts}<small>PTS</small></span></div>`).join("")}</div>
         <p class="note">${S.week.rows.length ? `${esc(nm(S.week.rows[0].pid))} leads the race for this week's Ballon d'Or.` : "No scores yet this week. Play the Daily Strike to get on the board."}</p></div>
-      ${todayDone() ? "" : `<button class="btn" id="lPlay" type="button">PLAY TODAY'S STRIKE ▶</button>`}
+      ${todayDone() ? ((store.load().posted || {})[id] === today.key ? "" : `<p class="note">Today's Strike was started before you joined, so it can't be checked and won't count. From tomorrow your score counts automatically.</p>`) : `<button class="btn" id="lPlay" type="button">PLAY TODAY'S STRIKE ▶</button>`}
       <div class="panel"><p class="h2"><span>SUPER BALLON D'OR RACE</span><b>${fmtMonth(S.month.month)}</b></p>${S.month.rows.length ? `<div class="table">${S.month.rows.map((r) => `<div class="tr small"><span class="who"><b>${esc(nm(r.pid))}</b></span><span class="pts">${r.golds}<small>BALLON D'ORS</small></span></div>`).join("")}</div>` : `<p class="note">The first Ballon d'Or of the month is handed out on Sunday night.</p>`}</div>
       <div class="panel"><p class="h2"><span>TROPHY CABINET</span></p>${S.pastWeeks.length || S.supers.length ? `${S.supers.map((m) => `<p class="cup super"><b>SUPER BALLON D'OR · ${esc(fmtMonth(m.month))}</b>${m.winners.map((p) => esc(nm(p))).join(" & ") || "Not awarded"}</p>`).join("")}${S.pastWeeks.map((w) => `<p class="cup"><b>BALLON D'OR · WEEK OF ${esc(fmtDay(w.start).toUpperCase())}</b>${w.winners.map((p) => esc(nm(p))).join(" & ") || "Not awarded"}${w.rows[0] ? ` · ${w.rows[0].pts} pts` : ""}</p>`).join("")}` : `<p class="note">Empty for now. The first Ballon d'Or goes to whoever tops this week.</p>`}</div>
       <div class="row"><button class="btn ghost" id="lInvite" type="button">INVITE FRIENDS</button><button class="btn ghost" id="lAnother" type="button">NEW OR JOIN</button><button class="btn ghost" id="lQuit" type="button">LEAVE LEAGUE</button></div>${how}`;
@@ -4118,7 +4138,7 @@ function drawLeague(msg = "") {
   if ($("#lNew")) $("#lNew").onclick = async (e) => { e.target.disabled = true; name(); const r = await api("/league", { name: $("#lName").value }); if (r.id) enter(r.id, $("#lName").value); else { e.target.disabled = false; drawLeague("Couldn't reach the server. Try again."); } };
   if ($("#lJoin")) $("#lJoin").onclick = () => { const c = $("#lCode").value.toUpperCase().replace(/[^A-Z0-9]/g, ""); if (c.length !== 6) return drawLeague("League codes have 6 characters."); league.data = null; enter(c); };
   if ($("#lAccept")) $("#lAccept").onclick = () => enter(id, D.name);
-  if ($("#lInvite")) $("#lInvite").onclick = (e) => shareLink(e.target, `${location.origin}${location.pathname}?league=${id}`, `Join my Topbinz league "${D.name}"`);
+  if ($("#lInvite")) $("#lInvite").onclick = (e) => shareLink(e.target, `${location.origin}${location.pathname}?league=${id}`, `Join my TopBinz league "${D.name}"`);
   if ($("#lAnother")) $("#lAnother").onclick = () => { league.id = null; league.data = null; history.replaceState(null, "", location.pathname); drawLeague(); };
   if ($("#lQuit")) $("#lQuit").onclick = async () => { await api(`/league/${id}/leave`, { pid: me() }); saveLeagues(myLeagues().filter((l) => l.id !== id)); league.id = null; league.data = null; openLeague(); };
   if ($("#lPlay")) $("#lPlay").onclick = () => start("daily");

@@ -11,6 +11,17 @@ class_name = "Room"
 name = "LEAGUE"
 class_name = "League"
 
+[[durable_objects.bindings]]
+name = "RUN"
+class_name = "Run"
+
 [[migrations]]
 tag = "v1"
 new_sqlite_classes = ["Room", "League"]
+
+[[migrations]]
+tag = "v2"
+new_sqlite_classes = ["Run"]
+
+[build]
+command = "node build.mjs"

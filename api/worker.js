@@ -1,10 +1,21 @@
+import { PROMPTS, byId, match, shotOf, BOOSTS } from "./game.js";
+
 const CORS = { "Access-Control-Allow-Origin": "*", "Access-Control-Allow-Methods": "GET, POST, OPTIONS", "Access-Control-Allow-Headers": "Content-Type" };
 const json = (v, status = 200) => new Response(JSON.stringify(v), { status, headers: { "Content-Type": "application/json", ...CORS } });
 const CODE = "ABCDEFGHJKLMNPQRSTUVWXYZ23456789";
 const makeCode = (n) => Array.from(crypto.getRandomValues(new Uint8Array(n)), (b) => CODE[b % CODE.length]).join("");
 const clean = (s, n) => String(s || "").replace(/[^\p{L}\p{N} ._'-]/gu, "").trim().slice(0, n);
 const okCode = (s, n) => typeof s === "string" && s.length === n && [...s].every((c) => CODE.includes(c));
-const PLAYER_IDS = new Set(["messi", "ronaldo", "mbappe", "yamal", "haaland", "bellingham", "neymar", "palmer", "vini", "son"]);
+const okDay = (k) => /^\d{4}-\d{2}-\d{2}$/.test(k) && Math.abs(parseDay(k) - Date.now()) < 2 * 86400000;
+const RONDO = PROMPTS.filter((p) => p.answers.length >= 16).map((p) => p.id);
+const TURN_MS = 25000, GRACE_MS = 4000, BOOST = 10;
+
+const accept = (p, typed, i) => {
+  if (!p || !Number.isInteger(i) || i < 0 || i >= p.answers.length) return false;
+  const m = match(p, String(typed || "").slice(0, 80));
+  return (m.kind === "ok" && m.i === i) || (m.kind === "suggest" && m.list.includes(i));
+};
+const shuffle = (list) => { const a = list.slice(); for (let i = a.length - 1; i > 0; i--) { const j = Math.floor(Math.random() * (i + 1)); [a[i], a[j]] = [a[j], a[i]]; } return a; };
 
 export default {
   async fetch(req, env) {
@@ -12,6 +23,12 @@ export default {
     const url = new URL(req.url), parts = url.pathname.split("/").filter(Boolean);
     if (parts[0] === "room" && parts[1] === "new" && req.method === "POST") return json({ code: makeCode(4) });
     if (parts[0] === "room" && okCode(parts[1], 4) && parts[2] === "ws") return env.ROOM.get(env.ROOM.idFromName(parts[1])).fetch(req);
+    if (parts[0] === "run" && req.method === "POST") {
+      const body = await req.json().catch(() => ({})), pid = clean(body.pid, 40), day = String(body.date || "");
+      if (!pid || !okDay(day)) return json({ error: "bad run" }, 400);
+      const res = await env.RUN.get(env.RUN.idFromName(`${pid}:${day}`)).fetch(new Request(`https://run/${parts[1] || ""}`, { method: "POST", body: JSON.stringify(body) }));
+      return new Response(res.body, { status: res.status, headers: { "Content-Type": "application/json", ...CORS } });
+    }
     if (parts[0] === "league" && parts.length === 1 && req.method === "POST") {
       const body = await req.json().catch(() => ({})), id = makeCode(6);
       const res = await env.LEAGUE.get(env.LEAGUE.idFromName(id)).fetch(new Request(`https://league/${id}/create`, { method: "POST", body: JSON.stringify({ name: body.name }) }));
@@ -25,38 +42,33 @@ export default {
   },
 };
 
+const fresh = () => ({ phase: "lobby", host: null, players: [], queue: [], round: 0, prompt: null, used: [], log: [], holder: null, heat: 0, winner: null, out: null, ev: [] });
+
 export class Room {
-  constructor(state) {
-    this.state = state;
-    this.socks = new Map();
-    this.reset();
+  constructor(ctx) {
+    this.ctx = ctx;
+    this.s = fresh();
+    ctx.blockConcurrencyWhile(async () => { this.s = (await ctx.storage.get("s")) || fresh(); });
   }
-  reset() {
-    this.phase = "lobby";
-    this.players = this.players ? this.players.filter((p) => this.socks.has(p.id)).map((p) => ({ ...p, alive: true })) : [];
-    this.queue = [];
-    this.round = 0;
-    this.prompt = null;
-    this.used = [];
-    this.log = [];
-    this.holder = null;
-    this.heat = 0;
-    this.winner = null;
-    this.out = null;
-    this.timers = [];
+  idOf(ws) { const a = ws.deserializeAttachment(); return a && a.id; }
+  socks(skip) { return this.ctx.getWebSockets().filter((ws) => ws !== skip && ws.readyState === 1); }
+  online(skip) { return new Set(this.socks(skip).map((ws) => this.idOf(ws)).filter(Boolean)); }
+  view(skip) {
+    const s = this.s, on = this.online(skip);
+    return { t: "state", phase: s.phase, host: s.host, round: s.round, prompt: s.prompt, used: s.used, log: s.log.slice(-40), holder: s.holder, heat: s.heat, winner: s.winner, out: s.out,
+      players: s.players.map((p) => ({ id: p.id, name: p.name, pl: p.pl, alive: p.alive, on: on.has(p.id) })) };
   }
-  clear() { for (const t of this.timers) clearTimeout(t); this.timers = []; }
-  later(ms, fn) { this.timers.push(setTimeout(fn, ms)); }
-  view() {
-    return { t: "state", phase: this.phase, host: this.host, round: this.round, prompt: this.prompt, used: this.used, log: this.log.slice(-40), holder: this.holder, heat: this.heat, winner: this.winner, out: this.out,
-      players: this.players.map((p) => ({ id: p.id, name: p.name, pl: p.pl, alive: p.alive, on: this.socks.has(p.id) })) };
+  cast(skip) { const v = JSON.stringify(this.view(skip)); for (const ws of this.socks(skip)) { try { ws.send(v); } catch {} } }
+  async commit(skip) {
+    const s = this.s;
+    s.ev.sort((a, b) => a.at - b.at);
+    await this.ctx.storage.put("s", s);
+    if (s.ev.length) await this.ctx.storage.setAlarm(s.ev[0].at); else await this.ctx.storage.deleteAlarm();
+    this.cast(skip);
   }
-  send(ws, v) { try { ws.send(JSON.stringify(v)); } catch {} }
-  cast(v = this.view()) { const s = JSON.stringify(v); for (const ws of this.socks.values()) { try { ws.send(s); } catch {} } }
-  alive() { return this.players.filter((p) => p.alive); }
+  alive() { return this.s.players.filter((p) => p.alive); }
   nextAfter(id, skip = 0) {
-    const ring = this.players.filter((p) => p.alive || p.id === id), i = ring.findIndex((p) => p.id === id);
-    const alive = ring.filter((p) => p.alive);
+    const ring = this.s.players.filter((p) => p.alive || p.id === id), i = ring.findIndex((p) => p.id === id), alive = ring.filter((p) => p.alive);
     if (!alive.length) return null;
     let j = i, left = skip + 1;
     while (left > 0) { j = (j + 1) % ring.length; if (ring[j].alive && ring[j].id !== id) left--; if (alive.length === 1) break; }
@@ -64,102 +76,135 @@ export class Room {
   }
   async fetch(req) {
     if (req.headers.get("Upgrade") !== "websocket") return new Response("expected websocket", { status: 426 });
-    const pair = new WebSocketPair(), [client, ws] = Object.values(pair);
-    ws.accept();
-    let me = null;
-    ws.addEventListener("message", (e) => {
-      let m;
-      try { m = JSON.parse(e.data); } catch { return; }
-      if (m.t === "hello") {
-        const id = clean(m.id, 40);
-        if (!id) return;
-        me = id;
-        const old = this.socks.get(id);
-        if (old && old !== ws) { try { old.close(1000, "replaced"); } catch {} }
-        this.socks.set(id, ws);
-        let p = this.players.find((x) => x.id === id);
-        if (!p) {
-          if (this.players.length >= 10) { this.send(ws, { t: "full" }); return; }
-          p = { id, alive: this.phase === "lobby" };
-          this.players.push(p);
-        }
-        p.name = clean(m.name, 16) || "Player";
-        p.pl = PLAYER_IDS.has(m.pl) ? m.pl : "messi";
-        if (!this.host || !this.socks.has(this.host)) this.host = id;
-        this.cast();
-        return;
-      }
-      if (!me) return;
-      if (m.t === "start" && me === this.host && this.phase === "lobby" && this.players.length >= 2 && Array.isArray(m.prompts) && m.prompts.length) {
-        this.queue = m.prompts.slice(0, 60).map((x) => clean(x, 16));
-        for (const p of this.players) p.alive = true;
-        this.round = 0;
-        this.winner = null;
-        this.startRound(this.players[Math.floor(Math.random() * this.players.length)].id);
-        return;
-      }
-      if (m.t === "answer" && this.phase === "playing" && me === this.holder && Number.isInteger(m.i) && m.i >= 0 && m.i < 200 && !this.used.includes(m.i)) {
-        this.used.push(m.i);
-        const pts = Math.max(0, Math.min(100, Number(m.pts) || 0)), skip = pts >= 70 && this.alive().length > 2 ? 1 : 0;
-        const to = this.nextAfter(me, skip);
-        this.log.push({ by: me, i: m.i, name: clean(m.name, 48), pts, to, skip });
-        this.holder = to;
-        this.cast();
-        return;
-      }
-      if (m.t === "again" && me === this.host && this.phase === "over") { this.clear(); this.reset(); this.cast(); }
-    });
-    const gone = () => {
-      if (!me || this.socks.get(me) !== ws) return;
-      this.socks.delete(me);
-      if (this.phase === "lobby") this.players = this.players.filter((p) => p.id !== me);
-      if (this.host === me) this.host = (this.players.find((p) => this.socks.has(p.id)) || {}).id || null;
-      if (!this.socks.size) { this.clear(); this.players = []; this.reset(); return; }
-      this.cast();
-    };
-    ws.addEventListener("close", gone);
-    ws.addEventListener("error", gone);
+    const [client, server] = Object.values(new WebSocketPair());
+    this.ctx.acceptWebSocket(server);
     return new Response(null, { status: 101, webSocket: client });
   }
-  startRound(first) {
-    this.clear();
-    this.round += 1;
-    this.prompt = this.queue[(this.round - 1) % this.queue.length];
-    this.used = [];
-    this.log = [];
-    this.out = null;
-    this.heat = 0;
-    this.holder = first;
-    this.phase = "ready";
-    this.cast();
-    const fuse = 16000 + Math.random() * 20000;
-    this.later(3200, () => {
-      this.phase = "playing";
-      this.cast();
-      this.later(fuse - 8000, () => { this.heat = 1; this.cast(); });
-      this.later(fuse - 3500, () => { this.heat = 2; this.cast(); });
-      this.later(fuse, () => this.pop());
-    });
-  }
-  pop() {
-    this.clear();
-    const victim = this.players.find((p) => p.id === this.holder);
-    if (victim) victim.alive = false;
-    this.out = this.holder;
-    this.phase = "pop";
-    this.heat = 0;
-    this.cast();
-    this.later(4200, () => {
-      const left = this.alive();
-      if (left.length <= 1) {
-        this.phase = "over";
-        this.winner = left[0] ? left[0].id : null;
-        this.holder = null;
-        this.cast();
-        return;
+  async webSocketMessage(ws, data) {
+    let m;
+    try { m = JSON.parse(data); } catch { return; }
+    const s = this.s;
+    if (m.t === "hello") {
+      const id = clean(m.id, 40);
+      if (!id) return;
+      for (const other of this.ctx.getWebSockets()) if (other !== ws && this.idOf(other) === id) { try { other.close(1000, "replaced"); } catch {} }
+      ws.serializeAttachment({ id });
+      let p = s.players.find((x) => x.id === id);
+      if (!p) {
+        if (s.players.length >= 10) { try { ws.send(JSON.stringify({ t: "full" })); } catch {} return; }
+        p = { id, alive: s.phase === "lobby" };
+        s.players.push(p);
       }
-      this.startRound(this.nextAfter(this.out));
-    });
+      p.name = clean(m.name, 16) || "Player";
+      p.pl = BOOSTS[m.pl] ? m.pl : "messi";
+      if (!s.host || !this.online().has(s.host)) s.host = id;
+      return this.commit();
+    }
+    const me = this.idOf(ws);
+    if (!me) return;
+    if (m.t === "start" && me === s.host && s.phase === "lobby" && s.players.length >= 2) {
+      s.queue = shuffle(RONDO).slice(0, 40);
+      for (const p of s.players) p.alive = true;
+      s.round = 0;
+      s.winner = null;
+      this.startRound(s.players[Math.floor(Math.random() * s.players.length)].id);
+      return this.commit();
+    }
+    if (m.t === "answer" && s.phase === "playing" && me === s.holder) {
+      const p = byId.get(s.prompt), i = m.i;
+      if (!accept(p, m.typed, i)) { try { ws.send(JSON.stringify({ t: "nope", why: "invalid" })); } catch {} return; }
+      if (s.used.includes(i)) { try { ws.send(JSON.stringify({ t: "nope", why: "used" })); } catch {} return; }
+      s.used.push(i);
+      const pts = p.answers[i].pts, skip = pts >= 70 && this.alive().length > 2 ? 1 : 0, to = this.nextAfter(me, skip);
+      s.log.push({ by: me, i, name: p.answers[i].name, pts, to, skip });
+      s.holder = to;
+      return this.commit();
+    }
+    if (m.t === "again" && me === s.host && s.phase === "over") {
+      const on = this.online();
+      Object.assign(s, fresh(), { host: s.host, players: s.players.filter((p) => on.has(p.id)).map((p) => ({ ...p, alive: true })) });
+      return this.commit();
+    }
+  }
+  async webSocketClose(ws) { await this.gone(ws); }
+  async webSocketError(ws) { await this.gone(ws); }
+  async gone(ws) {
+    const me = this.idOf(ws), s = this.s;
+    if (!me) return;
+    const on = this.online(ws);
+    if (on.has(me)) return;
+    if (!on.size) { this.s = fresh(); await this.ctx.storage.deleteAll(); return; }
+    if (s.phase === "lobby") s.players = s.players.filter((p) => p.id !== me);
+    if (s.host === me) s.host = (s.players.find((p) => on.has(p.id)) || {}).id || null;
+    await this.commit(ws);
+  }
+  startRound(first) {
+    const s = this.s, now = Date.now(), fuse = 16000 + Math.random() * 20000;
+    s.round += 1;
+    s.prompt = s.queue[(s.round - 1) % s.queue.length];
+    s.used = []; s.log = []; s.out = null; s.heat = 0; s.holder = first; s.phase = "ready";
+    s.ev = [{ at: now + 3200, t: "play" }, { at: now + 3200 + fuse - 8000, t: "heat1" }, { at: now + 3200 + fuse - 3500, t: "heat2" }, { at: now + 3200 + fuse, t: "pop" }];
+  }
+  async alarm() {
+    const s = this.s, now = Date.now();
+    while (s.ev.length && s.ev[0].at <= now + 50) {
+      const e = s.ev.shift();
+      if (e.t === "play") s.phase = "playing";
+      else if (e.t === "heat1") s.heat = 1;
+      else if (e.t === "heat2") s.heat = 2;
+      else if (e.t === "pop") {
+        const victim = s.players.find((p) => p.id === s.holder);
+        if (victim) victim.alive = false;
+        s.out = s.holder; s.phase = "pop"; s.heat = 0;
+        s.ev = [{ at: now + 4200, t: "next" }];
+      } else if (e.t === "next") {
+        const left = this.alive();
+        if (left.length <= 1) { s.phase = "over"; s.winner = left[0] ? left[0].id : null; s.holder = null; s.ev = []; }
+        else this.startRound(this.nextAfter(s.out));
+      }
+    }
+    await this.commit();
+  }
+}
+
+export class Run {
+  constructor(ctx) { this.ctx = ctx; }
+  async fetch(req) {
+    const op = new URL(req.url).pathname.split("/").filter(Boolean)[0], st = this.ctx.storage, body = await req.json().catch(() => ({}));
+    let r = await st.get("r");
+    const now = Date.now(), total = (x) => x.items.reduce((s, it) => s + (it.pts || 0) + (it.bonus || 0), 0);
+    const settle = (x) => { for (const it of x.items) if (it.open && it.pts === undefined && now - it.open > TURN_MS + GRACE_MS) { it.pts = 0; it.late = true; } x.done = x.items.every((it) => it.pts !== undefined); return x; };
+    if (op === "start") {
+      if (!r) {
+        const set = Array.isArray(body.set) ? [...new Set(body.set.map(String))] : [];
+        if (set.length !== 7 || !set.every((id) => byId.has(id))) return json({ error: "bad set" }, 400);
+        r = { pl: BOOSTS[body.pl] ? body.pl : "messi", items: set.map((id) => ({ id })), started: now };
+        await st.put("r", r);
+      }
+      return json({ ok: true, done: settle(r).done, total: total(r) });
+    }
+    if (!r) return json({ error: "no run" }, 404);
+    settle(r);
+    const k = Number(body.k), it = r.items[k];
+    if (op === "open") {
+      if (!it) return json({ error: "bad prompt" }, 400);
+      if (!it.open) { it.open = now; await st.put("r", r); }
+      return json({ ok: true, left: Math.max(0, TURN_MS - (now - it.open)) });
+    }
+    if (op === "answer") {
+      if (!it) return json({ error: "bad prompt" }, 400);
+      if (it.pts !== undefined) return json({ ok: true, pts: it.pts, bonus: it.bonus || 0, total: total(r), done: r.done });
+      if (!it.open || r.items.slice(0, k).some((x) => x.pts === undefined)) return json({ error: "out of order" }, 400);
+      const p = byId.get(it.id), i = body.i === null || body.i === undefined ? null : Number(body.i);
+      if (i === null || now - it.open > TURN_MS + GRACE_MS) { it.pts = 0; it.late = i !== null; }
+      else if (!accept(p, body.typed, i)) it.pts = 0;
+      else { it.i = i; it.pts = p.answers[i].pts; it.bonus = shotOf(it.pts).kind === BOOSTS[r.pl] ? BOOST : 0; }
+      settle(r);
+      await st.put("r", r);
+      return json({ ok: true, pts: it.pts, bonus: it.bonus || 0, total: total(r), done: r.done });
+    }
+    if (op === "total") return json({ done: r.done, total: total(r), pl: r.pl });
+    return json({ error: "unknown" }, 404);
   }
 }
 
@@ -225,9 +270,9 @@ export function standings(scores, today) {
 }
 
 export class League {
-  constructor(state) { this.state = state; }
+  constructor(ctx, env) { this.ctx = ctx; this.env = env; }
   async fetch(req) {
-    const url = new URL(req.url), [, op] = url.pathname.split("/").filter(Boolean), st = this.state.storage;
+    const url = new URL(req.url), [, op] = url.pathname.split("/").filter(Boolean), st = this.ctx.storage;
     const meta = await st.get("meta");
     if (op === "create") {
       if (meta) return json({ error: "exists" }, 409);
@@ -238,23 +283,27 @@ export class League {
       return json({ ok: true });
     }
     if (!meta) return json({ error: "no such league" }, 404);
-    const members = (await st.get("members")) || {}, scores = (await st.get("scores")) || {};
-    const now = Date.now(), near = (k) => /^\d{4}-\d{2}-\d{2}$/.test(k) && Math.abs(parseDay(k) - now) < 2 * 86400000;
+    const members = (await st.get("members")) || {}, scores = (await st.get("scores")) || {}, now = Date.now();
+    let note = null;
     if (req.method === "POST") {
       const body = await req.json().catch(() => ({})), pid = clean(body.pid, 40);
       if (!pid) return json({ error: "missing player" }, 400);
       if (op === "leave") { delete members[pid]; await st.put("members", members); return json({ ok: true }); }
       if (!members[pid] && Object.keys(members).length >= 60) return json({ error: "league is full" }, 403);
-      members[pid] = { name: clean(body.name, 16) || (members[pid] && members[pid].name) || "Player", pl: PLAYER_IDS.has(body.pl) ? body.pl : (members[pid] && members[pid].pl) || "messi", joined: (members[pid] && members[pid].joined) || now };
+      const was = members[pid] || {};
+      members[pid] = { name: clean(body.name, 16) || was.name || "Player", pl: BOOSTS[body.pl] ? body.pl : was.pl || "messi", joined: was.joined || now };
       await st.put("members", members);
       if (op === "score") {
-        const day = String(body.date || ""), score = Math.round(Number(body.score));
-        if (!near(day) || !Number.isFinite(score) || score < 0 || score > 1000) return json({ error: "bad score" }, 400);
-        scores[day] = scores[day] || {};
-        if (scores[day][pid] === undefined) { scores[day][pid] = score; await st.put("scores", scores); }
+        const day = String(body.date || "");
+        if (!okDay(day)) return json({ error: "bad date" }, 400);
+        if (!(scores[day] && scores[day][pid] !== undefined)) {
+          const run = await this.env.RUN.get(this.env.RUN.idFromName(`${pid}:${day}`)).fetch(new Request("https://run/total", { method: "POST", body: "{}" })).then((r) => r.json()).catch(() => ({}));
+          if (run.done) { scores[day] = scores[day] || {}; scores[day][pid] = run.total; await st.put("scores", scores); }
+          else note = run.error === "no run" ? "unverified" : "unfinished";
+        }
       }
     }
-    const today = near(url.searchParams.get("d") || "") ? url.searchParams.get("d") : keyOf(now);
-    return json({ name: meta.name, members, standings: standings(scores, today) });
+    const q = url.searchParams.get("d") || "", today = okDay(q) ? q : keyOf(now);
+    return json({ name: meta.name, members, note, standings: standings(scores, today) });
   }
 }
