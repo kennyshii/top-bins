@@ -7,7 +7,7 @@ const makeCode = (n) => Array.from(crypto.getRandomValues(new Uint8Array(n)), (b
 const clean = (s, n) => String(s || "").replace(/[^\p{L}\p{N} ._'-]/gu, "").trim().slice(0, n);
 const okCode = (s, n) => typeof s === "string" && s.length === n && [...s].every((c) => CODE.includes(c));
 const okDay = (k) => /^\d{4}-\d{2}-\d{2}$/.test(k) && Math.abs(parseDay(k) - Date.now()) < 2 * 86400000;
-const RONDO = PROMPTS.filter((p) => p.answers.length >= 16).map((p) => p.id);
+const RONDO = { normal: PROMPTS.filter((p) => p.answers.length >= 16 && !p.niche).map((p) => p.id), niche: PROMPTS.filter((p) => p.answers.length >= 16 && p.niche).map((p) => p.id) };
 const TURN_MS = 25000, GRACE_MS = 4000, BOOST = 10;
 
 const accept = (p, typed, i) => {
@@ -42,7 +42,7 @@ export default {
   },
 };
 
-const fresh = () => ({ phase: "lobby", host: null, players: [], queue: [], round: 0, prompt: null, used: [], log: [], holder: null, heat: 0, winner: null, out: null, ko: false, playAt: 0, ev: [] });
+const fresh = () => ({ phase: "lobby", level: "normal", host: null, players: [], queue: [], round: 0, prompt: null, used: [], log: [], holder: null, heat: 0, winner: null, out: null, ko: false, playAt: 0, ev: [] });
 const LIVES = 3;
 
 export class Room {
@@ -56,7 +56,7 @@ export class Room {
   online(skip) { return new Set(this.socks(skip).map((ws) => this.idOf(ws)).filter(Boolean)); }
   view(skip) {
     const s = this.s, on = this.online(skip);
-    return { t: "state", phase: s.phase, host: s.host, round: s.round, prompt: s.prompt, used: s.used, log: s.log.slice(-40), holder: s.holder, heat: s.heat, winner: s.winner, out: s.out, ko: s.ko, since: s.phase === "playing" ? Date.now() - s.playAt : 0,
+    return { t: "state", phase: s.phase, level: s.level || "normal", host: s.host, round: s.round, prompt: s.prompt, used: s.used, log: s.log.slice(-40), holder: s.holder, heat: s.heat, winner: s.winner, out: s.out, ko: s.ko, since: s.phase === "playing" ? Date.now() - s.playAt : 0,
       players: s.players.map((p) => ({ id: p.id, name: p.name, pl: p.pl, alive: p.alive, lives: p.lives ?? LIVES, on: on.has(p.id) })) };
   }
   cast(skip) { const v = JSON.stringify(this.view(skip)); for (const ws of this.socks(skip)) { try { ws.send(v); } catch {} } }
@@ -104,11 +104,15 @@ export class Room {
     const me = this.idOf(ws);
     if (!me) return;
     if (m.t === "start" && me === s.host && s.phase === "lobby" && s.players.length >= 2) {
-      s.queue = shuffle(RONDO).slice(0, 40);
+      s.queue = shuffle(RONDO[s.level === "niche" ? "niche" : "normal"]).slice(0, 40);
       for (const p of s.players) { p.alive = true; p.lives = LIVES; }
       s.round = 0;
       s.winner = null;
       this.startRound(s.players[Math.floor(Math.random() * s.players.length)].id);
+      return this.commit();
+    }
+    if (m.t === "level" && me === s.host && s.phase === "lobby") {
+      s.level = m.level === "niche" ? "niche" : "normal";
       return this.commit();
     }
     if (m.t === "answer" && s.phase === "playing" && me === s.holder) {
@@ -123,7 +127,7 @@ export class Room {
     }
     if (m.t === "again" && me === s.host && s.phase === "over") {
       const on = this.online();
-      Object.assign(s, fresh(), { host: s.host, players: s.players.filter((p) => on.has(p.id)).map((p) => ({ ...p, alive: true, lives: LIVES })) });
+      Object.assign(s, fresh(), { level: s.level, host: s.host, players: s.players.filter((p) => on.has(p.id)).map((p) => ({ ...p, alive: true, lives: LIVES })) });
       return this.commit();
     }
   }

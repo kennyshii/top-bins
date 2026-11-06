@@ -165,6 +165,14 @@ svg { display: block; width: 100%; height: auto; overflow: visible; }
 .note { margin: 0; font-size: 16px; color: rgba(125, 147, 184, 0.75); }
 .sr { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; }
 #copyBox { width: 100%; min-height: 120px; font-family: var(--body); font-size: 18px; color: var(--ink); background: var(--void); border: 2px solid var(--line); padding: 8px; }
+.level { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+.level button { display: flex; flex-direction: column; gap: 5px; text-align: left; padding: 10px 12px; background: var(--panel); border: 2px solid var(--line); color: var(--ink); cursor: pointer; font-family: var(--body); }
+.level button b { font-family: var(--display); font-size: 12px; letter-spacing: 2px; color: var(--mute); font-weight: 700; }
+.level button span { font-size: 16px; color: var(--mute); line-height: 1.1; }
+.level button[aria-checked="true"] { border-color: var(--gold); box-shadow: 3px 3px 0 var(--rose); }
+.level button[aria-checked="true"] b { color: var(--gold); }
+.level button[aria-checked="true"] span { color: var(--ink); }
+.level button:focus-visible { outline: 2px dashed var(--gold); outline-offset: 3px; }
 .modes { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
 .mode { display: flex; flex-direction: column; gap: 6px; text-align: left; padding: 12px; background: var(--panel); border: 2px solid var(--line); color: var(--ink); cursor: pointer; font-family: var(--body); }
 .mode b { font-family: var(--display); font-size: 12px; letter-spacing: 2px; color: var(--gold); font-weight: 700; }
@@ -269,6 +277,10 @@ svg { display: block; width: 100%; height: auto; overflow: visible; }
       <div class="squad" id="squad" role="group" aria-label="Choose your player"></div>
       <p class="pickNote" id="pickNote" aria-live="polite"></p>
     </div>
+    <div class="level" id="level" role="radiogroup" aria-label="Difficulty">
+      <button type="button" role="radio" aria-checked="true" data-lv="normal"><b>NORMAL</b><span>Today's stars and the big trophies</span></button>
+      <button type="button" role="radio" aria-checked="false" data-lv="niche"><b>NICHE</b><span>Old finals, famous scorelines, deep cuts</span></button>
+    </div>
     <div class="row">
       <button class="btn" id="go" type="button">KICK OFF ▶</button>
       <button class="btn ghost" id="unl" type="button">UNLIMITED ∞</button>
@@ -282,7 +294,7 @@ svg { display: block; width: 100%; height: auto; overflow: visible; }
     <ul class="how">
       <li><span>1</span>Type any answer that fits the prompt. Small typos are fixed for you.</li>
       <li><span>2</span>Answers everyone gives are tap-ins. The rarer your answer, the better the finish, all the way up to top bins.</li>
-      <li><span>3</span>Niche prompts pay more, because fewer people can answer them at all.</li>
+      <li><span>3</span>Pick NORMAL for today's stars and the big trophies, or NICHE for old finals, famous scorelines and forgotten squads. Leagues count your Normal daily.</li>
       <li><span>4</span>You never get the same prompt twice. Every strike is built from prompts you haven't seen yet.</li>
       <li><span>5</span>Your player earns +10 on their favorite finish and celebrates every goal their own way.</li>
     </ul>
@@ -426,10 +438,10 @@ const PROMPTS = [
     ["Kylian Mbappé", 200, "mbappe"], ["Harry Kane", 150, "kane"], ["Ronaldo Nazário", 100, "ronaldo|r9|ronaldo nazario"], ["Miroslav Klose", 80, "klose"], ["James Rodríguez", 60, "james|james rodriguez"],
     ["Thomas Müller", 60, "thomas muller|muller|mueller"], ["Diego Forlán", 20, "forlan"], ["David Villa", 15, "villa"], ["Wesley Sneijder", 12, "sneijder"], ["Davor Šuker", 12, "suker"],
   ] },
-  { q: "Name a winner of the men's World Cup Golden Ball", sub: "Best player of the tournament, 1998–2026", know: 0.6, a: [
+  { q: "Name a winner of the men's World Cup Golden Ball", sub: "Best player of the tournament, 1998–2026", know: 0.6, niche: true, a: [
     ["Lionel Messi", 250, "messi"], ["Rodri", 50, "rodrigo hernandez"], ["Luka Modrić", 120, "modric"], ["Zinedine Zidane", 80, "zidane|zizou"], ["Ronaldo Nazário", 60, "ronaldo|r9|ronaldo nazario"], ["Oliver Kahn", 30, "kahn"], ["Diego Forlán", 20, "forlan"],
   ] },
-  { q: "Name a winner of the men's World Cup best goalkeeper award", sub: "2002–2026", know: 0.5, a: [
+  { q: "Name a winner of the men's World Cup best goalkeeper award", sub: "2002–2026", know: 0.5, niche: true, a: [
     ["Unai Simón", 30, "unai simon|simon|unai"],
     ["Emiliano Martínez", 150, "emi martinez|dibu|dibu martinez|martinez"], ["Manuel Neuer", 100, "neuer"], ["Iker Casillas", 80, "casillas"], ["Thibaut Courtois", 70, "courtois"],
     ["Gianluigi Buffon", 70, "buffon|gigi buffon"], ["Oliver Kahn", 40, "kahn"],
@@ -484,7 +496,7 @@ const PROMPTS = [
     ["Juventus", 200, "juve"], ["Chelsea", 180, ""], ["Inter Milan", 150, "inter|internazionale"], ["Tottenham Hotspur", 120, "tottenham|spurs"], ["Napoli", 100, ""], ["Atalanta", 30, ""],
     ["Bari", 20, "as bari"], ["Siena", 15, ""], ["Arezzo", 8, ""],
   ] },
-  { q: "Name a PFA Players' Player of the Year winner", sub: "2008–2026", know: 0.6, a: [
+  { q: "Name a PFA Players' Player of the Year winner", sub: "2008–2026", know: 0.6, niche: true, a: [
     ["Mohamed Salah", 150, "salah|mo salah"], ["Kevin De Bruyne", 120, "de bruyne|kdb"], ["Cristiano Ronaldo", 100, "cristiano|ronaldo|cr7"], ["Gareth Bale", 90, "bale"], ["Erling Haaland", 80, "haaland"],
     ["Eden Hazard", 70, "hazard"], ["Luis Suárez", 60, "suarez"], ["N'Golo Kanté", 60, "kante|ngolo kante"], ["Virgil van Dijk", 60, "van dijk|vvd"], ["Wayne Rooney", 50, "rooney"],
     ["Robin van Persie", 40, "van persie|rvp"], ["Phil Foden", 40, "foden"], ["Riyad Mahrez", 30, "mahrez"], ["Ryan Giggs", 25, "giggs"],
@@ -498,7 +510,7 @@ const PROMPTS = [
     ["Cristiano Ronaldo", 250, "cristiano|ronaldo|cr7"], ["Lionel Messi", 230, "messi"], ["Robert Lewandowski", 100, "lewandowski|lewy"], ["Erling Haaland", 90, "haaland"], ["Karim Benzema", 80, "benzema"],
     ["Kylian Mbappé", 60, "mbappe"], ["Harry Kane", 50, "kane"], ["Neymar", 30, ""], ["Raphinha", 25, ""], ["Serhou Guirassy", 15, "guirassy"],
   ] },
-  { q: "Name a player who scored in a men's Euros final", sub: "2000–2024 · normal or extra time", know: 0.55, a: [
+  { q: "Name a player who scored in a men's Euros final", sub: "2000–2024 · normal or extra time", know: 0.55, niche: true, a: [
     ["Fernando Torres", 100, "torres"], ["Cole Palmer", 60, "palmer"], ["Nico Williams", 60, "nico|williams"], ["Éder", 50, "eder"], ["Mikel Oyarzabal", 50, "oyarzabal"], ["David Silva", 40, "silva"],
     ["Jordi Alba", 40, "alba"], ["Luke Shaw", 40, "shaw"], ["Leonardo Bonucci", 40, "bonucci"], ["David Trezeguet", 30, "trezeguet"], ["Juan Mata", 25, "mata"], ["Angelos Charisteas", 25, "charisteas"],
     ["Sylvain Wiltord", 15, "wiltord"], ["Marco Delvecchio", 8, "delvecchio"],
@@ -527,7 +539,7 @@ const PROMPTS = [
     ["Jesús Navas", 30, "navas"], ["Joselu", 30, ""], ["David Raya", 30, "raya"], ["Álex Grimaldo", 25, "grimaldo"], ["Nacho", 25, "nacho fernandez"], ["Fermín López", 20, "fermin|fermin lopez"],
     ["Álex Baena", 15, "baena"], ["Ayoze Pérez", 12, "ayoze|ayoze perez"], ["Dani Vivian", 10, "vivian"], ["Álex Remiro", 8, "remiro"],
   ] },
-  { q: "Name a Golden Boy award winner", sub: "Best young player in Europe, 2003–2025", know: 0.4, a: [
+  { q: "Name a Golden Boy award winner", sub: "Best young player in Europe, 2003–2025", know: 0.4, niche: true, a: [
     ["Lionel Messi", 150, "messi"], ["Kylian Mbappé", 120, "mbappe"], ["Erling Haaland", 100, "haaland"], ["Lamine Yamal", 100, "yamal|lamine"], ["Jude Bellingham", 90, "bellingham"], ["Paul Pogba", 70, "pogba"],
     ["Wayne Rooney", 60, "rooney"], ["Pedri", 50, ""], ["Gavi", 40, ""], ["Sergio Agüero", 40, "aguero|kun aguero"], ["Cesc Fàbregas", 35, "fabregas|cesc"], ["Raheem Sterling", 35, "sterling"],
     ["João Félix", 30, "joao felix|felix"], ["Mario Götze", 25, "gotze|goetze"], ["Matthijs de Ligt", 25, "de ligt"], ["Isco", 20, ""], ["Mario Balotelli", 20, "balotelli"], ["Anthony Martial", 15, "martial"],
@@ -556,7 +568,7 @@ const PROMPTS = [
     ["Borussia Mönchengladbach", 4, "gladbach|monchengladbach|borussia monchengladbach"], ["Saint-Étienne", 4, "saint etienne|st etienne|asse"], ["Steaua Bucharest", 3, "steaua|fcsb"], ["Red Star Belgrade", 3, "red star|crvena zvezda"],
     ["Fiorentina", 3, ""], ["Club Brugge", 3, "brugge|bruges"], ["Reims", 2, "stade de reims"], ["Panathinaikos", 2, ""], ["Malmö FF", 2, "malmo|malmo ff"], ["Partizan", 2, "partizan belgrade"],
   ] },
-  { q: "Name a Chelsea manager from the Abramovich era", sub: "2003–2022 · permanent, interim or caretaker", know: 0.55, a: [
+  { q: "Name a Chelsea manager from the Abramovich era", sub: "2003–2022 · permanent, interim or caretaker", know: 0.55, niche: true, a: [
     ["José Mourinho", 200, "mourinho"], ["Antonio Conte", 120, "conte"], ["Carlo Ancelotti", 110, "ancelotti"], ["Thomas Tuchel", 110, "tuchel"], ["Frank Lampard", 100, "lampard"],
     ["Roberto Di Matteo", 70, "di matteo"], ["Rafael Benítez", 60, "benitez|rafa"], ["Maurizio Sarri", 50, "sarri"], ["Luiz Felipe Scolari", 40, "scolari|big phil"], ["Guus Hiddink", 40, "hiddink"],
     ["André Villas-Boas", 40, "villas boas|avb"], ["Claudio Ranieri", 30, "ranieri"], ["Avram Grant", 25, "grant"], ["Ray Wilkins", 3, "wilkins"], ["Steve Holland", 2, "holland"],
@@ -622,10 +634,10 @@ const PROMPTS = [
     ["Aston Villa", 20, "villa"], ["Celtic", 20, ""], ["Marseille", 15, "olympique de marseille|om"], ["PSV Eindhoven", 10, "psv"], ["Feyenoord", 8, ""], ["Hamburger SV", 5, "hamburg|hsv"],
     ["Steaua Bucharest", 4, "steaua|fcsb"], ["Red Star Belgrade", 4, "red star|crvena zvezda"],
   ] },
-  { q: "Name a man who won the Champions League as a player and as a manager", sub: "Manager wins from 2000 on", know: 0.55, a: [
+  { q: "Name a man who won the Champions League as a player and as a manager", sub: "Manager wins from 2000 on", know: 0.55, niche: true, a: [
     ["Zinedine Zidane", 200, "zidane|zizou"], ["Pep Guardiola", 180, "guardiola|pep"], ["Carlo Ancelotti", 160, "ancelotti"], ["Frank Rijkaard", 50, "rijkaard"],
   ] },
-  { q: "Name a player who scored in the 2005 Champions League final", sub: "Liverpool 3–3 Milan in Istanbul · not the shootout", know: 0.55, a: [
+  { q: "Name a player who scored in the 2005 Champions League final", sub: "Liverpool 3–3 Milan in Istanbul · not the shootout", know: 0.55, niche: true, a: [
     ["Steven Gerrard", 200, "gerrard|stevie g"], ["Hernán Crespo", 90, "crespo"], ["Paolo Maldini", 90, "maldini"], ["Xabi Alonso", 90, "alonso|xabi"], ["Vladimír Šmicer", 40, "smicer"],
   ] },
   { q: "Name a club that has been English league champions", sub: "First Division or Premier League, 1888–2026", know: 0.85, a: [
@@ -649,22 +661,22 @@ const PROMPTS = [
     ["1. FC Köln", 12, "koln|cologne|fc koln|fc cologne"], ["1. FC Kaiserslautern", 10, "kaiserslautern"], ["1. FC Nürnberg", 5, "nurnberg|nuremberg"], ["1860 Munich", 4, "1860|tsv 1860|1860 munchen"],
     ["Eintracht Braunschweig", 3, "braunschweig"],
   ] },
-  { q: "Name a player from Arsenal's 2003–04 Invincibles", sub: "Made a Premier League appearance that season", know: 0.55, a: [
+  { q: "Name a player from Arsenal's 2003–04 Invincibles", sub: "Made a Premier League appearance that season", know: 0.55, niche: true, a: [
     ["Thierry Henry", 220, "henry"], ["Patrick Vieira", 150, "vieira"], ["Dennis Bergkamp", 130, "bergkamp"], ["Robert Pirès", 90, "pires"], ["Sol Campbell", 80, "campbell"], ["Ashley Cole", 75, "cole"],
     ["Jens Lehmann", 70, "lehmann"], ["Freddie Ljungberg", 60, "ljungberg"], ["Kolo Touré", 55, "toure|kolo"], ["Lauren", 35, ""], ["Gilberto Silva", 35, "gilberto"], ["Ray Parlour", 25, "parlour"], ["Edu", 20, ""],
     ["José Antonio Reyes", 20, "reyes"], ["Sylvain Wiltord", 15, "wiltord"], ["Kanu", 15, "nwankwo kanu"], ["Martin Keown", 15, "keown"], ["Gaël Clichy", 12, "clichy"], ["Pascal Cygan", 5, "cygan"],
     ["Jérémie Aliadière", 3, "aliadiere"],
   ] },
-  { q: "Name a FIFA Puskás Award winner", sub: "Goal of the year, 2009–2025", know: 0.4, a: [
+  { q: "Name a FIFA Puskás Award winner", sub: "Goal of the year, 2009–2025", know: 0.4, niche: true, a: [
     ["Cristiano Ronaldo", 120, "cristiano|ronaldo|cr7"], ["Zlatan Ibrahimović", 110, "zlatan|ibrahimovic|ibra"], ["Neymar", 90, "neymar jr"], ["Mohamed Salah", 80, "salah|mo salah"], ["James Rodríguez", 70, "james|james rodriguez"],
     ["Son Heung-min", 70, "son|heung min son|sonny"], ["Alejandro Garnacho", 60, "garnacho"], ["Olivier Giroud", 50, "giroud"], ["Erik Lamela", 40, "lamela"], ["Hamit Altıntop", 6, "altintop|hamit altintop"],
     ["Miroslav Stoch", 5, "stoch"], ["Marcin Oleksy", 5, "oleksy"], ["Wendell Lira", 3, "lira"], ["Mohd Faiz Subri", 3, "faiz subri|subri"], ["Dániel Zsóri", 3, "zsori"], ["Guilherme Madruga", 3, "madruga"],
     ["Santiago Montiel", 3, "montiel"],
   ] },
-  { q: "Name a Kopa Trophy winner", sub: "Best young player at the Ballon d'Or, 2018–2026", know: 0.45, a: [
+  { q: "Name a Kopa Trophy winner", sub: "Best young player at the Ballon d'Or, 2018–2026", know: 0.45, niche: true, a: [
     ["Lamine Yamal", 200, "yamal|lamine"], ["Jude Bellingham", 160, "bellingham"], ["Kylian Mbappé", 120, "mbappe"], ["Pedri", 90, "pedro gonzalez"], ["Gavi", 80, "pablo gavi"], ["Matthijs de Ligt", 40, "de ligt"],
   ] },
-  { q: "Name a Yashin Trophy winner", sub: "Best goalkeeper at the Ballon d'Or, 2019–2026", know: 0.45, a: [
+  { q: "Name a Yashin Trophy winner", sub: "Best goalkeeper at the Ballon d'Or, 2019–2026", know: 0.45, niche: true, a: [
     ["Emiliano Martínez", 160, "emi martinez|dibu|dibu martinez|martinez"], ["Thibaut Courtois", 140, "courtois"], ["Gianluigi Donnarumma", 120, "donnarumma|gigio"], ["Alisson Becker", 110, "alisson"],
     ["Unai Simón", 40, "simon|unai simon"],
   ] },
@@ -675,17 +687,17 @@ const PROMPTS = [
   { q: "Name a club Cristiano Ronaldo has played for", sub: "Senior career, up to 2026", know: 0.95, a: [
     ["Real Madrid", 250, "madrid|real"], ["Manchester United", 230, "man utd|man united|manchester utd|united"], ["Juventus", 160, "juve"], ["Al-Nassr", 120, "al nassr|nassr"], ["Sporting CP", 70, "sporting|sporting lisbon|sporting clube de portugal"],
   ] },
-  { q: "Name a club Thierry Henry played for", sub: "Senior career", know: 0.7, a: [
+  { q: "Name a club Thierry Henry played for", sub: "Senior career", know: 0.7, niche: true, a: [
     ["Arsenal", 260, ""], ["Barcelona", 160, "barca|fc barcelona"], ["Juventus", 60, "juve"], ["Monaco", 60, "as monaco"], ["New York Red Bulls", 50, "red bulls|ny red bulls|new york"],
   ] },
   { q: "Name a club David Beckham played for", sub: "Senior career · loans count", know: 0.8, a: [
     ["Manchester United", 250, "man utd|man united|manchester utd|united"], ["Real Madrid", 200, "madrid|real"], ["LA Galaxy", 150, "galaxy|los angeles galaxy"], ["Paris Saint-Germain", 60, "psg|paris sg|paris"],
     ["AC Milan", 50, "milan"], ["Preston North End", 10, "preston"],
   ] },
-  { q: "Name a club Diego Maradona played for", sub: "Senior career", know: 0.7, a: [
+  { q: "Name a club Diego Maradona played for", sub: "Senior career", know: 0.7, niche: true, a: [
     ["Napoli", 250, ""], ["Barcelona", 140, "barca|fc barcelona"], ["Boca Juniors", 140, "boca"], ["Sevilla", 30, ""], ["Argentinos Juniors", 25, "argentinos"], ["Newell's Old Boys", 20, "newells|newells old boys"],
   ] },
-  { q: "Name a club Ronaldo Nazário played for", sub: "The Brazilian Ronaldo, senior career", know: 0.65, a: [
+  { q: "Name a club Ronaldo Nazário played for", sub: "The Brazilian Ronaldo, senior career", know: 0.65, niche: true, a: [
     ["Real Madrid", 200, "madrid|real"], ["Barcelona", 170, "barca|fc barcelona"], ["Inter Milan", 170, "inter|internazionale"], ["AC Milan", 70, "milan"], ["PSV Eindhoven", 60, "psv"], ["Corinthians", 40, ""], ["Cruzeiro", 25, ""],
   ] },
   { q: "Name a club Luis Suárez played for", sub: "The Uruguayan striker, senior career up to 2026", know: 0.7, a: [
@@ -696,11 +708,11 @@ const PROMPTS = [
     ["Chelsea", 250, ""], ["Real Madrid", 160, "madrid|real"], ["Inter Milan", 150, "inter|internazionale"], ["Manchester United", 150, "man utd|man united|manchester utd|united"], ["Porto", 120, "fc porto"],
     ["Tottenham Hotspur", 100, "tottenham|spurs"], ["Roma", 80, "as roma"], ["Benfica", 40, ""], ["Fenerbahçe", 40, "fenerbahce|fener"], ["União de Leiria", 5, "leiria|uniao de leiria"],
   ] },
-  { q: "Name a player who scored for Real Madrid in a Champions League final", sub: "2014–2024 finals · not shootouts", know: 0.65, a: [
+  { q: "Name a player who scored for Real Madrid in a Champions League final", sub: "2014–2024 finals · not shootouts", know: 0.65, niche: true, a: [
     ["Cristiano Ronaldo", 220, "cristiano|ronaldo|cr7"], ["Sergio Ramos", 150, "ramos"], ["Gareth Bale", 140, "bale"], ["Vinícius Júnior", 120, "vinicius|vini|vini jr|vinicius jr"], ["Karim Benzema", 90, "benzema"],
     ["Marcelo", 40, ""], ["Casemiro", 35, ""], ["Dani Carvajal", 35, "carvajal"], ["Marco Asensio", 30, "asensio"],
   ] },
-  { q: "Name a player who scored for Barcelona in a Champions League final", sub: "2006–2015 finals", know: 0.6, a: [
+  { q: "Name a player who scored for Barcelona in a Champions League final", sub: "2006–2015 finals", know: 0.6, niche: true, a: [
     ["Lionel Messi", 250, "messi|leo messi"], ["Samuel Eto'o", 120, "eto o|etoo|eto'o"], ["Neymar", 90, "neymar jr"], ["Luis Suárez", 90, "suarez"], ["David Villa", 50, "villa"], ["Pedro", 40, "pedro rodriguez"],
     ["Ivan Rakitić", 30, "rakitic"], ["Juliano Belletti", 10, "belletti"],
   ] },
@@ -744,11 +756,11 @@ const PROMPTS = [
   { q: "Name a club Mikel Arteta played for or managed", sub: "Senior career and club jobs · Barcelona B counts as Barcelona", know: 0.6, a: [
     ["Arsenal", 280, ""], ["Everton", 150, ""], ["Real Sociedad", 60, "sociedad|la real"], ["Rangers", 50, "glasgow rangers"], ["Paris Saint-Germain", 40, "psg|paris sg|paris"], ["Barcelona", 30, "barca|barcelona b|fc barcelona"],
   ] },
-  { q: "Name a club Diego Simeone played for or managed", sub: "Senior career and club jobs, up to 2026", know: 0.5, a: [
+  { q: "Name a club Diego Simeone played for or managed", sub: "Senior career and club jobs, up to 2026", know: 0.5, niche: true, a: [
     ["Atlético Madrid", 300, "atletico|atleti|atletico de madrid"], ["Inter Milan", 60, "inter|internazionale"], ["Lazio", 60, "ss lazio"], ["Sevilla", 30, ""], ["Racing Club", 30, "racing"], ["River Plate", 25, "river"],
     ["Estudiantes", 20, "estudiantes de la plata"], ["Vélez Sarsfield", 15, "velez|velez sarsfield"], ["Catania", 12, ""], ["Pisa", 10, ""], ["San Lorenzo", 10, ""],
   ] },
-  { q: "Name a club Michael Carrick played for or managed", sub: "Senior career and club jobs, up to 2026 · loans count", know: 0.55, a: [
+  { q: "Name a club Michael Carrick played for or managed", sub: "Senior career and club jobs, up to 2026 · loans count", know: 0.55, niche: true, a: [
     ["Manchester United", 300, "man utd|man united|manchester utd|united"], ["Tottenham Hotspur", 100, "tottenham|spurs"], ["West Ham United", 90, "west ham|hammers"], ["Middlesbrough", 70, "boro"],
     ["Birmingham City", 10, "birmingham"], ["Swindon Town", 8, "swindon"],
   ] },
@@ -759,20 +771,20 @@ const PROMPTS = [
     ["Barcelona", 300, "barca|fc barcelona"], ["AC Milan", 140, "milan"], ["Paris Saint-Germain", 130, "psg|paris sg|paris"], ["Grêmio", 50, "gremio"], ["Flamengo", 45, ""], ["Atlético Mineiro", 35, "atletico mineiro|atletico|galo"],
     ["Querétaro", 12, "queretaro"], ["Fluminense", 12, ""],
   ] },
-  { q: "Name a club Kaká played for", sub: "Senior career", know: 0.7, a: [
+  { q: "Name a club Kaká played for", sub: "Senior career", know: 0.7, niche: true, a: [
     ["AC Milan", 280, "milan"], ["Real Madrid", 220, "madrid|real"], ["São Paulo", 80, "sao paulo"], ["Orlando City", 60, "orlando"],
   ] },
-  { q: "Name a club Didier Drogba played for", sub: "Senior career", know: 0.7, a: [
+  { q: "Name a club Didier Drogba played for", sub: "Senior career", know: 0.7, niche: true, a: [
     ["Chelsea", 300, ""], ["Marseille", 100, "olympique de marseille|om"], ["Galatasaray", 70, "gala"], ["Shanghai Shenhua", 40, "shanghai|shenhua"], ["Montreal Impact", 30, "montreal|cf montreal"], ["Guingamp", 30, "en avant guingamp"],
     ["Le Mans", 15, ""], ["Phoenix Rising", 15, "phoenix"],
   ] },
   { q: "Name a club Fernando Torres played for", sub: "Senior career", know: 0.75, a: [
     ["Liverpool", 260, ""], ["Atlético Madrid", 230, "atletico|atleti|atletico de madrid"], ["Chelsea", 200, ""], ["AC Milan", 50, "milan"], ["Sagan Tosu", 25, "tosu"],
   ] },
-  { q: "Name a club Arjen Robben played for", sub: "Senior career", know: 0.65, a: [
+  { q: "Name a club Arjen Robben played for", sub: "Senior career", know: 0.65, niche: true, a: [
     ["Bayern Munich", 260, "bayern|fc bayern|bayern munchen"], ["Chelsea", 150, ""], ["Real Madrid", 110, "madrid|real"], ["PSV Eindhoven", 70, "psv"], ["Groningen", 40, "fc groningen"],
   ] },
-  { q: "Name a club Robin van Persie played for", sub: "Senior career", know: 0.6, a: [
+  { q: "Name a club Robin van Persie played for", sub: "Senior career", know: 0.6, niche: true, a: [
     ["Arsenal", 260, ""], ["Manchester United", 220, "man utd|man united|manchester utd|united"], ["Feyenoord", 90, ""], ["Fenerbahçe", 60, "fenerbahce|fener"],
   ] },
   { q: "Name a club Sergio Agüero played for", sub: "Senior career", know: 0.7, a: [
@@ -784,7 +796,7 @@ const PROMPTS = [
   { q: "Name a club Luka Modrić has played for", sub: "Senior career up to 2026 · loans count", know: 0.7, a: [
     ["Real Madrid", 300, "madrid|real"], ["Tottenham Hotspur", 170, "tottenham|spurs"], ["AC Milan", 90, "milan"], ["Dinamo Zagreb", 60, "dinamo|zagreb"], ["Zrinjski Mostar", 8, "zrinjski"], ["Inter Zaprešić", 5, "zapresic|inter zapresic"],
   ] },
-  { q: "Name a club Mesut Özil played for", sub: "Senior career", know: 0.6, a: [
+  { q: "Name a club Mesut Özil played for", sub: "Senior career", know: 0.6, niche: true, a: [
     ["Arsenal", 260, ""], ["Real Madrid", 200, "madrid|real"], ["Werder Bremen", 70, "bremen|werder"], ["Schalke 04", 50, "schalke"], ["Fenerbahçe", 50, "fenerbahce|fener"], ["İstanbul Başakşehir", 15, "basaksehir|istanbul basaksehir"],
   ] },
   { q: "Name a club Edinson Cavani has played for", sub: "Senior career up to 2026", know: 0.55, a: [
@@ -824,13 +836,13 @@ const PROMPTS = [
   { q: "Name a club Paul Pogba has played for", sub: "Senior career up to 2026", know: 0.7, a: [
     ["Manchester United", 260, "man utd|man united|manchester utd|united"], ["Juventus", 240, "juve"], ["Monaco", 60, "as monaco"],
   ] },
-  { q: "Name a club Xabi Alonso played for", sub: "Senior career · loans count", know: 0.55, a: [
+  { q: "Name a club Xabi Alonso played for", sub: "Senior career · loans count", know: 0.55, niche: true, a: [
     ["Liverpool", 250, ""], ["Real Madrid", 220, "madrid|real"], ["Bayern Munich", 130, "bayern|fc bayern|bayern munchen"], ["Real Sociedad", 70, "sociedad|la real"], ["Eibar", 10, "sd eibar"],
   ] },
   { q: "Name a club Toni Kroos played for", sub: "Senior career · loans count", know: 0.7, a: [
     ["Real Madrid", 300, "madrid|real"], ["Bayern Munich", 200, "bayern|fc bayern|bayern munchen"], ["Bayer Leverkusen", 50, "leverkusen|bayer"],
   ] },
-  { q: "Name a club İlkay Gündoğan has played for", sub: "Senior career up to 2026", know: 0.5, a: [
+  { q: "Name a club İlkay Gündoğan has played for", sub: "Senior career up to 2026", know: 0.5, niche: true, a: [
     ["Manchester City", 280, "man city|city"], ["Borussia Dortmund", 150, "dortmund|bvb"], ["Barcelona", 100, "barca|fc barcelona"], ["Galatasaray", 60, "gala"], ["1. FC Nürnberg", 20, "nurnberg|nuremberg|fc nurnberg"],
     ["VfL Bochum", 10, "bochum"],
   ] },
@@ -846,13 +858,13 @@ const PROMPTS = [
   { q: "Name a club Jamie Vardy has played for", sub: "Senior career up to 2026", know: 0.55, a: [
     ["Leicester City", 300, "leicester"], ["Fleetwood Town", 60, "fleetwood"], ["Cremonese", 50, "us cremonese"], ["FC Halifax Town", 25, "halifax|halifax town"], ["Stocksbridge Park Steels", 15, "stocksbridge"],
   ] },
-  { q: "Name a club Jordan Henderson has played for", sub: "Senior career up to 2026 · loans count", know: 0.45, a: [
+  { q: "Name a club Jordan Henderson has played for", sub: "Senior career up to 2026 · loans count", know: 0.45, niche: true, a: [
     ["Liverpool", 300, ""], ["Sunderland", 100, ""], ["Al-Ettifaq", 60, "ettifaq|al ettifaq"], ["Ajax", 60, ""], ["Brentford", 50, ""], ["Coventry City", 10, "coventry"],
   ] },
   { q: "Name a club Thibaut Courtois has played for", sub: "Senior career up to 2026 · loans count", know: 0.6, a: [
     ["Real Madrid", 270, "madrid|real"], ["Chelsea", 200, ""], ["Atlético Madrid", 130, "atletico|atleti|atletico de madrid"], ["Genk", 40, "krc genk"],
   ] },
-  { q: "Name a club Jan Oblak has played for", sub: "Senior career up to 2026 · loans count", know: 0.4, a: [
+  { q: "Name a club Jan Oblak has played for", sub: "Senior career up to 2026 · loans count", know: 0.4, niche: true, a: [
     ["Atlético Madrid", 300, "atletico|atleti|atletico de madrid"], ["Benfica", 80, ""], ["Olimpija Ljubljana", 20, "olimpija|ljubljana"], ["Rio Ave", 15, ""], ["União de Leiria", 8, "leiria|uniao de leiria"],
     ["Beira-Mar", 5, "beira mar"], ["Olhanense", 5, ""],
   ] },
@@ -873,37 +885,37 @@ const PROMPTS = [
     ["Arsenal", 200, ""], ["Aston Villa", 165, "villa"], ["Sevilla", 134, ""], ["Paris Saint-Germain", 80, "psg|paris sg|paris"], ["Villarreal", 57, ""], ["Valencia", 23, ""], ["Spartak Moscow", 5, "spartak"], ["Almería", 3, "almeria"],
     ["Lorca Deportiva", 1, "lorca"],
   ] },
-  { q: "Name a club Arsène Wenger has managed", sub: "Club sides only", know: 0.5, a: [
+  { q: "Name a club Arsène Wenger has managed", sub: "Club sides only", know: 0.5, niche: true, a: [
     ["Arsenal", 330, ""], ["Monaco", 90, "as monaco"], ["Nagoya Grampus", 40, "nagoya|nagoya grampus eight|grampus"], ["Nancy", 20, "as nancy|nancy lorraine"],
   ] },
   { q: "Name a club Luis Enrique has managed", sub: "Club sides only, up to 2026 · Barcelona B counts as Barcelona", know: 0.5, a: [
     ["Paris Saint-Germain", 230, "psg|paris sg|paris"], ["Barcelona", 220, "barca|fc barcelona"], ["Roma", 70, "as roma"], ["Celta Vigo", 60, "celta"],
   ] },
-  { q: "Name a player from Brazil's 2002 World Cup-winning squad", sub: "Any of the 23", know: 0.7, a: [
+  { q: "Name a player from Brazil's 2002 World Cup-winning squad", sub: "Any of the 23", know: 0.7, niche: true, a: [
     ["Ronaldo Nazário", 250, "ronaldo|r9|ronaldo nazario|nazario|brazilian ronaldo|o fenomeno"], ["Ronaldinho", 209, "dinho"], ["Rivaldo", 158, ""], ["Roberto Carlos", 146, "carlos"], ["Cafu", 122, ""], ["Kaká", 69, "kaka"],
     ["Lúcio", 26, "lucio"], ["Gilberto Silva", 26, "gilberto"], ["Marcos", 13, ""], ["Dida", 10, ""], ["Edmílson", 10, "edmilson"], ["Roque Júnior", 7, "roque junior"], ["Denílson", 7, "denilson"],
     ["Kléberson", 7, "kleberson"], ["Juliano Belletti", 5, "belletti"], ["Juninho Paulista", 5, "juninho"], ["Rogério Ceni", 5, "rogerio ceni|ceni"], ["Edílson", 3, "edilson"], ["Luizão", 3, "luizao"],
     ["Vampeta", 3, ""], ["Ricardinho", 2, ""], ["Júnior", 2, "junior"], ["Anderson Polga", 1, "polga"],
   ] },
-  { q: "Name a player from Italy's 2006 World Cup-winning squad", sub: "Any of the 23", know: 0.65, a: [
+  { q: "Name a player from Italy's 2006 World Cup-winning squad", sub: "Any of the 23", know: 0.65, niche: true, a: [
     ["Gianluigi Buffon", 220, "buffon|gigi buffon"], ["Andrea Pirlo", 185, "pirlo"], ["Fabio Cannavaro", 153, "cannavaro"], ["Francesco Totti", 124, "totti"], ["Alessandro Del Piero", 98, "del piero"], ["Gennaro Gattuso", 74, "gattuso"],
     ["Marco Materazzi", 63, "materazzi"], ["Alessandro Nesta", 44, "nesta"], ["Filippo Inzaghi", 36, "inzaghi|pippo inzaghi"], ["Luca Toni", 28, "toni"], ["Fabio Grosso", 21, "grosso"], ["Daniele De Rossi", 21, "de rossi"],
     ["Gianluca Zambrotta", 15, "zambrotta"], ["Mauro Camoranesi", 6, "camoranesi"], ["Alberto Gilardino", 6, "gilardino"], ["Simone Perrotta", 3, "perrotta"], ["Vincenzo Iaquinta", 3, "iaquinta"],
     ["Andrea Barzagli", 3, "barzagli"], ["Massimo Oddo", 2, "oddo"], ["Cristian Zaccardo", 1, "zaccardo"], ["Angelo Peruzzi", 1, "peruzzi"], ["Simone Barone", 1, "barone"], ["Marco Amelia", 1, "amelia"],
   ] },
-  { q: "Name a player from France's 1998 World Cup-winning squad", sub: "Any of the 22", know: 0.6, a: [
+  { q: "Name a player from France's 1998 World Cup-winning squad", sub: "Any of the 22", know: 0.6, niche: true, a: [
     ["Zinedine Zidane", 250, "zidane|zizou"], ["Thierry Henry", 130, "henry"], ["Didier Deschamps", 96, "deschamps"], ["Fabien Barthez", 75, "barthez"], ["Lilian Thuram", 56, "thuram"], ["Patrick Vieira", 56, "vieira"],
     ["Marcel Desailly", 47, "desailly"], ["Emmanuel Petit", 39, "petit"], ["David Trezeguet", 39, "trezeguet"], ["Laurent Blanc", 31, "blanc"], ["Bixente Lizarazu", 24, "lizarazu"], ["Youri Djorkaeff", 24, "djorkaeff"],
     ["Robert Pirès", 17, "pires"], ["Frank Leboeuf", 11, "leboeuf"], ["Christian Karembeu", 9, "karembeu"], ["Christophe Dugarry", 9, "dugarry"], ["Stéphane Guivarc'h", 4, "guivarch"], ["Vincent Candela", 3, "candela"],
     ["Alain Boghossian", 2, "boghossian"], ["Bernard Lama", 2, "lama"], ["Bernard Diomède", 1, "diomede"], ["Lionel Charbonnier", 1, "charbonnier"],
   ] },
-  { q: "Name a player from Spain's Euro 2008-winning squad", sub: "Any of the 23", know: 0.6, a: [
+  { q: "Name a player from Spain's Euro 2008-winning squad", sub: "Any of the 23", know: 0.6, niche: true, a: [
     ["Fernando Torres", 200, "torres"], ["Xavi", 165, "xavi hernandez"], ["Iker Casillas", 149, "casillas"], ["Andrés Iniesta", 134, "iniesta"], ["David Villa", 105, "villa"], ["Sergio Ramos", 92, "ramos"],
     ["Carles Puyol", 68, "puyol"], ["Cesc Fàbregas", 57, "fabregas|cesc"], ["Xabi Alonso", 48, "alonso"], ["David Silva", 38, "silva"], ["Marcos Senna", 16, "senna"], ["Santi Cazorla", 11, "cazorla"],
     ["Pepe Reina", 7, "reina"], ["Joan Capdevila", 5, "capdevila"], ["Carlos Marchena", 5, "marchena"], ["Álvaro Arbeloa", 3, "arbeloa"], ["Raúl Albiol", 3, "albiol"], ["Dani Güiza", 2, "guiza"],
     ["Sergio García", 1, "sergio garcia"], ["Rubén de la Red", 1, "de la red"], ["Fernando Navarro", 1, "navarro"], ["Juanito", 1, "juanito gutierrez"], ["Andrés Palop", 1, "palop"],
   ] },
-  { q: "Name a player from Spain's Euro 2012-winning squad", sub: "Any of the 23", know: 0.6, a: [
+  { q: "Name a player from Spain's Euro 2012-winning squad", sub: "Any of the 23", know: 0.6, niche: true, a: [
     ["Andrés Iniesta", 190, "iniesta"], ["Xavi", 172, "xavi hernandez"], ["Iker Casillas", 156, "casillas"], ["Sergio Ramos", 124, "ramos"], ["Fernando Torres", 96, "torres"], ["Gerard Piqué", 83, "pique"],
     ["Sergio Busquets", 71, "busquets"], ["Cesc Fàbregas", 71, "fabregas|cesc"], ["Xabi Alonso", 60, "alonso"], ["David Silva", 60, "silva"], ["Jordi Alba", 50, "alba"], ["Juan Mata", 24, "mata"],
     ["Pedro", 17, "pedro rodriguez"], ["Santi Cazorla", 12, "cazorla"], ["Jesús Navas", 9, "navas"], ["Álvaro Arbeloa", 7, "arbeloa"], ["Pepe Reina", 5, "reina"], ["Víctor Valdés", 5, "valdes"],
@@ -916,125 +928,125 @@ const PROMPTS = [
     ["Anthony Gordon", 7, "gordon"], ["Eberechi Eze", 6, "eze"], ["Jarrod Bowen", 6, "bowen"], ["Ezri Konsa", 4, "konsa"], ["Aaron Ramsdale", 3, "ramsdale"], ["Joe Gomez", 2, "gomez"],
     ["Lewis Dunk", 1, "dunk"], ["Dean Henderson", 1, "henderson"], ["Adam Wharton", 1, "wharton"],
   ] },
-  { q: "Name a player from England's Women's Euro 2022-winning squad", sub: "Any of the 23 Lionesses", know: 0.45, a: [
+  { q: "Name a player from England's Women's Euro 2022-winning squad", sub: "Any of the 23 Lionesses", know: 0.45, niche: true, a: [
     ["Beth Mead", 200, "mead"], ["Leah Williamson", 165, "williamson"], ["Chloe Kelly", 149, "kelly"], ["Mary Earps", 134, "earps"], ["Lucy Bronze", 119, "bronze"], ["Alessia Russo", 105, "russo"],
     ["Ella Toone", 80, "toone"], ["Millie Bright", 57, "bright"], ["Lauren Hemp", 48, "hemp"], ["Georgia Stanway", 38, "stanway"], ["Ellen White", 38, "white"], ["Keira Walsh", 30, "walsh"],
     ["Fran Kirby", 23, "kirby"], ["Rachel Daly", 16, "daly"], ["Jill Scott", 16, "scott"], ["Alex Greenwood", 11, "greenwood"], ["Bethany England", 7, "england"], ["Nikita Parris", 5, "parris"],
     ["Demi Stokes", 3, "stokes"], ["Jess Carter", 3, "carter"], ["Hannah Hampton", 3, "hampton"], ["Lotte Wubben-Moy", 2, "wubben moy"], ["Ellie Roebuck", 1, "roebuck"],
   ] },
-  { q: "Name a player from Leicester's 2015–16 title team", sub: "Made a Premier League appearance that season", know: 0.6, a: [
+  { q: "Name a player from Leicester's 2015–16 title team", sub: "Made a Premier League appearance that season", know: 0.6, niche: true, a: [
     ["Jamie Vardy", 250, "vardy"], ["Riyad Mahrez", 179, "mahrez"], ["N'Golo Kanté", 153, "kante|ngolo kante"], ["Kasper Schmeichel", 105, "schmeichel"], ["Wes Morgan", 45, "morgan"], ["Robert Huth", 37, "huth"],
     ["Danny Drinkwater", 37, "drinkwater"], ["Shinji Okazaki", 29, "okazaki"], ["Christian Fuchs", 22, "fuchs"], ["Marc Albrighton", 19, "albrighton"], ["Danny Simpson", 13, "simpson"], ["Leonardo Ulloa", 10, "ulloa"],
     ["Jeffrey Schlupp", 8, "schlupp"], ["Andy King", 8, "king"], ["Demarai Gray", 6, "gray"], ["Nathan Dyer", 4, "dyer"], ["Gökhan İnler", 3, "inler"], ["Ritchie De Laet", 2, "de laet"],
     ["Marcin Wasilewski", 1, "wasilewski"], ["Daniel Amartey", 1, "amartey"], ["Yohan Benalouane", 1, "benalouane"], ["Mark Schwarzer", 1, "schwarzer"], ["Andrej Kramarić", 1, "kramaric"],
   ] },
-  { q: "Name a player who played in the 2008 Champions League final", sub: "Man United v Chelsea in Moscow · starters or subs who came on", know: 0.5, a: [
+  { q: "Name a player who played in the 2008 Champions League final", sub: "Man United v Chelsea in Moscow · starters or subs who came on", know: 0.5, niche: true, a: [
     ["Cristiano Ronaldo", 220, "cristiano|ronaldo|cr7"], ["Wayne Rooney", 110, "rooney"], ["John Terry", 110, "terry"], ["Frank Lampard", 85, "lampard"], ["Didier Drogba", 85, "drogba"], ["Petr Čech", 36, "cech"],
     ["Edwin van der Sar", 36, "van der sar"], ["Carlos Tevez", 28, "tevez"], ["Ryan Giggs", 28, "giggs"], ["Paul Scholes", 21, "scholes"], ["Rio Ferdinand", 21, "ferdinand|rio"], ["Nemanja Vidić", 18, "vidic"],
     ["Michael Ballack", 15, "ballack"], ["Ashley Cole", 13, ""], ["Michael Carrick", 10, "carrick"], ["Patrice Evra", 10, "evra"], ["Nicolas Anelka", 10, "anelka"], ["Claude Makélélé", 8, "makelele"],
     ["Michael Essien", 8, "essien"], ["Owen Hargreaves", 6, "hargreaves"], ["Joe Cole", 4, ""], ["Ricardo Carvalho", 3, "carvalho"], ["Florent Malouda", 3, "malouda"], ["Wes Brown", 2, "brown"],
     ["Nani", 2, ""], ["Anderson", 1, ""], ["Salomon Kalou", 1, "kalou"], ["Juliano Belletti", 1, "belletti"],
   ] },
-  { q: "Name a player who played in the 2009 Champions League final", sub: "Barcelona v Man United in Rome · starters or subs who came on", know: 0.5, a: [
+  { q: "Name a player who played in the 2009 Champions League final", sub: "Barcelona v Man United in Rome · starters or subs who came on", know: 0.5, niche: true, a: [
     ["Lionel Messi", 230, "messi"], ["Cristiano Ronaldo", 179, "cristiano|ronaldo|cr7"], ["Andrés Iniesta", 82, "iniesta"], ["Xavi", 82, "xavi hernandez"], ["Wayne Rooney", 71, "rooney"], ["Samuel Eto'o", 61, "etoo|eto o"],
     ["Thierry Henry", 51, "henry"], ["Gerard Piqué", 34, "pique"], ["Carles Puyol", 34, "puyol"], ["Sergio Busquets", 20, "busquets"], ["Víctor Valdés", 15, "valdes"], ["Ryan Giggs", 15, "giggs"],
     ["Edwin van der Sar", 15, "van der sar"], ["Rio Ferdinand", 12, "ferdinand|rio"], ["Nemanja Vidić", 10, "vidic"], ["Carlos Tevez", 10, "tevez"], ["Patrice Evra", 8, "evra"], ["Michael Carrick", 8, "carrick"],
     ["Yaya Touré", 6, "yaya|toure"], ["Dimitar Berbatov", 6, "berbatov"], ["Paul Scholes", 6, "scholes"], ["Park Ji-sung", 4, "park|ji sung park"], ["John O'Shea", 2, "oshea"], ["Anderson", 1, ""],
     ["Sylvinho", 1, ""], ["Pedro", 1, "pedro rodriguez"], ["Seydou Keita", 1, "keita"],
   ] },
-  { q: "Name a player who played in the 2011 Champions League final", sub: "Barcelona v Man United at Wembley · starters or subs who came on", know: 0.5, a: [
+  { q: "Name a player who played in the 2011 Champions League final", sub: "Barcelona v Man United at Wembley · starters or subs who came on", know: 0.5, niche: true, a: [
     ["Lionel Messi", 230, "messi"], ["Wayne Rooney", 94, "rooney"], ["Xavi", 82, "xavi hernandez"], ["Andrés Iniesta", 82, "iniesta"], ["David Villa", 51, "villa"], ["Javier Hernández", 27, "chicharito|hernandez"],
     ["Pedro", 20, "pedro rodriguez"], ["Gerard Piqué", 20, "pique"], ["Dani Alves", 20, "alves|daniel alves"], ["Sergio Busquets", 15, "busquets"], ["Javier Mascherano", 12, "mascherano"], ["Edwin van der Sar", 12, "van der sar"],
     ["Ryan Giggs", 12, "giggs"], ["Rio Ferdinand", 10, "ferdinand|rio"], ["Nemanja Vidić", 10, "vidic"], ["Víctor Valdés", 8, "valdes"], ["Patrice Evra", 6, "evra"], ["Michael Carrick", 6, "carrick"],
     ["Park Ji-sung", 4, "park|ji sung park"], ["Antonio Valencia", 3, "valencia"], ["Carles Puyol", 3, "puyol"], ["Éric Abidal", 3, "abidal"], ["Nani", 2, ""], ["Paul Scholes", 2, "scholes"],
     ["Fábio", 1, "fabio da silva"], ["Ibrahim Afellay", 1, "afellay"], ["Seydou Keita", 1, "keita"],
   ] },
-  { q: "Name a player who played in the 2005 Champions League final", sub: "Liverpool v AC Milan in Istanbul · starters or subs who came on", know: 0.5, a: [
+  { q: "Name a player who played in the 2005 Champions League final", sub: "Liverpool v AC Milan in Istanbul · starters or subs who came on", know: 0.5, niche: true, a: [
     ["Steven Gerrard", 230, "gerrard|stevie g"], ["Andriy Shevchenko", 71, "shevchenko|sheva"], ["Paolo Maldini", 71, "maldini"], ["Kaká", 61, "kaka"], ["Andrea Pirlo", 51, "pirlo"], ["Jamie Carragher", 51, "carragher"],
     ["Xabi Alonso", 42, "alonso|xabi"], ["Jerzy Dudek", 34, "dudek"], ["Hernán Crespo", 20, "crespo"], ["Gennaro Gattuso", 20, "gattuso"], ["Cafu", 15, ""], ["Alessandro Nesta", 15, "nesta"],
     ["Clarence Seedorf", 15, "seedorf"], ["Dida", 10, ""], ["Jaap Stam", 10, "stam"], ["Luis García", 10, "luis garcia"], ["Milan Baroš", 6, "baros"], ["Sami Hyypiä", 6, "hyypia"],
     ["Dietmar Hamann", 6, "hamann|didi hamann"], ["Harry Kewell", 4, "kewell"], ["Vladimír Šmicer", 4, "smicer"], ["John Arne Riise", 4, "riise"], ["Djibril Cissé", 3, "cisse"], ["Steve Finnan", 2, "finnan"],
     ["Rui Costa", 2, ""], ["Djimi Traoré", 2, "traore"], ["Serginho", 1, ""], ["Jon Dahl Tomasson", 1, "tomasson"],
   ] },
-  { q: "Name a player who played in the 1999 Champions League final", sub: "Man United v Bayern in Barcelona · starters or subs who came on", know: 0.4, a: [
+  { q: "Name a player who played in the 1999 Champions League final", sub: "Man United v Bayern in Barcelona · starters or subs who came on", know: 0.4, niche: true, a: [
     ["David Beckham", 200, "beckham"], ["Ole Gunnar Solskjær", 119, "solskjaer|ole"], ["Teddy Sheringham", 92, "sheringham"], ["Peter Schmeichel", 80, "schmeichel"], ["Ryan Giggs", 57, "giggs"], ["Oliver Kahn", 38, "kahn"],
     ["Dwight Yorke", 30, "yorke"], ["Andy Cole", 30, "cole|andrew cole"], ["Gary Neville", 23, "neville"], ["Lothar Matthäus", 16, "matthaus|matthaeus"], ["Jaap Stam", 16, "stam"], ["Stefan Effenberg", 11, "effenberg"],
     ["Nicky Butt", 9, "butt"], ["Denis Irwin", 7, "irwin"], ["Mario Basler", 7, "basler"], ["Ronny Johnsen", 3, "johnsen"], ["Jesper Blomqvist", 3, "blomqvist"], ["Mehmet Scholl", 3, "scholl"],
     ["Hasan Salihamidžić", 2, "salihamidzic|brazzo"], ["Carsten Jancker", 2, "jancker"], ["Samuel Kuffour", 2, "kuffour"], ["Markus Babbel", 1, "babbel"], ["Thorsten Fink", 1, "fink"], ["Jens Jeremies", 1, "jeremies"],
     ["Thomas Linke", 1, "linke"], ["Michael Tarnat", 1, "tarnat"], ["Alexander Zickler", 1, "zickler"],
   ] },
-  { q: "Name a player who played in the 2006 Champions League final", sub: "Barcelona v Arsenal in Paris · starters or subs who came on", know: 0.45, a: [
+  { q: "Name a player who played in the 2006 Champions League final", sub: "Barcelona v Arsenal in Paris · starters or subs who came on", know: 0.45, niche: true, a: [
     ["Ronaldinho", 200, "dinho"], ["Thierry Henry", 182, "henry"], ["Samuel Eto'o", 92, "etoo|eto o"], ["Cesc Fàbregas", 48, "fabregas|cesc"], ["Andrés Iniesta", 38, "iniesta"], ["Jens Lehmann", 38, "lehmann"],
     ["Sol Campbell", 30, "campbell"], ["Carles Puyol", 30, "puyol"], ["Deco", 23, ""], ["Henrik Larsson", 16, "larsson"], ["Ashley Cole", 16, "cole"], ["Robert Pirès", 11, "pires"],
     ["Freddie Ljungberg", 11, "ljungberg"], ["Kolo Touré", 9, "toure|kolo"], ["Víctor Valdés", 9, "valdes"], ["Juliano Belletti", 9, "belletti"], ["Gilberto Silva", 7, "gilberto"], ["Alexander Hleb", 5, "hleb"],
     ["Ludovic Giuly", 5, "giuly"], ["Rafael Márquez", 5, "marquez"], ["Mark van Bommel", 3, "van bommel"], ["Emmanuel Eboué", 3, "eboue"], ["Manuel Almunia", 2, "almunia"], ["Giovanni van Bronckhorst", 2, "van bronckhorst|gio"],
     ["Mathieu Flamini", 1, "flamini"], ["José Antonio Reyes", 1, "reyes"], ["Edmílson", 1, "edmilson"], ["Oleguer", 1, ""],
   ] },
-  { q: "Name a player who played in the 2019 Champions League final", sub: "Tottenham v Liverpool in Madrid · starters or subs who came on", know: 0.6, a: [
+  { q: "Name a player who played in the 2019 Champions League final", sub: "Tottenham v Liverpool in Madrid · starters or subs who came on", know: 0.6, niche: true, a: [
     ["Mohamed Salah", 200, "salah|mo salah"], ["Harry Kane", 149, "kane"], ["Virgil van Dijk", 119, "van dijk|vvd"], ["Sadio Mané", 80, "mane"], ["Son Heung-min", 68, "son|heung min son|sonny"], ["Divock Origi", 48, "origi"],
     ["Roberto Firmino", 38, "firmino"], ["Alisson Becker", 38, "alisson"], ["Hugo Lloris", 30, "lloris"], ["Trent Alexander-Arnold", 30, "trent|alexander arnold|taa"], ["Andy Robertson", 30, "robertson|robbo"], ["Jordan Henderson", 23, "henderson|hendo"],
     ["Christian Eriksen", 23, "eriksen"], ["Dele Alli", 20, "dele|alli"], ["Lucas Moura", 16, "lucas|moura"], ["Fabinho", 14, ""], ["Georginio Wijnaldum", 14, "wijnaldum|gini"], ["James Milner", 11, "milner"],
     ["Kieran Trippier", 7, "trippier"], ["Jan Vertonghen", 7, "vertonghen"], ["Toby Alderweireld", 7, "alderweireld"], ["Danny Rose", 5, "rose"], ["Moussa Sissoko", 5, "sissoko"], ["Joël Matip", 5, "matip"],
     ["Harry Winks", 3, "winks"], ["Eric Dier", 3, "dier"], ["Fernando Llorente", 2, "llorente"], ["Joe Gomez", 2, "gomez"],
   ] },
-  { q: "Name a player who played in the 2021 Champions League final", sub: "Man City v Chelsea in Porto · starters or subs who came on", know: 0.55, a: [
+  { q: "Name a player who played in the 2021 Champions League final", sub: "Man City v Chelsea in Porto · starters or subs who came on", know: 0.55, niche: true, a: [
     ["Kevin De Bruyne", 160, "de bruyne|kdb"], ["Kai Havertz", 142, "havertz"], ["N'Golo Kanté", 110, "kante|ngolo kante"], ["Phil Foden", 69, "foden"], ["Raheem Sterling", 69, "sterling"], ["Mason Mount", 57, "mount"],
     ["Riyad Mahrez", 46, "mahrez"], ["Édouard Mendy", 36, "mendy"], ["Ederson", 27, ""], ["Rúben Dias", 27, "dias|ruben dias"], ["Thiago Silva", 27, ""], ["Timo Werner", 27, "werner"],
     ["Kyle Walker", 20, "walker"], ["Jorginho", 20, ""], ["Reece James", 20, "reece|james"], ["Ben Chilwell", 16, "chilwell"], ["Christian Pulisic", 16, "pulisic"], ["Sergio Agüero", 16, "aguero|kun aguero"],
     ["İlkay Gündoğan", 13, "gundogan"], ["Bernardo Silva", 13, "bernardo"], ["John Stones", 10, "stones"], ["César Azpilicueta", 10, "azpilicueta|dave"], ["Antonio Rüdiger", 10, "rudiger|ruediger"], ["Gabriel Jesus", 8, "jesus"],
     ["Oleksandr Zinchenko", 6, "zinchenko"], ["Mateo Kovačić", 4, "kovacic"], ["Andreas Christensen", 2, "christensen"], ["Fernandinho", 2, ""],
   ] },
-  { q: "Name a player who played in the 2014 Champions League final", sub: "Real Madrid v Atlético Madrid in Lisbon · starters or subs who came on", know: 0.5, a: [
+  { q: "Name a player who played in the 2014 Champions League final", sub: "Real Madrid v Atlético Madrid in Lisbon · starters or subs who came on", know: 0.5, niche: true, a: [
     ["Cristiano Ronaldo", 220, "cristiano|ronaldo|cr7"], ["Gareth Bale", 98, "bale"], ["Sergio Ramos", 85, "ramos"], ["Luka Modrić", 53, "modric"], ["Karim Benzema", 44, "benzema"], ["Iker Casillas", 44, "casillas"],
     ["Thibaut Courtois", 36, "courtois"], ["Ángel Di María", 36, "di maria|dimaria"], ["Diego Costa", 28, "costa"], ["Diego Godín", 21, "godin"], ["David Villa", 21, "villa"], ["Marcelo", 21, ""],
     ["Koke", 15, ""], ["Raphaël Varane", 13, "varane"], ["Dani Carvajal", 13, "carvajal"], ["Isco", 10, ""], ["Álvaro Morata", 8, "morata"], ["Gabi", 6, "gabi fernandez"], ["Filipe Luís", 6, "filipe luis"],
     ["Juanfran", 6, ""], ["Miranda", 4, "joao miranda"], ["Sami Khedira", 4, "khedira"], ["Raúl García", 3, "raul garcia"], ["Fábio Coentrão", 2, "coentrao"], ["Tiago", 1, "tiago mendes"],
     ["Toby Alderweireld", 1, "alderweireld"], ["Adrián López", 1, "adrian|adrian lopez"], ["José Sosa", 1, "sosa"],
   ] },
-  { q: "Name a player who played in the 2022 Champions League final", sub: "Liverpool v Real Madrid in Paris · starters or subs who came on", know: 0.55, a: [
+  { q: "Name a player who played in the 2022 Champions League final", sub: "Liverpool v Real Madrid in Paris · starters or subs who came on", know: 0.55, niche: true, a: [
     ["Mohamed Salah", 180, "salah|mo salah"], ["Vinícius Júnior", 162, "vinicius|vini|vinicius jr"], ["Karim Benzema", 130, "benzema"], ["Thibaut Courtois", 115, "courtois"], ["Luka Modrić", 87, "modric"], ["Virgil van Dijk", 74, "van dijk|vvd"],
     ["Sadio Mané", 52, "mane"], ["Toni Kroos", 52, "kroos"], ["Casemiro", 42, ""], ["Federico Valverde", 33, "valverde|fede"], ["Alisson Becker", 33, "alisson"], ["Trent Alexander-Arnold", 33, "trent|alexander arnold|taa"],
     ["Luis Díaz", 25, "diaz|lucho"], ["Andy Robertson", 18, "robertson|robbo"], ["Dani Carvajal", 18, "carvajal"], ["Éder Militão", 15, "militao"], ["David Alaba", 15, "alaba"], ["Fabinho", 12, ""],
     ["Thiago Alcântara", 12, "thiago|alcantara"], ["Jordan Henderson", 12, "henderson|hendo"], ["Ferland Mendy", 7, "mendy"], ["Ibrahima Konaté", 7, "konate"], ["Diogo Jota", 7, "jota"], ["Roberto Firmino", 7, "firmino"],
     ["Eduardo Camavinga", 5, "camavinga"], ["Rodrygo", 5, ""], ["Naby Keïta", 3, "keita"], ["Dani Ceballos", 1, "ceballos"],
   ] },
-  { q: "Name a Man City player who played in the 93:20 game", sub: "City 3–2 QPR, May 2012 · starters or subs who came on", know: 0.45, a: [
+  { q: "Name a Man City player who played in the 93:20 game", sub: "City 3–2 QPR, May 2012 · starters or subs who came on", know: 0.45, niche: true, a: [
     ["Sergio Agüero", 250, "aguero|kun aguero"], ["Edin Džeko", 75, "dzeko"], ["Pablo Zabaleta", 56, "zabaleta"], ["Vincent Kompany", 56, "kompany"], ["Yaya Touré", 47, "yaya|toure"], ["Mario Balotelli", 47, "balotelli"],
     ["Joe Hart", 39, "hart"], ["David Silva", 31, "silva"], ["Carlos Tevez", 31, "tevez"], ["Samir Nasri", 24, "nasri"], ["Joleon Lescott", 12, "lescott"], ["Gareth Barry", 12, "barry"], ["Gaël Clichy", 8, "clichy"],
     ["Nigel de Jong", 8, "de jong"],
   ] },
-  { q: "Name a player who scored in Brazil 1–7 Germany", sub: "2014 World Cup semi-final in Belo Horizonte", know: 0.55, a: [
+  { q: "Name a player who scored in Brazil 1–7 Germany", sub: "2014 World Cup semi-final in Belo Horizonte", know: 0.55, niche: true, a: [
     ["Thomas Müller", 150, "muller|mueller|thomas muller"], ["Miroslav Klose", 150, "klose"], ["Toni Kroos", 132, "kroos"], ["André Schürrle", 48, "schurrle|schuerrle"], ["Sami Khedira", 29, "khedira"], ["Oscar", 14, ""],
   ] },
-  { q: "Name a player who scored in Man United 8–2 Arsenal", sub: "Premier League, August 2011", know: 0.4, a: [
+  { q: "Name a player who scored in Man United 8–2 Arsenal", sub: "Premier League, August 2011", know: 0.4, niche: true, a: [
     ["Wayne Rooney", 200, "rooney"], ["Ashley Young", 90, "young"], ["Danny Welbeck", 60, "welbeck"], ["Robin van Persie", 50, "van persie|rvp"], ["Nani", 40, ""], ["Theo Walcott", 40, "walcott"], ["Park Ji-sung", 30, "park|ji sung park"],
   ] },
-  { q: "Name a player who scored in Real Madrid 2–6 Barcelona", sub: "La Liga at the Bernabéu, May 2009", know: 0.4, a: [
+  { q: "Name a player who scored in Real Madrid 2–6 Barcelona", sub: "La Liga at the Bernabéu, May 2009", know: 0.4, niche: true, a: [
     ["Lionel Messi", 200, "messi"], ["Thierry Henry", 111, "henry"], ["Carles Puyol", 59, "puyol"], ["Gerard Piqué", 49, "pique"], ["Gonzalo Higuaín", 40, "higuain"], ["Sergio Ramos", 40, "ramos"],
   ] },
-  { q: "Name a player who scored in Barcelona 5–0 Real Madrid", sub: "La Liga at the Camp Nou, November 2010", know: 0.4, a: [
+  { q: "Name a player who scored in Barcelona 5–0 Real Madrid", sub: "La Liga at the Camp Nou, November 2010", know: 0.4, niche: true, a: [
     ["David Villa", 150, "villa"], ["Xavi", 120, "xavi hernandez"], ["Pedro", 90, "pedro rodriguez"], ["Jeffrén Suárez", 20, "jeffren"],
   ] },
-  { q: "Name a player who scored in Man United 1–6 Man City", sub: "Premier League at Old Trafford, October 2011", know: 0.4, a: [
+  { q: "Name a player who scored in Man United 1–6 Man City", sub: "Premier League at Old Trafford, October 2011", know: 0.4, niche: true, a: [
     ["Mario Balotelli", 180, "balotelli"], ["Sergio Agüero", 114, "aguero|kun aguero"], ["Edin Džeko", 90, "dzeko"], ["David Silva", 48, "silva"], ["Darren Fletcher", 15, "fletcher"],
   ] },
-  { q: "Name a player who scored in Liverpool 7–0 Man United", sub: "Premier League at Anfield, March 2023", know: 0.45, a: [
+  { q: "Name a player who scored in Liverpool 7–0 Man United", sub: "Premier League at Anfield, March 2023", know: 0.45, niche: true, a: [
     ["Mohamed Salah", 180, "salah|mo salah"], ["Darwin Núñez", 120, "nunez|darwin"], ["Cody Gakpo", 110, "gakpo"], ["Roberto Firmino", 80, "firmino"],
   ] },
-  { q: "Name a player who scored in Barcelona 6–1 PSG", sub: "Champions League last 16, March 2017 · own goals don't count", know: 0.45, a: [
+  { q: "Name a player who scored in Barcelona 6–1 PSG", sub: "Champions League last 16, March 2017 · own goals don't count", know: 0.45, niche: true, a: [
     ["Neymar", 160, "neymar jr"], ["Lionel Messi", 126, "messi"], ["Sergi Roberto", 110, "roberto"], ["Luis Suárez", 69, "suarez"], ["Edinson Cavani", 20, "cavani"],
   ] },
-  { q: "Name a player who scored in Tottenham 4–5 Arsenal", sub: "Premier League at White Hart Lane, November 2004", know: 0.3, a: [
+  { q: "Name a player who scored in Tottenham 4–5 Arsenal", sub: "Premier League at White Hart Lane, November 2004", know: 0.3, niche: true, a: [
     ["Thierry Henry", 160, "henry"], ["Jermain Defoe", 46, "defoe"], ["Patrick Vieira", 36, "vieira"], ["Robert Pirès", 27, "pires"], ["Freddie Ljungberg", 27, "ljungberg"], ["Ledley King", 13, "king"],
     ["Frédéric Kanouté", 8, "kanoute"], ["Lauren", 4, ""], ["Noureddine Naybet", 1, "naybet"],
   ] },
-  { q: "Name a player who scored in Chelsea 6–0 Arsenal", sub: "Premier League, March 2014 · Wenger's 1,000th game", know: 0.35, a: [
+  { q: "Name a player who scored in Chelsea 6–0 Arsenal", sub: "Premier League, March 2014 · Wenger's 1,000th game", know: 0.35, niche: true, a: [
     ["Eden Hazard", 140, "hazard"], ["Samuel Eto'o", 76, "etoo|eto o"], ["Mohamed Salah", 76, "salah|mo salah"], ["Oscar", 51, ""], ["André Schürrle", 30, "schurrle|schuerrle"],
   ] },
-  { q: "Name a player who scored in Man United 4–3 Man City", sub: "Premier League, September 2009 · Owen's late winner", know: 0.3, a: [
+  { q: "Name a player who scored in Man United 4–3 Man City", sub: "Premier League, September 2009 · Owen's late winner", know: 0.3, niche: true, a: [
     ["Michael Owen", 150, "owen"], ["Wayne Rooney", 116, "rooney"], ["Darren Fletcher", 48, "fletcher"], ["Craig Bellamy", 48, "bellamy"], ["Gareth Barry", 21, "barry"],
   ] },
-  { q: "Name a player who scored in Liverpool 5–1 Arsenal", sub: "Premier League at Anfield, February 2014", know: 0.3, a: [
+  { q: "Name a player who scored in Liverpool 5–1 Arsenal", sub: "Premier League at Anfield, February 2014", know: 0.3, niche: true, a: [
     ["Raheem Sterling", 120, "sterling"], ["Martin Škrtel", 71, "skrtel"], ["Daniel Sturridge", 71, "sturridge"], ["Mikel Arteta", 17, "arteta"],
   ] },
   { q: "Name a player who scored for Argentina at the 2022 World Cup", sub: "Normal or extra time, not shootouts", know: 0.7, a: [
@@ -1054,33 +1066,33 @@ const PROMPTS = [
     ["Lamine Yamal", 160, "yamal|lamine"], ["Dani Olmo", 126, "olmo"], ["Nico Williams", 110, "nico|williams"], ["Álvaro Morata", 69, "morata"], ["Mikel Oyarzabal", 57, "oyarzabal"], ["Fabián Ruiz", 46, "fabian ruiz|fabian"],
     ["Rodri", 36, ""], ["Mikel Merino", 27, "merino"], ["Dani Carvajal", 20, "carvajal"], ["Ferran Torres", 8, "ferran|torres"],
   ] },
-  { q: "Name a player who scored for Brazil at the 2002 World Cup", sub: "Own goals don't count", know: 0.55, a: [
+  { q: "Name a player who scored for Brazil at the 2002 World Cup", sub: "Own goals don't count", know: 0.55, niche: true, a: [
     ["Ronaldo Nazário", 250, "ronaldo|r9|ronaldo nazario|nazario|brazilian ronaldo"], ["Rivaldo", 150, ""], ["Ronaldinho", 140, "dinho"], ["Roberto Carlos", 70, "carlos"], ["Edmílson", 20, "edmilson"], ["Júnior", 10, "junior"],
   ] },
-  { q: "Name a player who scored for Germany at the 2014 World Cup", sub: "Own goals don't count", know: 0.55, a: [
+  { q: "Name a player who scored for Germany at the 2014 World Cup", sub: "Own goals don't count", know: 0.55, niche: true, a: [
     ["Thomas Müller", 220, "muller|mueller|thomas muller"], ["Miroslav Klose", 122, "klose"], ["Mario Götze", 112, "gotze|goetze"], ["Toni Kroos", 91, "kroos"], ["André Schürrle", 71, "schurrle|schuerrle"], ["Mats Hummels", 61, "hummels"],
     ["Mesut Özil", 42, "ozil"], ["Sami Khedira", 33, "khedira"],
   ] },
-  { q: "Name a player who scored for Italy at the 2006 World Cup", sub: "Normal or extra time, not shootouts", know: 0.45, a: [
+  { q: "Name a player who scored for Italy at the 2006 World Cup", sub: "Normal or extra time, not shootouts", know: 0.45, niche: true, a: [
     ["Marco Materazzi", 150, "materazzi"], ["Francesco Totti", 86, "totti"], ["Andrea Pirlo", 72, "pirlo"], ["Fabio Grosso", 72, "grosso"], ["Alessandro Del Piero", 60, "del piero"], ["Luca Toni", 48, "toni"],
     ["Filippo Inzaghi", 29, "inzaghi|pippo inzaghi"], ["Gianluca Zambrotta", 14, "zambrotta"], ["Alberto Gilardino", 14, "gilardino"], ["Vincenzo Iaquinta", 4, "iaquinta"],
   ] },
-  { q: "Name a player who took a penalty in a World Cup final shootout", sub: "2006 or 2022 · scored or missed", know: 0.45, a: [
+  { q: "Name a player who took a penalty in a World Cup final shootout", sub: "2006 or 2022 · scored or missed", know: 0.45, niche: true, a: [
     ["Lionel Messi", 200, "messi"], ["Kylian Mbappé", 134, "mbappe"], ["Gonzalo Montiel", 48, "montiel"], ["Paulo Dybala", 30, "dybala"], ["Andrea Pirlo", 30, "pirlo"], ["Fabio Grosso", 30, "grosso"],
     ["David Trezeguet", 23, "trezeguet"], ["Kingsley Coman", 16, "coman"], ["Aurélien Tchouaméni", 16, "tchouameni"], ["Leandro Paredes", 11, "paredes"], ["Marco Materazzi", 11, "materazzi"],
     ["Alessandro Del Piero", 11, "del piero"], ["Daniele De Rossi", 7, "de rossi"], ["Randal Kolo Muani", 7, "kolo muani|muani"], ["Sylvain Wiltord", 3, "wiltord"], ["Éric Abidal", 2, "abidal"], ["Willy Sagnol", 2, "sagnol"],
   ] },
-  { q: "Name a player who scored for Liverpool in a Champions League final", sub: "2005–2025 finals · not shootouts", know: 0.5, a: [
+  { q: "Name a player who scored for Liverpool in a Champions League final", sub: "2005–2025 finals · not shootouts", know: 0.5, niche: true, a: [
     ["Steven Gerrard", 180, "gerrard|stevie g"], ["Mohamed Salah", 154, "salah|mo salah"], ["Divock Origi", 83, "origi"], ["Sadio Mané", 52, "mane"], ["Xabi Alonso", 52, "alonso|xabi"], ["Vladimír Šmicer", 25, "smicer"], ["Dirk Kuyt", 17, "kuyt"],
   ] },
-  { q: "Name a player who scored for Man United in a European Cup or Champions League final", sub: "1968–2011 · not shootouts", know: 0.45, a: [
+  { q: "Name a player who scored for Man United in a European Cup or Champions League final", sub: "1968–2011 · not shootouts", know: 0.45, niche: true, a: [
     ["Cristiano Ronaldo", 160, "cristiano|ronaldo|cr7"], ["Ole Gunnar Solskjær", 126, "solskjaer|ole"], ["Wayne Rooney", 95, "rooney"], ["Teddy Sheringham", 82, "sheringham"], ["Bobby Charlton", 20, "charlton|sir bobby"],
     ["George Best", 13, "best"], ["Brian Kidd", 2, "kidd"],
   ] },
-  { q: "Name a player who scored for Bayern in a Champions League final", sub: "1999–2025 · not shootouts", know: 0.4, a: [
+  { q: "Name a player who scored for Bayern in a Champions League final", sub: "1999–2025 · not shootouts", know: 0.4, niche: true, a: [
     ["Arjen Robben", 160, "robben"], ["Thomas Müller", 110, "muller|mueller|thomas muller"], ["Kingsley Coman", 69, "coman"], ["Mario Mandžukić", 46, "mandzukic"], ["Stefan Effenberg", 13, "effenberg"], ["Mario Basler", 8, "basler"],
   ] },
-  { q: "Name a player who scored in a Europa League final", sub: "2010–2025 · normal or extra time, own goals don't count", know: 0.4, a: [
+  { q: "Name a player who scored in a Europa League final", sub: "2010–2025 · normal or extra time, own goals don't count", know: 0.4, niche: true, a: [
     ["Antoine Griezmann", 120, "griezmann"], ["Radamel Falcao", 86, "falcao"], ["Diego Forlán", 58, "forlan"], ["Eden Hazard", 58, "hazard"], ["Paul Pogba", 58, "pogba"], ["Fernando Torres", 45, "torres"],
     ["Olivier Giroud", 34, "giroud"], ["Edinson Cavani", 34, "cavani"], ["Romelu Lukaku", 34, "lukaku"], ["Ademola Lookman", 34, "lookman"], ["Daniel Sturridge", 25, "sturridge"], ["Henrikh Mkhitaryan", 25, "mkhitaryan"],
     ["Paulo Dybala", 25, "dybala"], ["Brennan Johnson", 25, "johnson"], ["Pedro", 17, "pedro rodriguez"], ["Branislav Ivanović", 17, "ivanovic"], ["Luuk de Jong", 17, "de jong"], ["Diego Godín", 10, "godin"],
@@ -1088,7 +1100,7 @@ const PROMPTS = [
     ["Grzegorz Krychowiak", 3, "krychowiak"], ["Rafael Santos Borré", 3, "borre|santos borre"], ["Joe Aribo", 2, "aribo"], ["Óscar Cardozo", 1, "cardozo"], ["Nikola Kalinić", 1, "kalinic"], ["Simon Davies", 1, "davies"],
     ["Ruslan Rotan", 1, "rotan"],
   ] },
-  { q: "Name a player who scored in an FA Cup final", sub: "2010–2026 · normal or extra time", know: 0.45, a: [
+  { q: "Name a player who scored in an FA Cup final", sub: "2010–2026 · normal or extra time", know: 0.45, niche: true, a: [
     ["Didier Drogba", 120, "drogba"], ["Alexis Sánchez", 71, "alexis|sanchez"], ["Aaron Ramsey", 71, "ramsey"], ["Pierre-Emerick Aubameyang", 71, "aubameyang|auba"], ["Raheem Sterling", 58, "sterling"], ["Gabriel Jesus", 45, "jesus"],
     ["Eden Hazard", 45, "hazard"], ["İlkay Gündoğan", 45, "gundogan"], ["Alejandro Garnacho", 45, "garnacho"], ["Kobbie Mainoo", 45, "mainoo"], ["Eberechi Eze", 45, "eze"], ["Antoine Semenyo", 34, "semenyo"],
     ["Kevin De Bruyne", 34, "de bruyne|kdb"], ["David Silva", 25, "silva"], ["Juan Mata", 25, "mata"], ["Jesse Lingard", 25, "lingard"], ["Youri Tielemans", 25, "tielemans"], ["Ben Watson", 25, "watson"],
@@ -1163,7 +1175,7 @@ const PROMPTS = [
     ["Real Madrid", 250, "madrid|real"], ["Barcelona", 133, "barca|fc barcelona"], ["Chelsea", 111, ""], ["Bayern Munich", 101, "bayern|fc bayern|bayern munchen"], ["Manchester United", 70, "man utd|man united|manchester utd|united"], ["Liverpool", 70, ""],
     ["Manchester City", 70, "man city|city"], ["AC Milan", 43, "milan"], ["Inter Milan", 43, "inter|internazionale"], ["Corinthians", 26, ""], ["São Paulo", 11, "sao paulo"], ["Internacional", 8, "inter porto alegre"],
   ] },
-  { q: "Name a club that won the European Cup Winners' Cup", sub: "1961–1999", know: 0.35, a: [
+  { q: "Name a club that won the European Cup Winners' Cup", sub: "1961–1999", know: 0.35, niche: true, a: [
     ["Barcelona", 200, "barca|fc barcelona"], ["Chelsea", 80, ""], ["Manchester United", 57, "man utd|man united|manchester utd|united"], ["Arsenal", 48, ""], ["AC Milan", 38, "milan"], ["Juventus", 30, "juve"], ["Lazio", 23, "ss lazio"],
     ["Paris Saint-Germain", 16, "psg|paris sg|paris"], ["Bayern Munich", 16, "bayern|fc bayern|bayern munchen"], ["Atlético Madrid", 11, "atletico|atleti|atletico de madrid"], ["Tottenham Hotspur", 11, "tottenham|spurs"], ["Everton", 7, ""],
     ["Manchester City", 7, "man city|city"], ["West Ham United", 7, "west ham|hammers"], ["Ajax", 7, ""], ["Borussia Dortmund", 7, "dortmund|bvb"], ["Parma", 5, ""], ["Sampdoria", 5, "samp"], ["Aberdeen", 5, ""],
@@ -1173,17 +1185,17 @@ const PROMPTS = [
   { q: "Name a club that has won the Conference League", sub: "2022–2026", know: 0.55, a: [
     ["Chelsea", 150, ""], ["West Ham United", 122, "west ham|hammers"], ["Roma", 108, "as roma"], ["Crystal Palace", 95, "palace"], ["Olympiacos", 39, "olympiakos"],
   ] },
-  { q: "Name a club that has won the Eredivisie", sub: "1956–57 to 2025–26", know: 0.5, a: [
+  { q: "Name a club that has won the Eredivisie", sub: "1956–57 to 2025–26", know: 0.5, niche: true, a: [
     ["Ajax", 250, ""], ["PSV Eindhoven", 220, "psv"], ["Feyenoord", 170, ""], ["AZ Alkmaar", 50, "az"], ["Twente", 40, "fc twente"], ["Sparta Rotterdam", 6, "sparta"], ["DWS", 3, ""], ["DOS", 3, ""],
   ] },
-  { q: "Name a club that has won the Portuguese league", sub: "1934–35 to 2025–26", know: 0.55, a: [
+  { q: "Name a club that has won the Portuguese league", sub: "1934–35 to 2025–26", know: 0.55, niche: true, a: [
     ["Benfica", 250, ""], ["Porto", 240, "fc porto"], ["Sporting CP", 200, "sporting|sporting lisbon"], ["Boavista", 20, ""], ["Belenenses", 6, "os belenenses"],
   ] },
-  { q: "Name a club that has been Scottish league champions", sub: "1890–91 to 2025–26", know: 0.55, a: [
+  { q: "Name a club that has been Scottish league champions", sub: "1890–91 to 2025–26", know: 0.55, niche: true, a: [
     ["Celtic", 250, ""], ["Rangers", 240, "glasgow rangers"], ["Aberdeen", 60, ""], ["Heart of Midlothian", 30, "hearts"], ["Hibernian", 25, "hibs"], ["Dundee United", 20, "dundee utd"], ["Dundee", 12, "dundee fc"],
     ["Kilmarnock", 8, "killie"], ["Motherwell", 6, ""], ["Third Lanark", 2, ""], ["Dumbarton", 2, ""],
   ] },
-  { q: "Name a club that has won MLS Cup", sub: "1996–2025", know: 0.5, a: [
+  { q: "Name a club that has won MLS Cup", sub: "1996–2025", know: 0.5, niche: true, a: [
     ["LA Galaxy", 200, "galaxy|los angeles galaxy"], ["Inter Miami", 126, "miami"], ["Seattle Sounders", 46, "seattle|sounders"], ["D.C. United", 46, "dc united|dc utd"], ["Columbus Crew", 29, "columbus|crew"], ["Toronto FC", 29, "toronto"],
     ["Atlanta United", 29, "atlanta"], ["Los Angeles FC", 29, "lafc"], ["New York City FC", 22, "nycfc|nyc|new york city"], ["Portland Timbers", 15, "portland|timbers"], ["Sporting Kansas City", 15, "sporting kc|kansas city|kansas city wizards|wizards|skc"],
     ["Houston Dynamo", 10, "houston|dynamo"], ["San Jose Earthquakes", 7, "san jose|earthquakes"], ["Real Salt Lake", 7, "rsl|salt lake"], ["Colorado Rapids", 5, "colorado|rapids"], ["Chicago Fire", 5, "chicago"],
@@ -1203,7 +1215,7 @@ const PROMPTS = [
     ["Los Angeles FC", 6, "lafc"], ["Red Bull Salzburg", 4, "salzburg|rb salzburg"], ["Monterrey", 4, "rayados"], ["Al Ahly", 4, "ahly"], ["Pachuca", 2, ""], ["Urawa Red Diamonds", 1, "urawa|urawa reds"],
     ["Ulsan HD", 1, "ulsan|ulsan hyundai"], ["Al Ain", 1, ""], ["Espérance de Tunis", 1, "esperance|esperance tunis"], ["Wydad AC", 1, "wydad|wydad casablanca"], ["Mamelodi Sundowns", 1, "sundowns"], ["Auckland City", 1, "auckland"],
   ] },
-  { q: "Name a club that has won the Copa Libertadores", sub: "1960–2025", know: 0.45, a: [
+  { q: "Name a club that has won the Copa Libertadores", sub: "1960–2025", know: 0.45, niche: true, a: [
     ["Boca Juniors", 200, "boca"], ["River Plate", 165, "river"], ["Flamengo", 119, ""], ["Palmeiras", 57, ""], ["Santos", 38, ""], ["São Paulo", 30, "sao paulo"], ["Independiente", 23, ""], ["Peñarol", 16, "penarol"],
     ["Grêmio", 11, "gremio"], ["Corinthians", 11, ""], ["Botafogo", 11, ""], ["Fluminense", 11, ""], ["Atlético Mineiro", 7, "atletico mineiro|galo"], ["Nacional", 7, "club nacional"], ["Estudiantes", 7, "estudiantes de la plata"],
     ["Internacional", 5, "inter"], ["Cruzeiro", 5, ""], ["Atlético Nacional", 5, ""], ["Racing Club", 3, "racing"], ["Vélez Sarsfield", 3, "velez|velez sarsfield"], ["Olimpia", 3, "club olimpia"],
@@ -1217,7 +1229,7 @@ const PROMPTS = [
     ["Liverpool", 200, ""], ["Manchester United", 168, "man utd|man united|manchester utd|united"], ["Chelsea", 153, ""], ["Manchester City", 99, "man city|city"], ["Tottenham Hotspur", 64, "tottenham|spurs"], ["Arsenal", 54, ""],
     ["Aston Villa", 36, "villa"], ["West Ham United", 36, "west ham|hammers"], ["Crystal Palace", 28, "palace"], ["Nottingham Forest", 21, "forest|nottm forest"], ["Everton", 7, ""], ["Ipswich Town", 5, "ipswich"],
   ] },
-  { q: "Name a German club that has won a major UEFA trophy", sub: "European Cup/Champions League, UEFA Cup/Europa League or Cup Winners' Cup", know: 0.5, a: [
+  { q: "Name a German club that has won a major UEFA trophy", sub: "European Cup/Champions League, UEFA Cup/Europa League or Cup Winners' Cup", know: 0.5, niche: true, a: [
     ["Bayern Munich", 250, "bayern|fc bayern|bayern munchen"], ["Borussia Dortmund", 150, "dortmund|bvb"], ["Eintracht Frankfurt", 70, "frankfurt|eintracht"], ["Hamburger SV", 50, "hamburg|hsv"], ["Schalke 04", 50, "schalke"],
     ["Borussia Mönchengladbach", 40, "gladbach|monchengladbach|borussia monchengladbach"], ["Werder Bremen", 35, "bremen|werder"], ["Bayer Leverkusen", 35, "leverkusen|bayer"], ["Magdeburg", 5, "fc magdeburg"],
   ] },
@@ -1229,13 +1241,13 @@ const PROMPTS = [
     ["Egypt", 200, ""], ["Cameroon", 122, ""], ["Senegal", 95, ""], ["Ivory Coast", 83, "cote d ivoire|cote divoire"], ["Nigeria", 83, ""], ["Ghana", 72, ""], ["Algeria", 33, ""], ["Morocco", 25, ""],
     ["Zambia", 13, ""], ["Tunisia", 8, ""], ["South Africa", 8, ""], ["DR Congo", 4, "congo dr|zaire|drc|democratic republic of the congo"], ["Congo", 1, "republic of the congo|congo brazzaville"], ["Sudan", 1, ""], ["Ethiopia", 1, ""],
   ] },
-  { q: "Name a country that has won the AFC Asian Cup", sub: "1956–2023", know: 0.5, a: [
+  { q: "Name a country that has won the AFC Asian Cup", sub: "1956–2023", know: 0.5, niche: true, a: [
     ["Japan", 200, ""], ["Saudi Arabia", 98, "saudi|ksa"], ["Iran", 87, ""], ["South Korea", 76, "korea|korea republic"], ["Qatar", 76, ""], ["Australia", 55, ""], ["Iraq", 21, ""], ["Kuwait", 5, ""], ["Israel", 2, ""],
   ] },
-  { q: "Name a country that has won the Women's Euros", sub: "1984–2025", know: 0.5, a: [
+  { q: "Name a country that has won the Women's Euros", sub: "1984–2025", know: 0.5, niche: true, a: [
     ["England", 200, ""], ["Germany", 180, "west germany"], ["Netherlands", 70, "holland"], ["Norway", 50, ""], ["Sweden", 30, ""],
   ] },
-  { q: "Name a country that won Olympic men's football gold", sub: "1992–2024", know: 0.45, a: [
+  { q: "Name a country that won Olympic men's football gold", sub: "1992–2024", know: 0.45, niche: true, a: [
     ["Brazil", 200, "brasil"], ["Argentina", 142, ""], ["Spain", 88, "espana"], ["Mexico", 58, ""], ["Nigeria", 39, ""], ["Cameroon", 30, ""],
   ] },
   { q: "Name a country that has finished in the top four at a men's World Cup", sub: "1930–2026 · semi-finalists or final-round sides", know: 0.85, a: [
@@ -1255,7 +1267,7 @@ const PROMPTS = [
   { q: "Name a CONMEBOL member country", sub: "South America's 10 football nations", know: 0.8, a: [
     ["Brazil", 200, "brasil"], ["Argentina", 200, ""], ["Uruguay", 100, ""], ["Colombia", 90, ""], ["Chile", 80, ""], ["Peru", 50, ""], ["Ecuador", 45, ""], ["Paraguay", 40, ""], ["Bolivia", 30, ""], ["Venezuela", 25, ""],
   ] },
-  { q: "Name a country that played at every men's World Cup from 1998 to 2026", sub: "All eight tournaments", know: 0.4, a: [
+  { q: "Name a country that played at every men's World Cup from 1998 to 2026", sub: "All eight tournaments", know: 0.4, niche: true, a: [
     ["Brazil", 200, "brasil"], ["Argentina", 134, ""], ["Germany", 119, ""], ["Spain", 80, "espana"], ["France", 68, ""], ["England", 57, ""], ["Mexico", 23, ""], ["South Korea", 11, "korea|korea republic"], ["Japan", 11, ""],
   ] },
   { q: "Name a country that played at the 2010 World Cup", sub: "Any of the 32 teams in South Africa", know: 0.85, a: [
@@ -1280,46 +1292,46 @@ const PROMPTS = [
     ["Mexico City", 100, "ciudad de mexico|cdmx|azteca"], ["Toronto", 62, ""], ["Atlanta", 52, ""], ["Boston", 52, "foxborough|foxboro|gillette"], ["Seattle", 42, ""], ["Houston", 42, ""], ["Philadelphia", 42, "philly"],
     ["San Francisco Bay Area", 33, "san francisco|bay area|santa clara|levis|sf"], ["Kansas City", 25, "kc|arrowhead"], ["Vancouver", 25, ""], ["Guadalajara", 12, "zapopan"], ["Monterrey", 12, "guadalupe"],
   ] },
-  { q: "Name a host city of the 2014 World Cup in Brazil", sub: "Any of the 12", know: 0.45, a: [
+  { q: "Name a host city of the 2014 World Cup in Brazil", sub: "Any of the 12", know: 0.45, niche: true, a: [
     ["Rio de Janeiro", 250, "rio"], ["São Paulo", 186, "sao paulo"], ["Belo Horizonte", 56, ""], ["Brasília", 56, "brasilia"], ["Salvador", 38, ""], ["Fortaleza", 22, ""], ["Recife", 22, ""], ["Manaus", 22, ""], ["Porto Alegre", 19, ""],
     ["Curitiba", 12, ""], ["Natal", 9, ""], ["Cuiabá", 6, "cuiaba"],
   ] },
-  { q: "Name a host city of the 2018 World Cup in Russia", sub: "Any of the 11", know: 0.45, a: [
+  { q: "Name a host city of the 2018 World Cup in Russia", sub: "Any of the 11", know: 0.45, niche: true, a: [
     ["Moscow", 250, "moskva"], ["Saint Petersburg", 170, "st petersburg|petersburg"], ["Sochi", 65, ""], ["Kazan", 56, ""], ["Kaliningrad", 37, ""], ["Rostov-on-Don", 29, "rostov"], ["Nizhny Novgorod", 25, "nizhny"],
     ["Volgograd", 25, ""], ["Samara", 20, ""], ["Yekaterinburg", 17, "ekaterinburg"], ["Saransk", 9, ""],
   ] },
-  { q: "Name a stadium that hosted 2022 World Cup matches", sub: "Any of the 8 in Qatar", know: 0.35, a: [
+  { q: "Name a stadium that hosted 2022 World Cup matches", sub: "Any of the 8 in Qatar", know: 0.35, niche: true, a: [
     ["Lusail Stadium", 200, "lusail|lusail iconic stadium"], ["Al Bayt Stadium", 85, "al bayt|bayt"], ["Stadium 974", 62, "974|ras abu aboud"], ["Khalifa International Stadium", 43, "khalifa|khalifa international"], ["Education City Stadium", 19, "education city"],
     ["Al Janoub Stadium", 13, "al janoub|janoub|al wakrah"], ["Al Thumama Stadium", 8, "al thumama|thumama"], ["Ahmad bin Ali Stadium", 6, "ahmad bin ali|al rayyan stadium"],
   ] },
-  { q: "Name a stadium that has hosted a men's World Cup final", sub: "1930–2026", know: 0.5, a: [
+  { q: "Name a stadium that has hosted a men's World Cup final", sub: "1930–2026", know: 0.5, niche: true, a: [
     ["Maracanã", 200, "maracana|estadio do maracana"], ["Wembley Stadium", 119, "wembley"], ["Estadio Azteca", 105, "azteca|estadio banorte"], ["Lusail Stadium", 80, "lusail|lusail iconic stadium"], ["MetLife Stadium", 80, "metlife|new york new jersey stadium"],
     ["Stade de France", 57, ""], ["Luzhniki Stadium", 38, "luzhniki"], ["Olympiastadion Berlin", 38, "berlin olympic stadium|olympic stadium berlin"], ["Soccer City", 30, "fnb stadium|soccer city stadium"], ["Rose Bowl", 30, ""],
     ["Santiago Bernabéu", 30, "bernabeu"], ["Stadio Olimpico", 23, "olimpico|rome olympic stadium"], ["Estadio Monumental", 11, "monumental|el monumental|mas monumental"], ["International Stadium Yokohama", 11, "yokohama|nissan stadium"],
     ["Olympiastadion Munich", 7, "munich olympic stadium|olympic stadium munich"], ["Estadio Centenario", 5, "centenario"], ["Råsunda Stadium", 1, "rasunda"], ["Wankdorf Stadium", 1, "wankdorf"], ["Estadio Nacional", 1, "estadio nacional de chile"],
     ["Stade Olympique de Colombes", 1, "colombes|stade de colombes"], ["Stadio Nazionale PNF", 1, "stadio nazionale|stadio flaminio"],
   ] },
-  { q: "Name a city that hosted a Champions League final", sub: "2000–2026", know: 0.5, a: [
+  { q: "Name a city that hosted a Champions League final", sub: "2000–2026", know: 0.5, niche: true, a: [
     ["London", 150, "wembley"], ["Paris", 116, "saint denis|st denis"], ["Madrid", 100, ""], ["Istanbul", 86, ""], ["Munich", 72, "munchen"], ["Milan", 60, "milano"], ["Lisbon", 48, "lisboa"], ["Rome", 38, "roma"],
     ["Berlin", 29, ""], ["Moscow", 21, "moskva"], ["Cardiff", 17, ""], ["Kyiv", 14, "kiev"], ["Porto", 14, "oporto"], ["Athens", 14, "athina"], ["Manchester", 11, ""], ["Budapest", 11, ""], ["Glasgow", 8, ""],
     ["Gelsenkirchen", 2, ""],
   ] },
-  { q: "Name a Premier League Player of the Season winner", sub: "The league's official award, 2010–11 to 2025–26", know: 0.55, a: [
+  { q: "Name a Premier League Player of the Season winner", sub: "The league's official award, 2010–11 to 2025–26", know: 0.55, niche: true, a: [
     ["Mohamed Salah", 200, "salah|mo salah"], ["Kevin De Bruyne", 134, "de bruyne|kdb"], ["Erling Haaland", 80, "haaland"], ["Virgil van Dijk", 57, "van dijk|vvd"], ["Eden Hazard", 48, "hazard"], ["Luis Suárez", 38, "suarez"],
     ["Jamie Vardy", 38, "vardy"], ["N'Golo Kanté", 38, "kante|ngolo kante"], ["Gareth Bale", 30, "bale"], ["Phil Foden", 30, "foden"], ["Bruno Fernandes", 23, "bruno|fernandes"], ["Vincent Kompany", 16, "kompany"],
     ["Rúben Dias", 11, "dias|ruben dias"], ["Nemanja Vidić", 7, "vidic"],
   ] },
-  { q: "Name a European Golden Shoe winner", sub: "2000–2026 · shared awards count", know: 0.55, a: [
+  { q: "Name a European Golden Shoe winner", sub: "2000–2026 · shared awards count", know: 0.55, niche: true, a: [
     ["Lionel Messi", 250, "messi"], ["Cristiano Ronaldo", 204, "cristiano|ronaldo|cr7"], ["Robert Lewandowski", 77, "lewandowski|lewy"], ["Harry Kane", 67, "kane"], ["Luis Suárez", 49, "suarez"], ["Kylian Mbappé", 49, "mbappe"],
     ["Erling Haaland", 49, "haaland"], ["Thierry Henry", 40, "henry"], ["Francesco Totti", 19, "totti"], ["Diego Forlán", 13, "forlan"], ["Ciro Immobile", 13, "immobile"], ["Luca Toni", 8, "toni"],
     ["Henrik Larsson", 6, "larsson"], ["Kevin Phillips", 3, "phillips"], ["Roy Makaay", 3, "makaay"], ["Mário Jardel", 1, "jardel"],
   ] },
-  { q: "Name an African Player of the Year winner", sub: "CAF award, 2000–2025", know: 0.5, a: [
+  { q: "Name an African Player of the Year winner", sub: "CAF award, 2000–2025", know: 0.5, niche: true, a: [
     ["Mohamed Salah", 200, "salah|mo salah"], ["Samuel Eto'o", 119, "etoo|eto o"], ["Didier Drogba", 105, "drogba"], ["Sadio Mané", 80, "mane"], ["Yaya Touré", 68, "yaya|toure"], ["Riyad Mahrez", 30, "mahrez"],
     ["Achraf Hakimi", 30, "hakimi"], ["Victor Osimhen", 23, "osimhen"], ["Pierre-Emerick Aubameyang", 23, "aubameyang|auba"], ["Emmanuel Adebayor", 16, "adebayor"], ["Ademola Lookman", 11, "lookman"],
     ["El Hadji Diouf", 5, "diouf"], ["Frédéric Kanouté", 5, "kanoute"], ["Patrick Mboma", 1, "mboma"],
   ] },
-  { q: "Name a man who has won the Champions League five or more times as a player", sub: "European Cup wins count · players active from 2000 on", know: 0.5, a: [
+  { q: "Name a man who has won the Champions League five or more times as a player", sub: "European Cup wins count · players active from 2000 on", know: 0.5, niche: true, a: [
     ["Cristiano Ronaldo", 200, "cristiano|ronaldo|cr7"], ["Luka Modrić", 119, "modric"], ["Toni Kroos", 92, "kroos"], ["Karim Benzema", 68, "benzema"], ["Dani Carvajal", 48, "carvajal"], ["Marcelo", 48, ""],
     ["Gareth Bale", 38, "bale"], ["Casemiro", 30, ""], ["Nacho", 23, "nacho fernandez"], ["Isco", 16, ""], ["Paolo Maldini", 16, "maldini"], ["Lucas Vázquez", 11, "lucas vazquez|vazquez"], ["Alessandro Costacurta", 1, "costacurta"],
   ] },
@@ -1327,70 +1339,70 @@ const PROMPTS = [
     ["Cristiano Ronaldo", 250, "cristiano|ronaldo|cr7"], ["Luka Modrić", 120, "modric"], ["Rodri", 110, "rodrigo hernandez"], ["Harry Kane", 110, "kane"], ["Michael Owen", 80, "owen"], ["Andriy Shevchenko", 60, "shevchenko|sheva"],
     ["George Weah", 30, "weah"], ["Ruud Gullit", 30, "gullit"],
   ] },
-  { q: "Name a player who has scored five goals in one Premier League game", sub: "Up to the end of 2025–26", know: 0.45, a: [
+  { q: "Name a player who has scored five goals in one Premier League game", sub: "Up to the end of 2025–26", know: 0.45, niche: true, a: [
     ["Sergio Agüero", 200, "aguero|kun aguero"], ["Alan Shearer", 142, "shearer"], ["Jermain Defoe", 87, "defoe"], ["Andy Cole", 67, "cole|andrew cole"], ["Dimitar Berbatov", 67, "berbatov"],
   ] },
   { q: "Name a player a Premier League club signed for £100m or more", sub: "Reported base fee, up to the end of 2025", know: 0.6, a: [
     ["Jack Grealish", 160, "grealish"], ["Declan Rice", 142, "rice"], ["Moisés Caicedo", 110, "caicedo"], ["Enzo Fernández", 110, "enzo|enzo fernandez|fernandez"], ["Alexander Isak", 95, "isak"], ["Florian Wirtz", 82, "wirtz"],
   ] },
-  { q: "Name a player who has turned out for both Arsenal and Chelsea", sub: "First-team players since 1992 · loans count", know: 0.55, a: [
+  { q: "Name a player who has turned out for both Arsenal and Chelsea", sub: "First-team players since 1992 · loans count", know: 0.55, niche: true, a: [
     ["Cesc Fàbregas", 150, "fabregas|cesc"], ["Ashley Cole", 116, "cole"], ["Olivier Giroud", 86, "giroud"], ["Petr Čech", 72, "cech"], ["David Luiz", 60, "luiz"], ["Kai Havertz", 60, "havertz"], ["Raheem Sterling", 48, "sterling"],
     ["Jorginho", 48, ""], ["Willian", 38, ""], ["Pierre-Emerick Aubameyang", 38, "aubameyang|auba"], ["William Gallas", 29, "gallas"], ["Nicolas Anelka", 21, "anelka"], ["Noni Madueke", 14, "madueke"],
     ["Kepa Arrizabalaga", 11, "kepa|arrizabalaga"], ["Emmanuel Petit", 8, "petit"], ["Lassana Diarra", 4, "diarra|lass"], ["Yossi Benayoun", 4, "benayoun"],
   ] },
-  { q: "Name a player who has turned out for both Man United and Chelsea", sub: "First-team players since 1992 · loans count", know: 0.5, a: [
+  { q: "Name a player who has turned out for both Man United and Chelsea", sub: "First-team players since 1992 · loans count", know: 0.5, niche: true, a: [
     ["Juan Mata", 150, "mata"], ["Romelu Lukaku", 132, "lukaku"], ["Nemanja Matić", 100, "matic"], ["Mason Mount", 100, "mount"], ["Jadon Sancho", 60, "sancho"], ["Alejandro Garnacho", 48, "garnacho"], ["Radamel Falcao", 38, "falcao"],
     ["Juan Sebastián Verón", 29, "veron|seba veron"], ["Mark Hughes", 21, "hughes|sparky"], ["Mark Bosnich", 2, "bosnich"], ["Paul Parker", 1, "parker"],
   ] },
-  { q: "Name a player who has turned out for both Real Madrid and Barcelona", sub: "First-team players since 1985", know: 0.5, a: [
+  { q: "Name a player who has turned out for both Real Madrid and Barcelona", sub: "First-team players since 1985", know: 0.5, niche: true, a: [
     ["Luís Figo", 250, "figo"], ["Ronaldo Nazário", 174, "ronaldo|r9|ronaldo nazario|nazario|brazilian ronaldo"], ["Michael Laudrup", 71, "laudrup"], ["Luis Enrique", 71, "enrique|lucho"], ["Samuel Eto'o", 62, "etoo|eto o"],
     ["Javier Saviola", 43, "saviola"], ["Bernd Schuster", 24, "schuster"], ["Gheorghe Hagi", 24, "hagi"], ["Robert Prosinečki", 11, "prosinecki"], ["Marcos Alonso", 11, "alonso"], ["Albert Celades", 7, "celades"],
     ["Luis Milla", 6, "milla"], ["Alfonso Pérez", 6, "alfonso"], ["Julen Lopetegui", 6, "lopetegui"], ["Miquel Soler", 3, "soler"], ["Dani García", 3, "dani garcia"],
   ] },
-  { q: "Name a player Liverpool signed from Southampton", sub: "Permanent moves since 2000", know: 0.5, a: [
+  { q: "Name a player Liverpool signed from Southampton", sub: "Permanent moves since 2000", know: 0.5, niche: true, a: [
     ["Virgil van Dijk", 250, "van dijk|vvd"], ["Sadio Mané", 200, "mane"], ["Adam Lallana", 100, "lallana"], ["Dejan Lovren", 80, "lovren"], ["Nathaniel Clyne", 50, "clyne"], ["Rickie Lambert", 50, "lambert"], ["Peter Crouch", 40, "crouch"],
   ] },
   { q: "Name a player who has worn Man United's No. 7 shirt", sub: "Squad numbers era, 1993–94 to 2026–27", know: 0.65, a: [
     ["Cristiano Ronaldo", 250, "cristiano|ronaldo|cr7"], ["David Beckham", 200, "beckham"], ["Eric Cantona", 150, "cantona"], ["Michael Owen", 60, "owen"], ["Ángel Di María", 60, "di maria|dimaria"], ["Edinson Cavani", 60, "cavani"],
     ["Alexis Sánchez", 60, "alexis|sanchez"], ["Mason Mount", 60, "mount"], ["Memphis Depay", 40, "memphis|depay"], ["Antonio Valencia", 40, "valencia"],
   ] },
-  { q: "Name a player who has worn Arsenal's No. 14 shirt", sub: "1999–2026", know: 0.45, a: [
+  { q: "Name a player who has worn Arsenal's No. 14 shirt", sub: "1999–2026", know: 0.45, niche: true, a: [
     ["Thierry Henry", 250, "henry"], ["Theo Walcott", 150, "walcott"], ["Pierre-Emerick Aubameyang", 100, "aubameyang|auba"], ["Viktor Gyökeres", 90, "gyokeres"], ["Eddie Nketiah", 60, "nketiah"],
   ] },
   { q: "Name a player who has worn Real Madrid's No. 7 shirt", sub: "1996–2026", know: 0.6, a: [
     ["Cristiano Ronaldo", 250, "cristiano|ronaldo|cr7"], ["Vinícius Júnior", 150, "vinicius|vini|vinicius jr"], ["Raúl", 150, "raul gonzalez"], ["Eden Hazard", 120, "hazard"], ["Mariano Díaz", 30, "mariano|mariano diaz"],
   ] },
-  { q: "Name an Arsenal club captain", sub: "1988–2026", know: 0.55, a: [
+  { q: "Name an Arsenal club captain", sub: "1988–2026", know: 0.55, niche: true, a: [
     ["Tony Adams", 150, "adams"], ["Patrick Vieira", 132, "vieira"], ["Thierry Henry", 116, "henry"], ["Martin Ødegaard", 116, "odegaard"], ["Cesc Fàbregas", 86, "fabregas|cesc"], ["Robin van Persie", 48, "van persie|rvp"],
     ["Pierre-Emerick Aubameyang", 29, "aubameyang|auba"], ["Mikel Arteta", 21, "arteta"], ["William Gallas", 14, "gallas"], ["Per Mertesacker", 14, "mertesacker"], ["Laurent Koscielny", 14, "koscielny"],
     ["Granit Xhaka", 8, "xhaka"], ["Thomas Vermaelen", 8, "vermaelen"],
   ] },
-  { q: "Name a Manchester United club captain", sub: "1990–2026", know: 0.55, a: [
+  { q: "Name a Manchester United club captain", sub: "1990–2026", know: 0.55, niche: true, a: [
     ["Roy Keane", 180, "keane"], ["Wayne Rooney", 74, "rooney"], ["Bryan Robson", 62, "robson"], ["Eric Cantona", 62, "cantona"], ["Gary Neville", 62, "neville"], ["Bruno Fernandes", 62, "bruno|fernandes"],
     ["Nemanja Vidić", 42, "vidic"], ["Harry Maguire", 42, "maguire"], ["Steve Bruce", 18, "bruce"], ["Michael Carrick", 12, "carrick"], ["Antonio Valencia", 7, "valencia"], ["Ashley Young", 5, "young"],
   ] },
-  { q: "Name a Chelsea club captain", sub: "1993–2026", know: 0.55, a: [
+  { q: "Name a Chelsea club captain", sub: "1993–2026", know: 0.55, niche: true, a: [
     ["John Terry", 250, "terry|jt"], ["César Azpilicueta", 120, "azpilicueta|dave"], ["Reece James", 100, "reece|james"], ["Dennis Wise", 70, "wise"], ["Marcel Desailly", 60, "desailly"], ["Gary Cahill", 50, "cahill"],
   ] },
-  { q: "Name a Liverpool club captain", sub: "1997–2026", know: 0.55, a: [
+  { q: "Name a Liverpool club captain", sub: "1997–2026", know: 0.55, niche: true, a: [
     ["Steven Gerrard", 250, "gerrard|stevie g"], ["Jordan Henderson", 150, "henderson|hendo"], ["Virgil van Dijk", 150, "van dijk|vvd"], ["Sami Hyypiä", 50, "hyypia"], ["Jamie Redknapp", 40, "redknapp"], ["Paul Ince", 40, "ince"],
   ] },
-  { q: "Name a Real Madrid club captain", sub: "2000–2025", know: 0.55, a: [
+  { q: "Name a Real Madrid club captain", sub: "2000–2025", know: 0.55, niche: true, a: [
     ["Sergio Ramos", 200, "ramos"], ["Iker Casillas", 137, "casillas"], ["Raúl", 113, "raul gonzalez"], ["Marcelo", 60, ""], ["Karim Benzema", 60, "benzema"], ["Fernando Hierro", 41, "hierro"], ["Dani Carvajal", 41, "carvajal"],
     ["Nacho", 32, "nacho fernandez"],
   ] },
-  { q: "Name a goalkeeper who won a Champions League final", sub: "Played in the final for the winners, 2000–2025", know: 0.5, a: [
+  { q: "Name a goalkeeper who won a Champions League final", sub: "Played in the final for the winners, 2000–2025", know: 0.5, niche: true, a: [
     ["Iker Casillas", 170, "casillas"], ["Manuel Neuer", 136, "neuer"], ["Thibaut Courtois", 105, "courtois"], ["Keylor Navas", 78, "navas"], ["Alisson Becker", 65, "alisson"], ["Petr Čech", 54, "cech"],
     ["Víctor Valdés", 44, "valdes"], ["Edwin van der Sar", 44, "van der sar"], ["Jerzy Dudek", 34, "dudek"], ["Gianluigi Donnarumma", 34, "donnarumma|gigio"], ["Ederson", 26, ""], ["Marc-André ter Stegen", 26, "ter stegen"],
     ["Dida", 19, ""], ["Oliver Kahn", 19, "kahn"], ["Édouard Mendy", 13, "mendy"], ["Júlio César", 13, "julio cesar"], ["Vítor Baía", 4, "baia|vitor baia"], ["César Sánchez", 1, "cesar sanchez|cesar"],
   ] },
-  { q: "Name a manager who has won the FA Cup", sub: "2000–2026", know: 0.55, a: [
+  { q: "Name a manager who has won the FA Cup", sub: "2000–2026", know: 0.55, niche: true, a: [
     ["Arsène Wenger", 220, "wenger"], ["Pep Guardiola", 120, "guardiola|pep"], ["José Mourinho", 44, "mourinho"], ["Alex Ferguson", 44, "ferguson|fergie|sir alex|sir alex ferguson"], ["Jürgen Klopp", 44, "klopp"], ["Mikel Arteta", 44, "arteta"],
     ["Antonio Conte", 28, "conte"], ["Carlo Ancelotti", 28, "ancelotti"], ["Rafael Benítez", 21, "benitez|rafa"], ["Roberto Mancini", 21, "mancini"], ["Louis van Gaal", 21, "van gaal|lvg"], ["Erik ten Hag", 21, "ten hag"],
     ["Oliver Glasner", 15, "glasner"], ["Brendan Rodgers", 15, "rodgers"], ["Roberto Di Matteo", 15, "di matteo"], ["Roberto Martínez", 15, "martinez"], ["Guus Hiddink", 9, "hiddink"], ["Harry Redknapp", 9, "redknapp"],
     ["Gérard Houllier", 5, "houllier"], ["Gianluca Vialli", 3, "vialli"],
   ] },
-  { q: "Name a manager who has won the UEFA Cup or Europa League", sub: "2000–2026", know: 0.45, a: [
+  { q: "Name a manager who has won the UEFA Cup or Europa League", sub: "2000–2026", know: 0.45, niche: true, a: [
     ["José Mourinho", 150, "mourinho"], ["Unai Emery", 150, "emery"], ["Diego Simeone", 72, "simeone|cholo"], ["Rafael Benítez", 48, "benitez|rafa"], ["Ange Postecoglou", 38, "postecoglou|ange"], ["Gian Piero Gasperini", 29, "gasperini"],
     ["Maurizio Sarri", 21, "sarri"], ["Oliver Glasner", 21, "glasner"], ["Julen Lopetegui", 14, "lopetegui"], ["André Villas-Boas", 14, "villas boas|avb"], ["Juande Ramos", 8, "juande"], ["José Luis Mendilibar", 8, "mendilibar"],
     ["Gérard Houllier", 6, "houllier"], ["Quique Sánchez Flores", 4, "quique|sanchez flores"], ["Dick Advocaat", 2, "advocaat"], ["Mircea Lucescu", 2, "lucescu"], ["Fatih Terim", 2, "terim"], ["Bert van Marwijk", 1, "van marwijk"],
@@ -1401,44 +1413,44 @@ const PROMPTS = [
     ["Steve McClaren", 44, "mcclaren"], ["Kevin Keegan", 28, "keegan"], ["Glenn Hoddle", 28, "hoddle"], ["Terry Venables", 21, "venables"], ["Lee Carsley", 21, "carsley"], ["Bobby Robson", 14, "robson|sir bobby"],
     ["Graham Taylor", 14, ""], ["Stuart Pearce", 9, "pearce"], ["Peter Taylor", 3, ""], ["Howard Wilkinson", 3, "wilkinson"],
   ] },
-  { q: "Name a Real Madrid manager since 2000", sub: "Permanent or interim, 2000–2026", know: 0.55, a: [
+  { q: "Name a Real Madrid manager since 2000", sub: "Permanent or interim, 2000–2026", know: 0.55, niche: true, a: [
     ["Zinedine Zidane", 200, "zidane|zizou"], ["Carlo Ancelotti", 200, "ancelotti"], ["José Mourinho", 134, "mourinho"], ["Xabi Alonso", 48, "alonso|xabi"], ["Rafael Benítez", 30, "benitez|rafa"], ["Vicente del Bosque", 30, "del bosque"],
     ["Fabio Capello", 23, "capello"], ["Julen Lopetegui", 23, "lopetegui"], ["Manuel Pellegrini", 16, "pellegrini"], ["Santiago Solari", 11, "solari"], ["Álvaro Arbeloa", 11, "arbeloa"], ["Bernd Schuster", 5, "schuster"],
     ["Juande Ramos", 3, "juande"], ["Carlos Queiroz", 3, "queiroz"], ["Vanderlei Luxemburgo", 2, "luxemburgo"], ["José Antonio Camacho", 1, "camacho"], ["Juan Ramón López Caro", 1, "lopez caro"],
     ["Mariano García Remón", 1, "garcia remon"],
   ] },
-  { q: "Name a Barcelona manager since 2000", sub: "Permanent or interim, 2000–2026", know: 0.55, a: [
+  { q: "Name a Barcelona manager since 2000", sub: "Permanent or interim, 2000–2026", know: 0.55, niche: true, a: [
     ["Pep Guardiola", 220, "guardiola|pep"], ["Xavi", 123, "xavi hernandez"], ["Luis Enrique", 99, "enrique|lucho"], ["Frank Rijkaard", 66, "rijkaard"], ["Hansi Flick", 66, "flick"], ["Ronald Koeman", 47, "koeman"],
     ["Ernesto Valverde", 39, "valverde"], ["Tito Vilanova", 23, "vilanova"], ["Quique Setién", 23, "setien"], ["Gerardo Martino", 16, "tata martino|martino"], ["Louis van Gaal", 16, "van gaal|lvg"], ["Carles Rexach", 4, "rexach"],
     ["Llorenç Serra Ferrer", 2, "serra ferrer"], ["Radomir Antić", 2, "antic"], ["Sergi Barjuán", 1, "barjuan"], ["Jordi Roura", 1, "roura"],
   ] },
-  { q: "Name a Liverpool manager since 1990", sub: "Permanent or caretaker, 1990–2026", know: 0.6, a: [
+  { q: "Name a Liverpool manager since 1990", sub: "Permanent or caretaker, 1990–2026", know: 0.6, niche: true, a: [
     ["Jürgen Klopp", 250, "klopp"], ["Rafael Benítez", 143, "benitez|rafa"], ["Arne Slot", 112, "slot"], ["Brendan Rodgers", 91, "rodgers"], ["Kenny Dalglish", 81, "dalglish|king kenny"], ["Gérard Houllier", 62, "houllier"],
     ["Roy Hodgson", 52, "hodgson"], ["Andoni Iraola", 52, "iraola"], ["Graeme Souness", 43, "souness"], ["Roy Evans", 33, "evans"], ["Phil Thompson", 11, "thompson"], ["Ronnie Moran", 7, "moran"],
   ] },
-  { q: "Name an Arsenal manager since 1986", sub: "Permanent, interim or caretaker", know: 0.6, a: [
+  { q: "Name an Arsenal manager since 1986", sub: "Permanent, interim or caretaker", know: 0.6, niche: true, a: [
     ["Arsène Wenger", 260, "wenger"], ["Mikel Arteta", 220, "arteta"], ["Unai Emery", 100, "emery"], ["George Graham", 80, "graham"], ["Freddie Ljungberg", 40, "ljungberg"], ["Bruce Rioch", 30, "rioch"], ["Stewart Houston", 15, "houston"],
     ["Pat Rice", 10, "rice"],
   ] },
-  { q: "Name a Manchester City manager since 1998", sub: "Permanent or caretaker, 1998–2026", know: 0.55, a: [
+  { q: "Name a Manchester City manager since 1998", sub: "Permanent or caretaker, 1998–2026", know: 0.55, niche: true, a: [
     ["Pep Guardiola", 260, "guardiola|pep"], ["Roberto Mancini", 130, "mancini"], ["Manuel Pellegrini", 100, "pellegrini"], ["Enzo Maresca", 90, "maresca"], ["Mark Hughes", 60, "hughes|sparky"], ["Sven-Göran Eriksson", 60, "eriksson|sven"],
     ["Kevin Keegan", 50, "keegan"], ["Stuart Pearce", 40, "pearce"], ["Joe Royle", 20, "royle"], ["Brian Kidd", 15, "kidd"],
   ] },
-  { q: "Name a manager who has won La Liga", sub: "1999–2000 to 2025–26", know: 0.5, a: [
+  { q: "Name a manager who has won La Liga", sub: "1999–2000 to 2025–26", know: 0.5, niche: true, a: [
     ["Pep Guardiola", 200, "guardiola|pep"], ["Carlo Ancelotti", 105, "ancelotti"], ["Zinedine Zidane", 92, "zidane|zizou"], ["Diego Simeone", 80, "simeone|cholo"], ["José Mourinho", 57, "mourinho"], ["Hansi Flick", 57, "flick"],
     ["Luis Enrique", 48, "enrique|lucho"], ["Xavi", 38, "xavi hernandez"], ["Frank Rijkaard", 30, "rijkaard"], ["Ernesto Valverde", 23, "valverde"], ["Fabio Capello", 16, "capello"], ["Vicente del Bosque", 16, "del bosque"],
     ["Rafael Benítez", 16, "benitez|rafa"], ["Tito Vilanova", 11, "vilanova"], ["Bernd Schuster", 5, "schuster"], ["Javier Irureta", 1, "irureta"],
   ] },
-  { q: "Name a manager who has won Serie A", sub: "1999–2000 to 2025–26 · titles won on the pitch", know: 0.45, a: [
+  { q: "Name a manager who has won Serie A", sub: "1999–2000 to 2025–26 · titles won on the pitch", know: 0.45, niche: true, a: [
     ["Massimiliano Allegri", 150, "allegri"], ["Antonio Conte", 150, "conte"], ["José Mourinho", 100, "mourinho"], ["Carlo Ancelotti", 60, "ancelotti"], ["Roberto Mancini", 60, "mancini"], ["Fabio Capello", 48, "capello"],
     ["Simone Inzaghi", 38, "inzaghi"], ["Luciano Spalletti", 38, "spalletti"], ["Marcello Lippi", 29, "lippi"], ["Stefano Pioli", 29, "pioli"], ["Maurizio Sarri", 21, "sarri"], ["Cristian Chivu", 21, "chivu"],
     ["Sven-Göran Eriksson", 8, "eriksson|sven"],
   ] },
-  { q: "Name a manager who has won the Bundesliga", sub: "2009–10 to 2025–26", know: 0.45, a: [
+  { q: "Name a manager who has won the Bundesliga", sub: "2009–10 to 2025–26", know: 0.45, niche: true, a: [
     ["Pep Guardiola", 150, "guardiola|pep"], ["Jürgen Klopp", 150, "klopp"], ["Xabi Alonso", 100, "alonso|xabi"], ["Hansi Flick", 72, "flick"], ["Vincent Kompany", 72, "kompany"], ["Jupp Heynckes", 60, "heynckes"],
     ["Thomas Tuchel", 48, "tuchel"], ["Carlo Ancelotti", 38, "ancelotti"], ["Julian Nagelsmann", 38, "nagelsmann"], ["Louis van Gaal", 21, "van gaal|lvg"], ["Niko Kovač", 14, "kovac"],
   ] },
-  { q: "Name a manager who has won Ligue 1", sub: "2009–10 to 2025–26", know: 0.35, a: [
+  { q: "Name a manager who has won Ligue 1", sub: "2009–10 to 2025–26", know: 0.35, niche: true, a: [
     ["Luis Enrique", 150, "enrique|lucho"], ["Thomas Tuchel", 86, "tuchel"], ["Carlo Ancelotti", 72, "ancelotti"], ["Laurent Blanc", 60, "blanc"], ["Mauricio Pochettino", 48, "pochettino|poch"], ["Unai Emery", 38, "emery"],
     ["Didier Deschamps", 38, "deschamps"], ["Christophe Galtier", 29, "galtier"], ["Leonardo Jardim", 21, "jardim"], ["Rudi Garcia", 14, "garcia"], ["René Girard", 2, "girard"],
   ] },
@@ -1523,7 +1535,7 @@ const PROMPTS = [
     ["Manchester United", 300, "man utd|man united|manchester utd|united"], ["Leicester City", 110, "leicester"], ["Hull City", 40, "hull"], ["Sheffield United", 30, "sheffield utd|sheff utd|blades"],
     ["Wigan Athletic", 8, "wigan"],
   ] },
-  { q: "Name a club Jordan Pickford has played for", sub: "Senior career up to 2026 · loans count", know: 0.5, a: [
+  { q: "Name a club Jordan Pickford has played for", sub: "Senior career up to 2026 · loans count", know: 0.5, niche: true, a: [
     ["Everton", 320, ""], ["Sunderland", 120, ""], ["Preston North End", 15, "preston"], ["Bradford City", 10, "bradford"], ["Carlisle United", 6, "carlisle"], ["Burton Albion", 5, "burton"],
     ["Darlington", 4, ""], ["Alfreton Town", 2, "alfreton"],
   ] },
@@ -1553,7 +1565,7 @@ const PROMPTS = [
     ["Tottenham Hotspur", 250, "tottenham|spurs"], ["Manchester United", 160, "man utd|man united|manchester utd|united"], ["Inter Milan", 90, "inter|internazionale"], ["Ajax", 70, ""],
     ["Brentford", 40, ""], ["VfL Wolfsburg", 15, "wolfsburg"],
   ] },
-  { q: "Name a club Memphis Depay has played for", sub: "Senior career up to 2026", know: 0.5, a: [
+  { q: "Name a club Memphis Depay has played for", sub: "Senior career up to 2026", know: 0.5, niche: true, a: [
     ["Manchester United", 220, "man utd|man united|manchester utd|united"], ["Barcelona", 180, "barca|fc barcelona"], ["Lyon", 110, "olympique lyonnais|ol"], ["PSV Eindhoven", 70, "psv"],
     ["Atlético Madrid", 40, "atletico|atleti|atletico de madrid"], ["Corinthians", 30, ""],
   ] },
@@ -1566,7 +1578,7 @@ const PROMPTS = [
   { q: "Name a club Mason Mount has played for", sub: "Senior career up to 2026 · loans count", know: 0.6, a: [
     ["Chelsea", 300, ""], ["Manchester United", 200, "man utd|man united|manchester utd|united"], ["Derby County", 40, "derby"], ["Vitesse", 15, "vitesse arnhem"],
   ] },
-  { q: "Name a club Kingsley Coman has played for", sub: "Senior career up to 2026 · loans count", know: 0.5, a: [
+  { q: "Name a club Kingsley Coman has played for", sub: "Senior career up to 2026 · loans count", know: 0.5, niche: true, a: [
     ["Bayern Munich", 300, "bayern|fc bayern|bayern munchen"], ["Paris Saint-Germain", 70, "psg|paris sg|paris"], ["Juventus", 60, "juve"], ["Al-Nassr", 50, "al nassr|nassr"],
   ] },
   { q: "Name a club Rafael Leão has played for", sub: "Senior career up to 2026", know: 0.55, a: [
@@ -1575,10 +1587,10 @@ const PROMPTS = [
   { q: "Name a club Paulo Dybala has played for", sub: "Senior career up to 2026", know: 0.6, a: [
     ["Juventus", 300, "juve"], ["Roma", 200, "as roma"], ["Palermo", 50, ""], ["Instituto", 8, "instituto de cordoba"],
   ] },
-  { q: "Name a club Weston McKennie has played for", sub: "Senior career up to 2026 · loans count", know: 0.45, a: [
+  { q: "Name a club Weston McKennie has played for", sub: "Senior career up to 2026 · loans count", know: 0.45, niche: true, a: [
     ["Juventus", 300, "juve"], ["Schalke 04", 100, "schalke"], ["Leeds United", 50, "leeds"],
   ] },
-  { q: "Name a club Tyler Adams has played for", sub: "Senior career up to 2026", know: 0.4, a: [
+  { q: "Name a club Tyler Adams has played for", sub: "Senior career up to 2026", know: 0.4, niche: true, a: [
     ["Bournemouth", 200, "afc bournemouth"], ["Leeds United", 149, "leeds"], ["RB Leipzig", 119, "leipzig"], ["New York Red Bulls", 68, "red bulls|ny red bulls|nyrb|new york red bulls ii"],
   ] },
   { q: "Name a club N'Golo Kanté has played for", sub: "Senior career up to 2026", know: 0.65, a: [
@@ -1602,7 +1614,7 @@ const PROMPTS = [
   { q: "Name a club Jack Grealish has played for", sub: "Senior career up to 2026 · loans count", know: 0.7, a: [
     ["Manchester City", 270, "man city|city"], ["Aston Villa", 250, "villa"], ["Everton", 70, ""], ["Notts County", 10, "notts"],
   ] },
-  { q: "Name a club Jesse Lingard has played for", sub: "Senior career up to 2026 · loans count", know: 0.5, a: [
+  { q: "Name a club Jesse Lingard has played for", sub: "Senior career up to 2026 · loans count", know: 0.5, niche: true, a: [
     ["Manchester United", 330, "man utd|man united|manchester utd|united"], ["West Ham United", 80, "west ham|hammers"], ["Nottingham Forest", 50, "forest|nottm forest"], ["FC Seoul", 40, "seoul"],
     ["Corinthians", 15, ""], ["Derby County", 8, "derby"], ["Brighton & Hove Albion", 6, "brighton"], ["Birmingham City", 6, "birmingham"], ["Leicester City", 4, "leicester"],
   ] },
@@ -1616,7 +1628,7 @@ const PROMPTS = [
     ["Manchester United", 300, "man utd|man united|manchester utd|united"], ["Ajax", 200, ""], ["Bayer Leverkusen", 50, "leverkusen|bayer"], ["FC Utrecht", 20, "utrecht"],
     ["Go Ahead Eagles", 8, "go ahead|gae"], ["Bayern Munich II", 6, "bayern|bayern ii|bayern munich ii|bayern reserves"],
   ] },
-  { q: "Name a club Ange Postecoglou has managed", sub: "Club sides only, up to 2026", know: 0.5, a: [
+  { q: "Name a club Ange Postecoglou has managed", sub: "Club sides only, up to 2026", know: 0.5, niche: true, a: [
     ["Tottenham Hotspur", 300, "tottenham|spurs"], ["Celtic", 160, ""], ["Nottingham Forest", 60, "forest|nottm forest"], ["Al-Nassr", 30, "al nassr|nassr"],
     ["Yokohama F. Marinos", 25, "yokohama|yokohama f marinos|marinos"], ["Melbourne Victory", 8, "victory"], ["Brisbane Roar", 8, "brisbane|roar"], ["South Melbourne", 5, ""],
     ["Panachaiki", 2, ""], ["Whittlesea Zebras", 1, "whittlesea"], ["Western Suburbs", 1, "wests"],
@@ -1720,7 +1732,7 @@ const SHOTS = [
   { min: 50, max: 69, name: "SCREAMER", kind: "screamer", color: "#ffd36b", sq: "🟨", line: "Thirty-yard free kick. Over the wall and on fire." },
   { min: 25, max: 49, name: "OFF THE POST", kind: "post", color: "#7ef0a6", sq: "🟩", line: "Clang. And in." },
   { min: 1, max: 24, name: "TAP-IN", kind: "tapin", color: "#4de3ff", sq: "🟦", line: "Everyone was scoring that one." },
-  { min: 0, max: 0, name: "SAVED", kind: "saved", color: "#7d93b8", sq: "⬛", line: "No answer. Courtois got all eight arms to it." },
+  { min: 0, max: 0, name: "BUS PARKED", kind: "saved", color: "#7d93b8", sq: "⬛", line: "No answer, so they parked the bus. Courtois dived the wrong way and the team coach saved it." },
 ];
 const shotOf = (pts) => SHOTS.find((s) => pts >= s.min);
 const oneIn = (share) => Math.max(2, Math.round(1 / share)).toLocaleString("en-US");
@@ -1893,6 +1905,10 @@ const sfx = (() => {
     kick(p = 1) { const t = t0(); tone({ t, f: 150, f2: 45, dur: 0.16, gain: 0.55 * p }); hit({ t, dur: 0.035, type: "lowpass", f: 2400, gain: 0.45 * p }); },
     whoosh(d = 0.6) { hit({ dur: d, f: 450, f2: 2600, q: 1.4, gain: 0.2, a: d * 0.6 }); },
     net(p = 1) { const t = t0(); hit({ t, dur: 0.4, f: 1900, q: 0.8, gain: 0.32 * p, a: 0.01 }); tone({ t, f: 95, f2: 60, dur: 0.12, gain: 0.32 * p }); },
+    engine() { const t = t0(); tone({ t, type: "sawtooth", f: 48, f2: 92, dur: 0.75, gain: 0.12, a: 0.05 }); tone({ t, type: "square", f: 24, f2: 46, dur: 0.75, gain: 0.07, a: 0.05 }); hit({ t, dur: 0.75, type: "lowpass", f: 260, gain: 0.35, a: 0.06 }); },
+    screech() { const t = t0(); hit({ t, dur: 0.6, type: "bandpass", f: 3300, f2: 2300, q: 9, gain: 0.5, a: 0.02 }); tone({ t, type: "sawtooth", f: 2500, f2: 1900, dur: 0.55, gain: 0.035, a: 0.02 }); tone({ t, type: "sawtooth", f: 2650, f2: 2040, dur: 0.55, gain: 0.025, a: 0.02 }); },
+    bonk() { const t = t0(); tone({ t, f: 170, f2: 70, dur: 0.3, gain: 0.6 }); hit({ t, dur: 0.12, type: "lowpass", f: 900, gain: 0.6 }); [[410, 0.12, 0.5], [880, 0.06, 0.35], [1340, 0.04, 0.25]].forEach(([f, gain, dur]) => tone({ t: t + 0.005, f, f2: f * 0.97, dur, gain, a: 0.002 })); },
+    horn() { const t = t0(); for (const d of [0, 0.26]) { tone({ t: t + d, type: "square", f: 392, dur: 0.17, gain: 0.08, a: 0.01 }); tone({ t: t + d, type: "square", f: 494, dur: 0.17, gain: 0.07, a: 0.01 }); tone({ t: t + d, type: "sawtooth", f: 196, dur: 0.17, gain: 0.05, a: 0.01 }); } },
     clang() { const t = t0(); [[620, 0.3, 1.5], [1520, 0.18, 1.0], [2490, 0.11, 0.6], [3810, 0.05, 0.35]].forEach(([f, gain, dur]) => tone({ t, f, f2: f * 0.985, dur, gain, a: 0.002 })); hit({ t, dur: 0.03, type: "highpass", f: 2000, gain: 0.3 }); },
     dive() { const t = t0(); hit({ t, dur: 0.28, f: 600, f2: 1800, gain: 0.1, a: 0.12 }); hit({ t: t + 0.32, dur: 0.14, type: "lowpass", f: 380, gain: 0.45 }); },
     bounce(p = 1) { tone({ f: 120, f2: 70, dur: 0.08, gain: 0.3 * p }); },
@@ -1954,11 +1970,14 @@ const sfx = (() => {
   };
 })();
 
-const unseen = () => { const had = new Set(store.load().seen || []); return PROMPTS.filter((p) => !had.has(p.id)); };
+const level = () => (store.load().level === "niche" ? "niche" : "normal");
+const inLevel = (p, lv = level()) => !!p.niche === (lv === "niche");
+const rk = (lv) => (lv === "niche" ? { run: "runN", daily: "dailyN" } : { run: "run", daily: "daily" });
+const unseen = () => { const had = new Set(store.load().seen || []); return PROMPTS.filter((p) => inLevel(p) && !had.has(p.id)); };
 
 function deal() {
   const s = store.load(), run = liveRun(s), held = new Set(run ? run.set : []);
-  const old = (s.seen || []).map((id) => byId.get(id)).filter((p) => p && !held.has(p.id));
+  const old = (s.seen || []).map((id) => byId.get(id)).filter((p) => p && inLevel(p) && !held.has(p.id));
   const fresh = shuffled(unseen().filter((p) => !held.has(p.id))), out = [];
   const take = (list, cap) => {
     for (const p of list) {
@@ -1977,7 +1996,7 @@ function markSeen(id) {
   store.save(s);
 }
 
-const liveRun = (s) => { const r = s.run; return r && r.date === today.key && r.pool === POOL && r.set.every((id) => byId.has(id)) ? r : null; };
+const liveRun = (s, lv = level()) => { const r = s[rk(lv).run]; return r && r.date === today.key && r.pool === POOL && r.set.every((id) => byId.has(id)) ? r : null; };
 
 const $ = (s) => document.querySelector(s);
 const el = { intro: $("#intro"), play: $("#play"), done: $("#done"), card: $("#card"), q: $("#q"), sub: $("#sub"), form: $("#form"), answer: $("#answer"), timer: $("#timer"), fb: $("#fb"),
@@ -1987,14 +2006,15 @@ $("#strikeTag").textContent = `STRIKE #${today.no}`;
 for (let i = 0; i < 25; i++) el.timer.appendChild(document.createElement("i"));
 
 let game = null, tick = null, advanceTimer = null, pending = null, phase = "intro";
-const todayDone = () => { const d = store.load().daily; return d && d.date === today.key && d.pool === POOL && d.set.every((id) => byId.has(id)) ? d : null; };
+const todayDone = (lv = level()) => { const d = store.load()[rk(lv).daily]; return d && d.date === today.key && d.pool === POOL && d.set.every((id) => byId.has(id)) ? d : null; };
 const cur = () => byId.get(game.set[game.round]);
 
 function introLog() {
   const s = store.load();
-  const st = s.stats, left = unseen().length, run = liveRun(s);
+  const st = s.stats, left = unseen().length, run = liveRun(s), lv = level(), pool = PROMPTS.filter((p) => inLevel(p, lv)).length, tag = lv === "niche" ? "NICHE" : "NORMAL";
   const lines = st && st.played ? [`STREAK ${st.streak} · PLAYED ${st.played} · AVG ${Math.round(st.sum / st.played)} · BEST ${st.best}`] : [];
-  lines.push(left ? `${left} OF ${PROMPTS.length} PROMPTS STILL NEW TO YOU` : `YOU'VE SEEN ALL ${PROMPTS.length} PROMPTS · REPEATS START WITH THE OLDEST`);
+  lines.push(left ? `${left} OF ${pool} ${tag} PROMPTS STILL NEW TO YOU` : `YOU'VE SEEN ALL ${pool} ${tag} PROMPTS · REPEATS START WITH THE OLDEST`);
+  for (const b of document.querySelectorAll("#level button")) b.setAttribute("aria-checked", String(b.dataset.lv === lv));
   $("#introLog").textContent = lines.join("\n");
   const done = !!todayDone();
   $("#go").textContent = done ? "PLAY UNLIMITED ∞" : run && run.results.length ? `RESUME ${run.results.length}/7 ▶` : "KICK OFF ▶";
@@ -2016,13 +2036,14 @@ function show(which) {
 function start(mode) {
   const s = store.load(), run = mode === "daily" ? liveRun(s) : null;
   const pl = player();
-  if (run) game = { mode, set: run.set, round: run.results.length, results: run.results, total: run.total, pl: pl.id };
+  const lv = level();
+  if (run) game = { mode, level: lv, set: run.set, round: run.results.length, results: run.results, total: run.total, pl: pl.id };
   else {
-    game = { mode, set: deal(), round: 0, results: [], total: 0, pl: pl.id };
-    if (mode === "daily") { s.run = { date: today.key, pool: POOL, set: game.set, results: [], total: 0 }; store.save(s); }
+    game = { mode, level: lv, set: deal(), round: 0, results: [], total: 0, pl: pl.id };
+    if (mode === "daily") { s[rk(lv).run] = { date: today.key, pool: POOL, set: game.set, results: [], total: 0 }; store.save(s); }
   }
   pitch.setPlayer(pl);
-  if (mode === "daily" && myLeagues().length) runSend("start", { pl: pl.id, set: game.set });
+  if (mode === "daily" && lv === "normal" && myLeagues().length) runSend("start", { pl: pl.id, set: game.set });
   if (game.round >= 7) return finish();
   show("play");
   el.card.hidden = true;
@@ -2036,7 +2057,7 @@ function start(mode) {
 function hud() {
   el.hGoals.textContent = game.results.filter((r) => r.pts > 0).length;
   el.hScore.textContent = game.total;
-  el.hRound.textContent = `PROMPT ${Math.min(game.round + 1, 7)} OF 7`;
+  el.hRound.textContent = `PROMPT ${Math.min(game.round + 1, 7)} OF 7${game.level === "niche" ? " · NICHE" : ""}`;
 }
 
 function clearSugg() { pending = null; el.sugg.hidden = true; el.sugg.textContent = ""; }
@@ -2044,7 +2065,7 @@ function clearSugg() { pending = null; el.sugg.hidden = true; el.sugg.textConten
 function ask(how) {
   const p = cur();
   markSeen(p.id);
-  if (game.mode === "daily") runSend("open", { k: game.round });
+  if (game.mode === "daily" && game.level !== "niche") runSend("open", { k: game.round });
   clearTimeout(advanceTimer);
   if (how === "respot") pitch.respot(); else if (how === "idle") pitch.idle();
   phase = "ask";
@@ -2082,10 +2103,10 @@ function resolve(i, typed, fixed, gave) {
   const ans = i === null ? null : p.answers[i];
   const pts = ans ? ans.pts : 0, shot = shotOf(pts), pl = playerById(game.pl);
   const bonus = ans && pl.boost === shot.kind ? BOOST : 0;
-  if (game.mode === "daily") runSend("answer", { k: game.round, typed: typed || "", i });
+  if (game.mode === "daily" && game.level !== "niche") runSend("answer", { k: game.round, typed: typed || "", i });
   game.results.push({ p: game.set[game.round], i, typed, pts, bonus, pl: pl.id });
   game.total += pts + bonus;
-  if (game.mode === "daily") { const s = store.load(), run = liveRun(s); if (run) { run.results = game.results; run.total = game.total; store.save(s); } }
+  if (game.mode === "daily") { const s = store.load(), run = liveRun(s, game.level); if (run) { run.results = game.results; run.total = game.total; store.save(s); } }
   hud();
   el.card.hidden = true;
   const { hit, end, cel, title } = pitch.play(shot.kind, ans ? pl.cel[Math.min(pl.cel.length - 1, BIG.has(shot.kind) ? 0 : shot.kind === "post" ? 1 : 2)] : null);
@@ -2210,12 +2231,12 @@ function finish() {
       st.played += 1; st.sum += g.total; st.best = Math.max(st.best, g.total); st.last = today.key;
     }
     s.stats = st;
-    s.daily = { date: today.key, pool: POOL, set: g.set, results: g.results, total: g.total, pl: g.pl };
-    delete s.run;
+    s[rk(g.level).daily] = { date: today.key, pool: POOL, set: g.set, results: g.results, total: g.total, pl: g.pl };
+    delete s[rk(g.level).run];
     store.save(s);
   }
   renderResults(g);
-  if (g.mode === "daily") postScores();
+  if (g.mode === "daily" && g.level !== "niche") postScores();
   sfx.play("final");
   sfx.play("applause");
 }
@@ -2254,7 +2275,7 @@ function logSvg(results) {
 }
 
 function shareText(g) {
-  const head = g.mode === "daily" ? `TOPBINZ #${today.no}` : "TOPBINZ ∞";
+  const head = `${g.mode === "daily" ? `TOPBINZ #${today.no}` : "TOPBINZ ∞"}${g.level === "niche" ? " · NICHE" : ""}`;
   return `${head} · ${g.total} pts · as ${playerById(g.pl).name}\n${g.results.map((r) => shotOf(r.pts).sq).join("")}\n${g.results.map((r, i) => `${i + 1}. ${r.i === null ? "—" : r.pts + (r.bonus || 0)}`).join("  ")}`;
 }
 
@@ -2312,12 +2333,14 @@ function renderResults(g) {
   });
 }
 
+function setLevel(lv) { const s = store.load(); s.level = lv === "niche" ? "niche" : "normal"; store.save(s); introLog(); }
+for (const b of document.querySelectorAll("#level button")) b.addEventListener("click", () => { setLevel(b.dataset.lv); sfx.play("blip", 2); });
 $("#go").addEventListener("click", () => start(todayDone() ? "unlimited" : "daily"));
 $("#unl").addEventListener("click", () => start("unlimited"));
 $("#seeToday").addEventListener("click", () => {
   const d = todayDone();
   if (!d) return;
-  game = { mode: "daily", set: d.set, round: 7, results: d.results, total: d.total, pl: d.pl || (d.results.find((r) => r.pl) || {}).pl };
+  game = { mode: "daily", level: level(), set: d.set, round: 7, results: d.results, total: d.total, pl: d.pl || (d.results.find((r) => r.pl) || {}).pl };
   renderResults(game);
 });
 
@@ -2931,6 +2954,50 @@ const pitch = (() => {
     for (let i = 0; i < 12; i++) { const a = r() * Math.PI * 2, dist = rad + r() * rad * 0.7; R(x + Math.cos(a) * dist - d / 2, y + Math.sin(a) * dist - d / 2 - r() * rad * 0.5, d, d, r() < 0.5 ? "#ff8a3d" : "#ffd36b"); }
   }
 
+  function drawBus(b) {
+    const { len, h } = b, u = h / 40;
+    g.save();
+    g.translate(Math.round(b.x), Math.round(b.y));
+    g.rotate(b.rock || 0);
+    g.translate(-Math.round(len / 2), 0);
+    R(-2 * u, -1.5 * u, len + 4 * u, 3 * u, "rgba(0,0,0,0.38)");
+    R(0, -38 * u, len, 31 * u, "#1d2f7a");
+    R(2 * u, -40.5 * u, len - 7 * u, 3 * u, "#e8f1ff");
+    R(len - 5 * u, -38 * u, 5 * u, 2 * u, "#1d2f7a");
+    R(0, -9.5 * u, len, 4.5 * u, "#111a45");
+    R(0, -20 * u, len, 3 * u, "#ffd36b");
+    R(0, -16.4 * u, len, 1.4 * u, "#ff5d8f");
+    for (let x = 5 * u, i = 0; x < len - 30 * u; x += 13 * u, i++) {
+      R(x, -34 * u, 11 * u, 12 * u, "#0b1433");
+      R(x + 1 * u, -33 * u, 2.5 * u, 10 * u, "rgba(127,182,255,0.32)");
+      if (i % 3 !== 1) { R(x + 5 * u, -28.5 * u, 3.4 * u, 3.4 * u, "#c9925f"); R(x + 4.4 * u, -25 * u, 4.6 * u, 3 * u, i % 2 ? "#e8f1ff" : "#ff5d8f"); }
+    }
+    R(len - 27 * u, -34 * u, 8 * u, 27 * u, "#0b1433");
+    R(len - 23.4 * u, -34 * u, 0.8 * u, 27 * u, "#2a3b80");
+    for (let k = 0; k < 6; k++) R(len - 16 * u + k * 1.6 * u, -34 * u + k * 0.6 * u, 14 * u - k * 1.6 * u, 3 * u, k % 2 ? "#6fa8f0" : "#8cc0ff");
+    R(len - 16 * u, -30.4 * u, 14 * u, 13 * u, "#7fb6ff");
+    R(len - 9 * u, -27 * u, 3.6 * u, 3.6 * u, "#c9925f");
+    R(len - 9.6 * u, -23.4 * u, 4.8 * u, 4 * u, "#1b2438");
+    R(len - 15 * u, -39.6 * u, 11 * u, 3.4 * u, "#120c04");
+    R(len - 14 * u, -38.8 * u, 9 * u, 1.8 * u, "#ffb000");
+    R(len - 2.6 * u, -13 * u, 2.6 * u, 3 * u, b.honk ? "#ffffff" : "#fff2c2");
+    if (b.honk) R(len, -15 * u, 7 * u, 7 * u, "rgba(255,247,214,0.35)");
+    R(0, -14 * u, 1.8 * u, 4.2 * u, b.brake ? "#ff3b3b" : "#6b1420");
+    if (b.brake) R(-4 * u, -16 * u, 4 * u, 8 * u, "rgba(255,59,59,0.28)");
+    const fs = Math.max(4, Math.round(4.6 * u));
+    g.font = `700 ${fs}px Silkscreen, monospace`;
+    g.textBaseline = "alphabetic";
+    g.fillStyle = "#e8f1ff";
+    g.fillText("TOPBINZ FC", Math.round(8 * u), Math.round(-10.6 * u));
+    for (const wx of [len * 0.17, len * 0.79]) {
+      const cx = wx, cy = -4 * u, r = 6.2 * u;
+      g.fillStyle = "#06080e"; g.beginPath(); g.arc(cx, cy, r, 0, Math.PI * 2); g.fill();
+      g.fillStyle = "#8d98ad"; g.beginPath(); g.arc(cx, cy, r * 0.45, 0, Math.PI * 2); g.fill();
+      for (let k = 0; k < 3; k++) { const a = b.spin + (k * Math.PI * 2) / 3; R(cx + Math.cos(a) * r * 0.3 - 0.6 * u, cy + Math.sin(a) * r * 0.3 - 0.6 * u, 1.2 * u, 1.2 * u, "#e8f1ff"); }
+    }
+    g.restore();
+  }
+
   function keeperDraw(kp) {
     const ps = kp.pose || kReady(), b = 0.3 * (1 - Math.cos(clk * 2.1 + 1));
     R(kp.x - 4 * L.ks, L.GB + L.ks * 0.4, 8 * L.ks, L.ks, "rgba(0,0,0,0.3)");
@@ -3380,37 +3447,33 @@ const pitch = (() => {
       if (tm >= 1.85) { const a = tm - 1.85; st.net = { x: N[0], y: N[1] - gh * 0.04, a: 0.9 * L.k * Math.exp(-a * 3), after: a, w: 14, r2: (gw * 0.1) ** 2 }; st.crowd = 0.25; }
       return st;
     } },
-    saved: { hit: 0.92, end: 3.4, warp: [[0.86, 1.25, 0.3]], sfx: [[0.62, "kick", 1.1], [0.63, "whoosh", 0.5], [0.76, "whoosh", 0.3], [0.92, "parry"], [0.93, "ooh", 0, 1], [1.45, "applause", 2.2], [1.75, "bounce", 0.4]], f(tm, m) {
-      const st = shotBase(tm, m), { gw, gh, GT, ss, sg, spot, yS, yP, ps, ks } = L, f = !!who.foot, sd = f ? -1 : 1;
+    saved: { hit: 1.0, end: 3.6, warp: [[0.72, 1.1, 0.35]], sfx: [[0.62, "kick", 1.1], [0.63, "whoosh", 0.5], [0.72, "engine"], [0.9, "screech"], [1.0, "bonk"], [1.01, "ooh", 0, 1], [2.5, "horn"], [1.8, "applause", 2.2], [2.05, "bounce", 0.4], [2.45, "bounce", 0.25]], f(tm, m) {
+      const st = shotBase(tm, m), { gw, gh, GT, GB, GL, GR, ss, sg, spot, ps } = L, f = !!who.foot, sd = f ? -1 : 1;
       const sink = pose({ view: "back", p: 11, lf: [-5.6, 0, 1], rf: [5.6, 0, 1], lh: ARMS.head[0], rh: ARMS.head[1], f }), up = react("head", { f });
-      const s0 = striker(Math.min(tm, 2.3), 0.08, 0.62, L.stand, L.strike, ps, { pw: 1 }), held = blendPose(blendPose(s0.pose, sink, inOut(seg(tm, 1.0, 1.3))), up, inOut(seg(tm, 2.0, 2.3)));
+      const s0 = striker(Math.min(tm, 2.3), 0.08, 0.62, L.stand, L.strike, ps, { pw: 1 }), held = blendPose(blendPose(s0.pose, sink, inOut(seg(tm, 1.05, 1.35))), up, inOut(seg(tm, 2.0, 2.3)));
       st.shooter = { ...s0, pose: held };
       if (tm >= 2.3) { const r = move(tm, 2.3, 3.1, [s0.x, s0.y], [s0.x - sd * gw * 0.18, gy(16)], ps, { A: 0.05, rate: 2, view: "front", arms: "head", look: 0.6 }); r.pose = blendPose(held, r.pose, ease(seg(tm, 2.3, 2.55))); st.shooter = r; }
-      const S = [spot[0], spot[1] - ss / 2], B = [W / 2 - gw * 0.095, GT + gh * 0.45], Ld = [W / 2 - gw * 0.42, yS + (yP - yS) * 0.55];
-      if (tm >= 0.62 && tm < 0.92) { const u = seg(tm, 0.62, 0.92), p = quad(S, [lerp(S[0], B[0], 0.5), B[1] - gh * 0.1], B, u); st.ball = { x: p[0], y: p[1], s: lerp(ss, sg * 1.05, u), sx: tm * 70, sy: tm * 20, gy: lerp(spot[1], L.GB, u), layer: "front" }; }
-      else if (tm >= 0.92 && tm < 1.75) { const u = easeOut(seg(tm, 0.92, 1.75)), p = quad(B, [B[0] - gw * 0.14, GT - gh * 1.1], Ld, u); st.ball = { x: p[0], y: p[1], s: lerp(sg, sg * 0.7, u), sx: -tm * 90, sy: tm * 40, layer: u < 0.3 ? "front" : "net" }; }
-      else if (tm >= 1.75) st.ball = null;
-      const kx = W / 2, ky = L.home[1], fan = ease(seg(tm, 0.82, 0.9)) * (1 - ease(seg(tm, 1.9, 2.08)));
-      let kp = kReady();
-      if (tm >= 0.6) kp = blendPose(kp, K_SET, ease(seg(tm, 0.6, 0.72)));
-      if (tm >= 0.72) kp = blendPose(kp, kStar(0), ease(seg(tm, 0.72, 0.82)));
-      if (tm >= 0.82) kp = kStar(fan);
-      if (tm >= 2.08) kp = blendPose(kStar(0), K_ROAR, ease(seg(tm, 2.08, 2.3)));
-      if (tm >= 2.9) kp = blendPose(K_ROAR, kReady(), ease(seg(tm, 2.9, 3.3)));
-      st.keeper = { x: kx, y: ky - Math.sin(Math.PI * seg(tm, 0.74, 0.92)) * ks * 1.3 - (tm > 2.15 && tm < 2.6 ? Math.abs(Math.sin((tm - 2.15) * 7)) * ks * 0.7 : 0), a: 0, pose: kp };
-      const F = { z: 2, x: W / 2, y: GT + gh * 0.4 };
-      st.cam = tm < 0.66 ? C0() : tm < 0.86 ? camTo(C0(), F, ease(seg(tm, 0.66, 0.86))) : tm < 2.05 ? F : camTo(F, C0(), ease(seg(tm, 2.05, 2.75)));
-      st.bars = seg(tm, 0.8, 0.9) - seg(tm, 1.55, 1.75);
-      st.speed = 0.7 * (seg(tm, 0.84, 0.9) - seg(tm, 1.0, 1.2));
-      if (tm >= 0.92) {
-        const a = tm - 0.92;
-        st.flash = 0.35 * (1 - seg(a, 0, 0.06));
-        st.shake = a < 0.15 ? 1.2 : 0;
-        st.fx.push({ type: "burst", x: B[0], y: B[1], t: a, n: 22, sp: gw * 0.4, life: 0.6, cols: ["#ffffff", "#c6ff3d", "#6fdc8c"], grav: gh * 0.6, seed: 41 });
-        st.fx.push({ type: "say", text: "SAVED!", x: W / 2, y: GT + gh * 0.28, t: a - 0.05, life: 1.9, k: 9.5 / (P * F.z), col: "#6fdc8c" });
+      st.keeper = kDive(tm, { x: W / 2, y: L.home[1], a: 0, pose: kReady() }, 0.6, 0.64, 0.74, 0.9, [GR - gw * 0.13, GT + gh * 0.36]);
+      const len = gw * 1.22, bh = gh * 1.02, by = GB + gh * 0.05, arr = seg(tm, 0.76, 0.99), go = arr < 0.7 ? arr * 1.2 : 0.84 + 0.16 * (1 - (1 - (arr - 0.7) / 0.3) ** 2), bx = lerp(GL - len * 0.55 - gw * 0.9, W / 2, go), stop = tm - 0.98, hA = tm - 1.0;
+      const rock = tm < 0.98 ? -0.02 * Math.sin(Math.PI * arr) : 0.05 * Math.exp(-stop * 4.5) * Math.sin(stop * 15) + (hA > 0 ? -0.03 * Math.exp(-hA * 6) * Math.sin(hA * 24) : 0);
+      if (tm >= 0.76) st.bus = { x: bx, y: by, gy: by, len, h: bh, rock, spin: go * 46, brake: tm > 0.9 && tm < 1.4, honk: tm > 2.5 && tm < 2.95 && Math.floor((tm - 2.5) / 0.13) % 2 === 0 };
+      if (tm > 0.9 && tm < 1.25) for (const [k, sd2] of [[0.2, 56], [0.78, 57]]) st.fx.push({ type: "burst", x: bx - len / 2 + len * k, y: by, t: (tm - 0.9) % 0.28, n: 9, sp: gw * 0.16, life: 0.28, cols: ["#cfc8b4", "#8f8a7a", "#e8f1ff"], grav: gh * 0.25, seed: sd2, ground: true });
+      const S = [spot[0], spot[1] - ss / 2], C = [W / 2 - gw * 0.06, GB - gh * 0.5], Ld = [W / 2 - gw * 0.38, GB + (spot[1] - GB) * 0.42];
+      if (tm >= 0.62 && tm < 1.0) { const u = seg(tm, 0.62, 1.0), p = quad(S, [lerp(S[0], C[0], 0.5), C[1] - gh * 0.16], C, u); st.ball = { x: p[0], y: p[1], s: lerp(ss, sg * 1.05, u), sx: tm * 70, sy: tm * 20, gy: lerp(spot[1], by + gh * 0.02, u), layer: "front" }; }
+      else if (tm >= 1.0 && tm < 1.85) { const u = easeOut(seg(tm, 1.0, 1.85)), p = quad(C, [C[0] - gw * 0.2, GT - gh * 1.35], Ld, u); st.ball = { x: p[0], y: p[1], s: lerp(sg * 1.05, lerp(sg, ss, 0.55), u), sx: -tm * 90, sy: tm * 40, gy: lerp(by + gh * 0.02, Ld[1], u), layer: "front" }; }
+      else if (tm >= 1.85) { const u = seg(tm, 1.85, 2.9), x = Ld[0] - gw * 0.14 * easeOut(u), hop = Math.abs(Math.sin(Math.PI * Math.min(u * 2.2, 2))) * gh * 0.22 * (1 - u), s2 = lerp(sg, ss, 0.55); st.ball = { x, y: Ld[1] - s2 / 2 - hop, s: s2, sx: -tm * 60 * (1 - u), sy: 0, gy: Ld[1], layer: "front" }; }
+      const F = { z: Math.max(1.05, Math.min(1.65, H / (gh * 2.5))), x: W / 2, y: GT + gh * 0.38 };
+      st.cam = tm < 0.6 ? C0() : tm < 0.84 ? camTo(C0(), F, ease(seg(tm, 0.6, 0.84))) : tm < 2.35 ? F : camTo(F, C0(), ease(seg(tm, 2.35, 3.05)));
+      st.bars = seg(tm, 0.78, 0.88) - seg(tm, 1.45, 1.65);
+      st.speed = 0.6 * (seg(tm, 0.8, 0.86) - seg(tm, 0.95, 1.1));
+      if (hA >= 0) {
+        st.flash = 0.3 * (1 - seg(hA, 0, 0.06));
+        st.shake = hA < 0.18 ? 1.5 : 0;
+        st.fx.push({ type: "burst", x: C[0], y: C[1], t: hA, n: 18, sp: gw * 0.35, life: 0.55, cols: ["#ffffff", "#ffd36b", "#9aa6bf"], grav: gh * 0.6, seed: 43 });
+        st.fx.push({ type: "say", text: "PARKED THE BUS!", x: W / 2, y: GT - gh * 0.18, t: hA - 0.05, life: 1.4, k: 8.5 / (P * F.z), col: "#ffd36b" });
         st.crowd = 0.45; st.led = 3;
       }
-      if (tm >= 1.75 && tm < 3.2) st.jump = { x: Ld[0], y: Ld[1], t: tm - 1.75 };
+      if (tm > 2.5 && tm < 3.2) st.fx.push({ type: "say", text: "BEEP BEEP", x: bx + len * 0.3, y: by - bh * 1.14, t: tm - 2.5, life: 0.7, k: 5 / (P * F.z), col: "#e8f1ff" });
       return st;
     } },
   };
@@ -3853,6 +3916,7 @@ const pitch = (() => {
     if (st.shooter) items.push([st.shooter.gy ?? st.shooter.y, () => starAt(st.shooter)]);
     if (st.mate) items.push([st.mate.gy ?? st.mate.y, () => mateAt(st.mate)]);
     if (st.wall) for (const p of st.wall) items.push([p.gy ?? p.y, () => person(p, p.pal)]);
+    if (st.bus) items.push([st.bus.gy, () => drawBus(st.bus)]);
     if (b && b.layer === "front") items.push([b.gy ?? b.y + b.s / 2, () => frontBall(b, t)]);
     items.sort((p, q) => p[0] - q[0]).forEach(([, draw]) => draw());
     if (b && b.layer === "top") ballAt(b.x, b.y, b.s, b.sx, b.sy);
@@ -4242,7 +4306,9 @@ function drawRondo(msg = "", pending = "") {
   let head = "", body = "";
   if (st.phase === "lobby") {
     head = `<p class="kicker">RONDO · ROOM</p><h2 class="title code">${esc(rondo.code)}</h2>`;
+    const lvl = st.level === "niche" ? "niche" : "normal";
     body = `<div class="panel"><p class="h2"><span>IN THE ROOM</span><b>${st.players.length}/10</b></p><div class="roster" id="rRoster"></div>
+      ${host ? `<div class="level" id="rLevel" role="radiogroup" aria-label="Prompts"><button type="button" role="radio" aria-checked="${lvl === "normal"}" data-lv="normal"><b>NORMAL</b><span>Stars and big trophies</span></button><button type="button" role="radio" aria-checked="${lvl === "niche"}" data-lv="niche"><b>NICHE</b><span>Old finals and deep cuts</span></button></div>` : `<p class="note">${lvl === "niche" ? "NICHE prompts: old finals, famous scorelines, deep cuts." : "NORMAL prompts: today's stars and the big trophies."}</p>`}
       ${host ? `<button class="btn" id="rStart" type="button" ${st.players.length < 2 ? "disabled" : ""}>${st.players.length < 2 ? "WAITING FOR A FRIEND…" : "KICK OFF ▶"}</button>` : `<p class="note">Waiting for ${esc(names[st.host] || "the host")} to kick off.</p>`}
       <button class="btn ghost" id="rInvite" type="button">INVITE FRIENDS</button></div>`;
   } else if (st.phase === "over") {
@@ -4273,6 +4339,7 @@ function drawRondo(msg = "", pending = "") {
     roster.appendChild(d);
   }
   if ($("#rStart")) $("#rStart").onclick = () => rondo.ws && rondo.ws.send(JSON.stringify({ t: "start" }));
+  for (const b of document.querySelectorAll("#rLevel button")) b.onclick = () => rondo.ws && rondo.ws.send(JSON.stringify({ t: "level", level: b.dataset.lv }));
   if ($("#rAgain")) $("#rAgain").onclick = () => rondo.ws && rondo.ws.send(JSON.stringify({ t: "again" }));
   if ($("#rInvite")) $("#rInvite").onclick = (e) => shareLink(e.target, `${location.origin}${location.pathname}?room=${rondo.code}`, "Join my TopBinz Rondo room");
   const form = $("#rForm");
@@ -4314,7 +4381,7 @@ function runSend(op, body) {
 
 async function postScores() {
   await runChain;
-  const d = todayDone(), list = myLeagues();
+  const d = todayDone("normal"), list = myLeagues();
   if (!d || !list.length) return;
   const s = store.load(), posted = s.posted || {};
   for (const l of list) {
@@ -4365,7 +4432,7 @@ function drawLeague(msg = "") {
       <div class="panel"><p class="h2"><span>THIS WEEK</span><b>${fmtDay(S.week.start)} – ${fmtDay(S.week.end)}</b></p>
         <div class="table">${rows.map((r, i) => `<div class="tr${r.pid === me() ? " me" : ""}" data-pl="${M[r.pid] ? M[r.pid].pl : "messi"}"><span class="pos">${r.pts ? i + 1 : "–"}</span><span class="who"><b>${esc(nm(r.pid))}</b><small>${(tr[r.pid] && tr[r.pid].ballon) ? `BALLON D'OR ×${tr[r.pid].ballon}` : ""}${(tr[r.pid] && tr[r.pid].superBallon) ? ` · SUPER ×${tr[r.pid].superBallon}` : ""}</small></span><span class="tdy">${played.has(r.pid) ? `${played.get(r.pid).score}<small>TODAY</small>` : `<small>NOT YET</small>`}</span><span class="pts">${r.pts}<small>PTS</small></span></div>`).join("")}</div>
         <p class="note">${S.week.rows.length ? `${esc(nm(S.week.rows[0].pid))} leads the race for this week's Ballon d'Or.` : "No scores yet this week. Play the Daily Strike to get on the board."}</p></div>
-      ${todayDone() ? ((store.load().posted || {})[id] === today.key ? "" : `<p class="note">Today's Strike was started before you joined, so it can't be checked and won't count. From tomorrow your score counts automatically.</p>`) : `<button class="btn" id="lPlay" type="button">PLAY TODAY'S STRIKE ▶</button>`}
+      ${todayDone("normal") ? ((store.load().posted || {})[id] === today.key ? "" : `<p class="note">Today's Strike was started before you joined, so it can't be checked and won't count. From tomorrow your score counts automatically.</p>`) : `<button class="btn" id="lPlay" type="button">PLAY TODAY'S STRIKE ▶</button>`}
       <div class="panel"><p class="h2"><span>SUPER BALLON D'OR RACE</span><b>${fmtMonth(S.month.month)}</b></p>${S.month.rows.length ? `<div class="table">${S.month.rows.map((r) => `<div class="tr small"><span class="who"><b>${esc(nm(r.pid))}</b></span><span class="pts">${r.golds}<small>BALLON D'ORS</small></span></div>`).join("")}</div>` : `<p class="note">The first Ballon d'Or of the month is handed out on Sunday night.</p>`}</div>
       <div class="panel"><p class="h2"><span>TROPHY CABINET</span></p>${S.pastWeeks.length || S.supers.length ? `${S.supers.map((m) => `<p class="cup super"><b>SUPER BALLON D'OR · ${esc(fmtMonth(m.month))}</b>${m.winners.map((p) => esc(nm(p))).join(" & ") || "Not awarded"}</p>`).join("")}${S.pastWeeks.map((w) => `<p class="cup"><b>BALLON D'OR · WEEK OF ${esc(fmtDay(w.start).toUpperCase())}</b>${w.winners.map((p) => esc(nm(p))).join(" & ") || "Not awarded"}${w.rows[0] ? ` · ${w.rows[0].pts} pts` : ""}</p>`).join("")}` : `<p class="note">Empty for now. The first Ballon d'Or goes to whoever tops this week.</p>`}</div>
       <div class="row"><button class="btn ghost" id="lInvite" type="button">INVITE FRIENDS</button><button class="btn ghost" id="lAnother" type="button">NEW OR JOIN</button><button class="btn ghost" id="lQuit" type="button">LEAVE LEAGUE</button></div>${how}`;
@@ -4388,7 +4455,7 @@ function drawLeague(msg = "") {
   if ($("#lInvite")) $("#lInvite").onclick = (e) => shareLink(e.target, `${location.origin}${location.pathname}?league=${id}`, `Join my TopBinz league "${D.name}"`);
   if ($("#lAnother")) $("#lAnother").onclick = () => { league.id = null; league.data = null; history.replaceState(null, "", location.pathname); drawLeague(); };
   if ($("#lQuit")) $("#lQuit").onclick = async () => { await api(`/league/${id}/leave`, { pid: me() }); saveLeagues(myLeagues().filter((l) => l.id !== id)); league.id = null; league.data = null; openLeague(); };
-  if ($("#lPlay")) $("#lPlay").onclick = () => start("daily");
+  if ($("#lPlay")) $("#lPlay").onclick = () => { setLevel("normal"); start(todayDone("normal") ? "unlimited" : "daily"); };
   $("#lBack").onclick = () => { history.replaceState(null, "", location.pathname); goHome(); };
 }
 
