@@ -3976,6 +3976,7 @@ const pitch = (() => {
     }
     const order = [...seats.values()].sort((a, b) => a.y - b.y);
     let ballDrawn = false;
+    const labels = [];
     const ball = () => {
       ballDrawn = true;
       if (rd.phase === "pop") {
@@ -4000,11 +4001,15 @@ const pitch = (() => {
       else if (me2 && (demo || playing)) ps = pose({ lh: [-13, 9, 2], rh: [13, 9, 2], mouth: heat > 0.7 ? "o" : "grin", look: 0.4 });
       R(st.x - 14 * S * st.d, st.y - 1, 28 * S * st.d, Math.max(1, 3 * S), "rgba(0,0,0,0.35)");
       star(g, pl, ps, S * st.d, st.x, st.y + dy);
-      nameTag(p.name.toUpperCase(), st.x, st.y + 3, me2 ? "#ffd36b" : p.alive ? "#e8f1ff" : "#7d93b8");
-      { const hsz = Math.max(1, Math.round(S * st.d * 0.75)); hearts(st.x, Math.round(st.y + dy - 70 * S * st.d - 5 * hsz), p.lives ?? 3, hit, Math.floor(t * 8) % 2, hsz); }
+      labels.push(() => {
+        nameTag(p.name.toUpperCase(), st.x, st.y + 3, me2 ? "#ffd36b" : p.alive ? "#e8f1ff" : "#7d93b8");
+        const hsz = Math.max(1, Math.round(S * st.d * 0.75));
+        hearts(st.x, Math.round(st.y + dy - 70 * S * st.d - 5 * hsz), p.lives ?? 3, hit, Math.floor(t * 8) % 2, hsz);
+      });
       if (!demo && rd.phase === "over" && p.id === rd.winner) for (let i = 0; i < 8; i++) { const a = t * 2 + (i * TAU) / 8, rr2 = S * 26; R(st.x + Math.cos(a) * rr2, st.y - S * 34 + Math.sin(a) * rr2 * 0.5, 2, 2, i % 2 ? "#ffd36b" : "#ffffff"); }
     }
     if (!ballDrawn) ball();
+    labels.forEach((f) => f());
   }
 
   function galaGeo() { const R2 = Math.round(Math.min(W * 0.13, H * 0.085)); return { cx: W / 2, by: Math.round(H * 0.4), R: R2, floor: Math.round(H * 0.4 + R2 * 2.9) }; }
