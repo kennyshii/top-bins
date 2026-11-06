@@ -1669,7 +1669,17 @@ const sfx = (() => {
   let ctx = null, out = null, buf = null, claps = null, bed = null, roar = null, bedLevel = 0, on = store.load().mute !== true;
   const t0 = () => ctx.currentTime;
 
+  let voiced = false;
+  function speak(text, n) {
+    const sp = window.speechSynthesis;
+    if (!sp || !window.SpeechSynthesisUtterance) return;
+    const vs = sp.getVoices(), v = vs.find((x) => /^en-GB/i.test(x.lang) && /daniel|arthur|male/i.test(x.name)) || vs.find((x) => /^en-GB/i.test(x.lang)) || vs.find((x) => /^en/i.test(x.lang));
+    sp.cancel();
+    for (let i = 0; i < n; i++) { const u = new SpeechSynthesisUtterance(text); u.rate = 0.62; u.pitch = 0.75; u.volume = 1; if (v) u.voice = v; sp.speak(u); }
+  }
+
   function boot() {
+    if (!voiced && window.speechSynthesis && window.SpeechSynthesisUtterance) { voiced = true; const u = new SpeechSynthesisUtterance(" "); u.volume = 0; speechSynthesis.speak(u); }
     if (!AC) return;
     if (!ctx) {
       try { ctx = new AC(); } catch { ctx = null; return; }
@@ -1801,7 +1811,7 @@ const sfx = (() => {
     aww() { chant("ao", 1.2, 0.45, 0.72); swell(0.15); },
     siu() { swell(1, 2.2); const t = t0(); hit({ t, dur: 0.22, type: "highpass", f: 4200, gain: 0.28, a: 0.05 }); chant("iu", 1.6, 0.72, 1.06, t + 0.16); },
     hey() { swell(0.9, 1.6); chant("e", 0.5, 0.7, 1.05); },
-    jude() { swell(1, 4); const t = t0(); for (let i = 0; i < 2; i++) { const at = t + i * 1.8; chant("ei", 0.85, 1.3, 1.06, at); chant("ue", 1.05, 1.3, 0.86, at + 0.72); for (const d of [0.62, 1.55]) hit({ t: at + d, dur: 0.05, type: "highpass", f: 1500, gain: 0.5, src: claps }); } },
+    jude() { swell(1, 4); speak("Hey Jude!", 2); const t = t0(); for (let i = 0; i < 2; i++) { const at = t + i * 1.8; chant("ei", 0.85, 0.75, 1.06, at); chant("ue", 1.05, 0.75, 0.86, at + 0.72); for (const d of [0.62, 1.55]) hit({ t: at + d, dur: 0.05, type: "highpass", f: 1500, gain: 0.5, src: claps }); } },
     hush() { duck(); chant("o", 1.1, 0.16, 0.92); },
     shh() { duck(); hit({ dur: 1.2, f: 3200, q: 1.2, gain: 0.24, a: 0.15 }); },
     gong() { duck(); const t = t0(); [[196, 0.13, 3.2], [394, 0.06, 2.2], [589, 0.04, 1.4], [786, 0.025, 0.9]].forEach(([f, gain, dur]) => tone({ t, f, dur, gain, a: 0.01 })); },
@@ -1843,9 +1853,10 @@ const sfx = (() => {
       on = !on;
       const s = store.load(); s.mute = !on; store.save(s);
       if (ctx) out.gain.setTargetAtTime(on ? 0.9 : 0, t0(), 0.05);
+      if (!on && window.speechSynthesis) speechSynthesis.cancel();
       return on;
     },
-    pause(hide) { if (ctx) hide ? ctx.suspend() : ctx.resume(); },
+    pause(hide) { if (hide && window.speechSynthesis) speechSynthesis.cancel(); if (ctx) hide ? ctx.suspend() : ctx.resume(); },
   };
 })();
 
