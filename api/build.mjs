@@ -4,5 +4,5 @@ const cut = (from, to) => { const a = src.indexOf(from), b = src.indexOf(to, a);
 const data = cut("const PROMPTS = [", "const byId = new Map(PROMPTS.map((p) => [p.id, p]));");
 const shots = cut("const SHOTS = [", "const shotOf = (pts) => SHOTS.find((s) => pts >= s.min);");
 const boosts = Object.fromEntries([...src.matchAll(/\{ id: "(\w+)",[^\n]*?boost: "(\w+)"/g)].map((m) => [m[1], m[2]]));
-writeFileSync(new URL("./game.js", import.meta.url), `${data}\n${shots}\nconst BOOSTS = ${JSON.stringify(boosts)};\nexport { PROMPTS, byId, match, shotOf, BOOSTS };\n`);
+writeFileSync(new URL("./game.js", import.meta.url), `${data}\n${shots}\nconst BOOSTS = ${JSON.stringify(boosts)};\nexport { PROMPTS, byId, match, shotOf, BOOSTS, dailySet, dayNo };\n`);
 console.log("game.js:", Object.keys(boosts).length, "players");

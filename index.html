@@ -295,7 +295,7 @@ svg { display: block; width: 100%; height: auto; overflow: visible; }
       <li><span>1</span>Type any answer that fits the prompt. Small typos are fixed for you.</li>
       <li><span>2</span>Answers everyone gives are tap-ins. The rarer your answer, the better the finish, all the way up to top bins.</li>
       <li><span>3</span>Pick NORMAL for today's stars and the big trophies, or NICHE for old finals, famous scorelines and forgotten squads. Leagues count your Normal daily.</li>
-      <li><span>4</span>You never get the same prompt twice. Every strike is built from prompts you haven't seen yet.</li>
+      <li><span>4</span>Everyone gets the same 7 daily prompts, so you can compare scores with your mates. Unlimited never repeats a prompt until you've seen them all.</li>
       <li><span>5</span>Your player earns +10 on their favorite finish and celebrates every goal their own way.</li>
     </ul>
   </section>
@@ -1714,6 +1714,24 @@ const hashStr = (s) => [...s].reduce((h, c) => Math.imul(h ^ c.charCodeAt(0), 16
 const shuffled = (list) => { const a = [...list]; for (let i = a.length - 1; i > 0; i--) { const j = Math.floor(Math.random() * (i + 1)); [a[i], a[j]] = [a[j], a[i]]; } return a; };
 const famOf = (q) => / (played for|has managed)\b/.test(q) ? "career" : /scored (in|for)|took a penalty/.test(q) ? "goals" : /squad|Invincibles|played in the|title team/.test(q) ? "team" : "other";
 for (const p of PROMPTS) { p.id = hashStr(p.q).toString(36); p.fam = famOf(p.q); }
+const dayNo = (k) => { const [y, m, d] = String(k).split("-").map(Number); return Math.floor((Date.UTC(y, m - 1, d) - Date.UTC(2026, 9, 30)) / 86400000) + 1; };
+const dailySet = (no, lv) => {
+  const pool = PROMPTS.filter((p) => !!p.niche === (lv === "niche")).sort((a, b) => (a.id < b.id ? -1 : 1)), per = Math.floor(pool.length / 7), n = Math.max(1, no) - 1, cyc = Math.floor(n / per), cap = { career: 3, goals: 2, team: 2 };
+  const r = rng(hashStr(`${lv}:${cyc}`)), list = [...pool];
+  for (let i = list.length - 1; i > 0; i--) { const j = Math.floor(r() * (i + 1)); [list[i], list[j]] = [list[j], list[i]]; }
+  let day = [];
+  for (let d = 0; d <= n % per; d++) {
+    day = [];
+    for (const strict of [true, false]) for (let i = 0; i < list.length && day.length < 7; i++) {
+      const p = list[i];
+      if (strict && cap[p.fam] && day.filter((x) => x.fam === p.fam).length >= cap[p.fam]) continue;
+      day.push(p); list.splice(i--, 1);
+    }
+  }
+  const r2 = rng(hashStr(`${lv}:day:${no}`));
+  for (let i = day.length - 1; i > 0; i--) { const j = Math.floor(r2() * (i + 1)); [day[i], day[j]] = [day[j], day[i]]; }
+  return day.map((p) => p.id);
+};
 const byId = new Map(PROMPTS.map((p) => [p.id, p]));
 const CAP = { career: 3, goals: 2, team: 2 };
 const dayKey = (d) => `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}-${String(d.getDate()).padStart(2, "0")}`;
@@ -1976,9 +1994,9 @@ const rk = (lv) => (lv === "niche" ? { run: "runN", daily: "dailyN" } : { run: "
 const unseen = () => { const had = new Set(store.load().seen || []); return PROMPTS.filter((p) => inLevel(p) && !had.has(p.id)); };
 
 function deal() {
-  const s = store.load(), run = liveRun(s), held = new Set(run ? run.set : []);
-  const old = (s.seen || []).map((id) => byId.get(id)).filter((p) => p && inLevel(p) && !held.has(p.id));
-  const fresh = shuffled(unseen().filter((p) => !held.has(p.id))), out = [];
+  const s = store.load(), run = liveRun(s), held = new Set([...(run ? run.set : []), ...dailySet(today.no, level())]);
+  const old = shuffled((s.seen || []).map((id) => byId.get(id)).filter((p) => p && inLevel(p) && !held.has(p.id)));
+  const fresh = shuffled(unseen().filter((p) => !held.has(p.id))), spare = shuffled(PROMPTS.filter((p) => inLevel(p) && held.has(p.id))), out = [];
   const take = (list, cap) => {
     for (const p of list) {
       if (out.length >= 7) return;
@@ -1986,7 +2004,7 @@ function deal() {
       out.push(p);
     }
   };
-  take(fresh, true); take(fresh, false); take(old, true); take(old, false);
+  take(fresh, true); take(fresh, false); take(old, true); take(old, false); take(spare, false);
   return shuffled(out).map((p) => p.id);
 }
 
@@ -2013,7 +2031,7 @@ function introLog() {
   const s = store.load();
   const st = s.stats, left = unseen().length, run = liveRun(s), lv = level(), pool = PROMPTS.filter((p) => inLevel(p, lv)).length, tag = lv === "niche" ? "NICHE" : "NORMAL";
   const lines = st && st.played ? [`STREAK ${st.streak} · PLAYED ${st.played} · AVG ${Math.round(st.sum / st.played)} · BEST ${st.best}`] : [];
-  lines.push(left ? `${left} OF ${pool} ${tag} PROMPTS STILL NEW TO YOU` : `YOU'VE SEEN ALL ${pool} ${tag} PROMPTS · REPEATS START WITH THE OLDEST`);
+  lines.push(left ? `${left} OF ${pool} ${tag} PROMPTS STILL NEW TO YOU` : `YOU'VE SEEN ALL ${pool} ${tag} PROMPTS · UNLIMITED IS RANDOM NOW`);
   for (const b of document.querySelectorAll("#level button")) b.setAttribute("aria-checked", String(b.dataset.lv === lv));
   $("#introLog").textContent = lines.join("\n");
   const done = !!todayDone();
@@ -2039,7 +2057,7 @@ function start(mode) {
   const lv = level();
   if (run) game = { mode, level: lv, set: run.set, round: run.results.length, results: run.results, total: run.total, pl: pl.id };
   else {
-    game = { mode, level: lv, set: deal(), round: 0, results: [], total: 0, pl: pl.id };
+    game = { mode, level: lv, set: mode === "daily" ? dailySet(today.no, lv) : deal(), round: 0, results: [], total: 0, pl: pl.id };
     if (mode === "daily") { s[rk(lv).run] = { date: today.key, pool: POOL, set: game.set, results: [], total: 0 }; store.save(s); }
   }
   pitch.setPlayer(pl);

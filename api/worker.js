@@ -1,4 +1,4 @@
-import { PROMPTS, byId, match, shotOf, BOOSTS } from "./game.js";
+import { PROMPTS, byId, match, shotOf, BOOSTS, dailySet, dayNo } from "./game.js";
 
 const CORS = { "Access-Control-Allow-Origin": "*", "Access-Control-Allow-Methods": "GET, POST, OPTIONS", "Access-Control-Allow-Headers": "Content-Type" };
 const json = (v, status = 200) => new Response(JSON.stringify(v), { status, headers: { "Content-Type": "application/json", ...CORS } });
@@ -182,7 +182,8 @@ export class Run {
     if (op === "start") {
       if (!r) {
         const set = Array.isArray(body.set) ? [...new Set(body.set.map(String))] : [];
-        if (set.length !== 7 || !set.every((id) => byId.has(id))) return json({ error: "bad set" }, 400);
+        const want = new Set(dailySet(dayNo(body.date), "normal"));
+        if (set.length !== 7 || !set.every((id) => want.has(id))) return json({ error: "bad set" }, 400);
         r = { pl: BOOSTS[body.pl] ? body.pl : "messi", items: set.map((id) => ({ id })), started: now };
         await st.put("r", r);
       }
