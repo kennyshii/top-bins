@@ -1801,7 +1801,7 @@ const sfx = (() => {
     aww() { chant("ao", 1.2, 0.45, 0.72); swell(0.15); },
     siu() { swell(1, 2.2); const t = t0(); hit({ t, dur: 0.22, type: "highpass", f: 4200, gain: 0.28, a: 0.05 }); chant("iu", 1.6, 0.72, 1.06, t + 0.16); },
     hey() { swell(0.9, 1.6); chant("e", 0.5, 0.7, 1.05); },
-    jude() { swell(1, 3.6); const t = t0(); for (let i = 0; i < 4; i++) { const at = t + i * 0.76; chant("u", 0.32, 1.25, 1.02, at); chant("e", 0.42, 1.25, 0.9, at + 0.3); for (const d of [0.52, 0.62]) hit({ t: at + d, dur: 0.05, type: "highpass", f: 1500, gain: 0.55, src: claps }); } },
+    jude() { swell(1, 4); const t = t0(); for (let i = 0; i < 2; i++) { const at = t + i * 1.8; chant("ei", 0.85, 1.3, 1.06, at); chant("ue", 1.05, 1.3, 0.86, at + 0.72); for (const d of [0.62, 1.55]) hit({ t: at + d, dur: 0.05, type: "highpass", f: 1500, gain: 0.5, src: claps }); } },
     hush() { duck(); chant("o", 1.1, 0.16, 0.92); },
     shh() { duck(); hit({ dur: 1.2, f: 3200, q: 1.2, gain: 0.24, a: 0.15 }); },
     gong() { duck(); const t = t0(); [[196, 0.13, 3.2], [394, 0.06, 2.2], [589, 0.04, 1.4], [786, 0.025, 0.9]].forEach(([f, gain, dur]) => tone({ t, f, dur, gain, a: 0.01 })); },
@@ -3484,20 +3484,23 @@ const pitch = (() => {
   };
 
   const CEL = {
-    siu: { len: 5.0, title: "THE SIUUU", sfx: [[0.35, "cheer", 0.5], [2.36, "whoosh", 0.4], [2.88, "siu", 0, 1]], f(c, a, st) {
-      const to = far(sideOf(a)), ph = c * 12, b = Math.abs(Math.sin(c * 6)) * 0.8;
-      const twirl = pose({ p: 0.6 + b, lh: [-9.5, 14, 2], rh: [6 + Math.cos(ph) * 3.2, -15.5 + Math.sin(ph) * 1.9, 1], mouth: "smile", look: -0.3, ex: [{ k: "twirl", hand: "r", ph, r: 3.2 }] });
+    siu: { len: 4.2, title: "THE SIUUU", sfx: [[0.35, "cheer", 0.5], [1.49, "whoosh", 0.4], [2.02, "siu", 0, 1]], f(c, a, st) {
+      const to = far(sideOf(a)), run = (t) => dash(t, a, 0, 1.4, [a.x0, a.y0], to, { A: 0.9, go: true });
+      const twirl = (t, ps) => {
+        const ph = t * 12, sd = ps.view === "side", up = [(sd ? 3 : 6) + Math.cos(ph) * 3.2, -15.5 + Math.sin(ph) * 1.9, 1], low = [sd ? -8 : -9.5, 13 + Math.sin(t * 9) * 3, 2];
+        return over(ps, sd ? { lh: up, rh: low, ex: [{ k: "twirl", hand: "l", ph, r: 3.2 }] } : { lh: low, rh: up, ex: [{ k: "twirl", hand: "r", ph, r: 3.2 }] }, ease(seg(t, 0.2, 0.36)) * (1 - ease(seg(t, 1.32, 1.44))));
+      };
+      if (c < 1.4) { const r = run(c); r.pose = twirl(c, r.pose); return r; }
       const crouch = pose({ p: 6, lf: [-5.2, 0, 1], rf: [5.2, 0, 1], A: [[18, -40, 30], [18, -40, 30]] });
       const air = (u) => {
         const dn = inOut(seg(u, 0.45, 1)), sp = ease(seg(u, 0.55, 1));
         return pose({ sx: Math.cos(TAU * inOut(seg(u, 0.08, 0.88))), dy: -84 * u * (1 - u), lh: [lerp(-10, -19, dn), lerp(-20, 15, dn), 1], rh: [lerp(10, 19, dn), lerp(-20, 15, dn), 1], lf: [lerp(-3.4, -8.4, sp), lerp(-6, -1.2, sp), 1], rf: [lerp(3.4, 8.4, sp), lerp(-6, -1.2, sp), 1], mouth: "o" });
       };
-      if (c < 2.25) return arrive(c, a, 1.35, to, twirl, 0.38, { A: 0.9 });
-      if (c < 2.38) return at(to, blendPose(twirl, crouch, ease(seg(c, 2.25, 2.38))));
-      if (c < 2.88) { const u = seg(c, 2.38, 2.88); return at(to, blendPose(crouch, air(u), ease(seg(u, 0, 0.16)))); }
+      if (c < 1.5) return at(to, blendPose(twirl(c, run(1.4).pose), crouch, ease(seg(c, 1.4, 1.5))));
+      if (c < 2.02) { const u = seg(c, 1.5, 2.02); return at(to, blendPose(crouch, air(u), ease(seg(u, 0, 0.16)))); }
       const land = pose({ p: 3, lf: [-8.4, 0, 1], rf: [8.4, 0, 1], lh: [-19, 16, 1], rh: [19, 16, 1], mouth: "shout", look: -0.4 }), sq = pose({ ...land, p: 7, lh: [-17.5, 18.5, 1], rh: [17.5, 18.5, 1] });
-      if (c > 2.92) st.fx.push(say("SIUUU!", to, kAt(a, to[1]), c - 2.92, 1.7, undefined, a.z));
-      const d = c - 2.88;
+      if (c > 2.06) st.fx.push(say("SIUUU!", to, kAt(a, to[1]), c - 2.06, 1.7, undefined, a.z));
+      const d = c - 2.02;
       return at(to, d < 0.09 ? blendPose(air(1), sq, easeOut(d / 0.09)) : blendPose(sq, land, inOut(seg(d, 0.09, 0.42))));
     } },
     calma: { len: 3.8, title: "CALMA, CALMA", sfx: [[1.05, "hush", 0, 1]], f(c, a, st) {
@@ -3563,8 +3566,9 @@ const pitch = (() => {
       if (c < 1.25) return arrive(c, a, 1.0, to, squat, 0.3);
       return at(to, blendPose(squat, sit, inOut(seg(c, 1.25, 1.6))));
     } },
-    arms: { len: 4.2, title: "ARMS SPREAD WIDE", sfx: [[0.4, "cheer", 0.5], [1.35, "jude", 0, 1]], f(c, a) {
+    arms: { len: 4.6, title: "ARMS SPREAD WIDE", sfx: [[0.4, "cheer", 0.5], [1.35, "jude", 0, 1]], f(c, a, st) {
       const to = near(a, sideOf(a) * 0.5, 0.24), sw = Math.sin(c * 0.9);
+      for (const t of [1.35, 3.15]) st.fx.push(say("HEY JUDE!", to, kAt(a, to[1]), c - t, 1.5, "#e8f1ff", a.z));
       return arrive(c, a, 1.3, to, pose({ lh: [-27, -1 + Math.sin(c * 1.8) * 1.2, 1], rh: [27, -1 + Math.sin(c * 1.8 + 0.6) * 1.2, 1], look: -0.9, lean: sw * 0.8, tilt: sw * 0.4, sx: 1 - 0.12 * bump(c, 1.9, 3.4), mouth: "smile" }), 0.5, { A: 0.9 });
     } },
     ears: { len: 3.6, title: "CAN'T HEAR YOU", sfx: [[1.2, "louder", 0, 1]], f(c, a) {
