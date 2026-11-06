@@ -155,7 +155,67 @@ svg { display: block; width: 100%; height: auto; overflow: visible; }
 .note { margin: 0; font-size: 16px; color: rgba(125, 147, 184, 0.75); }
 .sr { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; }
 #copyBox { width: 100%; min-height: 120px; font-family: var(--body); font-size: 18px; color: var(--ink); background: var(--void); border: 2px solid var(--line); padding: 8px; }
-@media (prefers-reduced-motion: reduce) { #answer.shake, .stamp, .snd.wake { animation: none; } }
+.modes { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+.mode { display: flex; flex-direction: column; gap: 6px; text-align: left; padding: 12px; background: var(--panel); border: 2px solid var(--line); color: var(--ink); cursor: pointer; font-family: var(--body); }
+.mode b { font-family: var(--display); font-size: 12px; letter-spacing: 2px; color: var(--gold); font-weight: 700; }
+.mode span { font-size: 17px; color: var(--mute); line-height: 1.1; }
+.mode:hover { border-color: var(--cyan); }
+.mode:focus-visible { outline: 2px dashed var(--gold); outline-offset: 3px; }
+#party, #league { display: flex; flex-direction: column; gap: 14px; padding-top: 2vh; }
+#party[hidden], #league[hidden] { display: none; }
+.title { margin: 0; font-family: var(--display); font-weight: 700; font-size: clamp(26px, 8vw, 44px); line-height: 1; letter-spacing: 3px; color: var(--ink); text-shadow: 3px 0 var(--rose), -3px 0 var(--cyan); overflow-wrap: anywhere; }
+.title.code { letter-spacing: 12px; }
+.field { width: 100%; font-family: var(--body); font-size: 26px; color: var(--ink); background: rgba(5, 10, 20, 0.6); border: 2px solid var(--line); padding: 4px 10px; }
+.field:focus { border-color: var(--cyan); outline: none; }
+.field.code { flex: 1; min-width: 0; width: auto; text-transform: uppercase; letter-spacing: 6px; }
+.field.big { flex: 1; min-width: 0; width: auto; font-size: 28px; text-transform: uppercase; border-color: var(--cyan); }
+.field:disabled, .btn:disabled { opacity: 0.45; cursor: default; }
+.btn:disabled:hover { background: #0a1426; color: var(--ink); }
+.roster { display: grid; grid-template-columns: repeat(auto-fill, minmax(88px, 1fr)); gap: 8px; }
+.mate { display: flex; flex-direction: column; align-items: center; gap: 3px; padding: 6px 4px; border: 2px solid var(--line); min-width: 0; }
+.mate canvas, .seat canvas { width: 44px; height: 44px; image-rendering: pixelated; image-rendering: crisp-edges; }
+.mate b { font-weight: 400; font-size: 18px; max-width: 100%; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.mate small { font-family: var(--display); font-size: 8px; letter-spacing: 2px; color: var(--gold); min-height: 1em; }
+.mate.off { opacity: 0.45; }
+.mate.win { border-color: var(--gold); box-shadow: 0 0 16px rgba(255, 211, 107, 0.3); }
+.ring { position: relative; width: min(100%, 320px); aspect-ratio: 1; margin: 4px auto; border: 2px dashed rgba(125, 147, 184, 0.25); border-radius: 50%; }
+.seat { position: absolute; transform: translate(-50%, -50%); display: flex; flex-direction: column; align-items: center; gap: 2px; width: 76px; }
+.seat b { font-weight: 400; font-size: 16px; max-width: 76px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; background: rgba(5, 10, 20, 0.7); padding: 0 4px; }
+.seat.out { opacity: 0.3; filter: grayscale(1); }
+.seat.has b { color: var(--gold); }
+.seat.me b { text-decoration: underline; }
+.ball { position: absolute; width: 22px; height: 22px; margin: -30px 0 0 18px; transform: translate(-50%, -50%); border-radius: 50%; background: radial-gradient(circle at 35% 35%, #fff 0 28%, #eef4ff 29% 52%, #1b2438 53% 64%, #b9c6db 65%); box-shadow: 0 0 0 2px #050a14; z-index: 2; }
+.ring.h1 .ball { animation: jit 0.2s steps(2) infinite; box-shadow: 0 0 0 2px #050a14, 0 0 14px #ff8a3d; }
+.ring.h2 .ball { animation: jit 0.08s steps(2) infinite; background: radial-gradient(circle at 35% 35%, #fff7d6 0 28%, #ff8a3d 29% 60%, #ff4d2e 61%); box-shadow: 0 0 0 2px #050a14, 0 0 22px #ff4d2e; }
+.ball.boom { animation: boom 0.5s steps(5) forwards; }
+@keyframes jit { 50% { transform: translate(calc(-50% + 2px), calc(-50% - 1px)); } }
+@keyframes boom { 40% { transform: translate(-50%, -50%) scale(2.4); background: #ffd36b; } to { transform: translate(-50%, -50%) scale(3); opacity: 0; } }
+.turn { margin: 0; text-align: center; font-family: var(--display); font-size: 12px; letter-spacing: 2px; color: var(--gold); }
+.used { display: flex; flex-wrap: wrap; gap: 6px; }
+.used span { display: flex; flex-direction: column; padding: 2px 8px; border: 1px solid var(--line); font-size: 18px; line-height: 1.05; }
+.used small { font-family: var(--display); font-size: 7px; letter-spacing: 1.5px; color: var(--mute); }
+.used .thru { border-color: var(--gold); }
+.tabs { display: flex; flex-wrap: wrap; gap: 6px; }
+.tabb { font-family: var(--display); font-size: 10px; letter-spacing: 2px; color: var(--mute); background: none; border: 2px solid var(--line); padding: 6px 10px; cursor: pointer; }
+.tabb.on { color: var(--gold); border-color: var(--gold); }
+.table { display: grid; }
+.tr { display: grid; grid-template-columns: 22px 28px minmax(0, 1fr) auto 52px; align-items: center; gap: 8px; padding: 6px 0; border-top: 1px dashed var(--line); }
+.tr:first-child { border-top: 0; }
+.tr.small { grid-template-columns: minmax(0, 1fr) auto; }
+.tr.me .who b { color: var(--gold); }
+.tr .pos { font-size: 22px; color: var(--mute); }
+.tr .mini { width: 28px; height: 28px; image-rendering: pixelated; image-rendering: crisp-edges; }
+.tr .who { display: flex; flex-direction: column; min-width: 0; }
+.tr .who b { font-weight: 400; font-size: 21px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.tr small { font-family: var(--display); font-size: 7px; letter-spacing: 1.5px; color: var(--gold); }
+.tr .tdy, .tr .pts { display: flex; flex-direction: column; align-items: flex-end; font-size: 22px; line-height: 1; font-variant-numeric: tabular-nums; }
+.tr .tdy small, .tr .pts small { color: var(--mute); }
+.tr .pts { font-size: 28px; }
+.cup { margin: 0; display: flex; flex-direction: column; gap: 2px; padding: 6px 0; border-top: 1px dashed var(--line); font-size: 20px; }
+.cup:first-of-type { border-top: 0; }
+.cup b { font-family: var(--display); font-size: 9px; letter-spacing: 2px; font-weight: 400; color: var(--gold); }
+.cup.super b { color: var(--cyan); }
+@media (prefers-reduced-motion: reduce) { #answer.shake, .stamp, .snd.wake, .ball { animation: none; } }
 </style>
 </head>
 <body>
@@ -185,6 +245,10 @@ svg { display: block; width: 100%; height: auto; overflow: visible; }
       <button class="btn" id="go" type="button">KICK OFF ▶</button>
       <button class="btn ghost" id="unl" type="button">UNLIMITED ∞</button>
       <button class="btn ghost" id="seeToday" type="button" hidden>TODAY'S RESULT</button>
+    </div>
+    <div class="modes">
+      <button class="mode" id="goRondo" type="button"><b>RONDO</b><span>Live with friends. Pass the ball before it blows.</span></button>
+      <button class="mode" id="goLeague" type="button"><b>BALLON D'OR LEAGUE</b><span>Daily scores, a weekly Ballon d'Or, a monthly Super Ballon d'Or.</span></button>
     </div>
     <p class="logbook" id="introLog"></p>
     <ul class="how">
@@ -218,6 +282,8 @@ svg { display: block; width: 100%; height: auto; overflow: visible; }
   </section>
 
   <section class="res" id="done" hidden></section>
+  <section id="party" hidden></section>
+  <section id="league" hidden></section>
 </main>
 
 <div id="stamp" hidden aria-live="polite">
@@ -1909,7 +1975,7 @@ function introLog() {
 }
 
 function show(which) {
-  for (const k of ["intro", "play", "done"]) el[k].hidden = k !== which;
+  for (const k of ["intro", "play", "done", "party", "league"]) el[k].hidden = k !== which;
   el.stamp.hidden = true;
   el.skip.hidden = true;
   clearTimeout(advanceTimer);
@@ -2118,6 +2184,7 @@ function finish() {
     store.save(s);
   }
   renderResults(g);
+  if (g.mode === "daily") postScores();
   sfx.play("final");
   sfx.play("applause");
 }
@@ -2223,6 +2290,7 @@ $("#seeToday").addEventListener("click", () => {
 });
 
 function goHome() {
+  if (rondo.ws) leaveRondo();
   clearInterval(tick);
   clearTimeout(advanceTimer);
   clearSugg();
@@ -3812,10 +3880,266 @@ const pitch = (() => {
   };
 })();
 
+const API = "https://topbinz-api.topbinz.workers.dev";
+const me = () => { const s = store.load(); if (!s.pid) { s.pid = Array.from(crypto.getRandomValues(new Uint8Array(12)), (b) => b.toString(16).padStart(2, "0")).join(""); store.save(s); } return s.pid; };
+const nick = () => store.load().nick || "";
+const setNick = (v) => { const s = store.load(); s.nick = String(v || "").trim().slice(0, 16); store.save(s); return s.nick; };
+const api = (path, body) => fetch(API + path, body ? { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify(body) } : {}).then((r) => r.json()).catch(() => ({ error: "offline" }));
+const face = (host, id, cls = "") => { const cv = document.createElement("canvas"); cv.width = 28; cv.height = 28; cv.className = cls; pitch.portrait(cv, playerById(id)); host.appendChild(cv); return cv; };
+const nickField = (id) => `<label class="lab" for="${id}">YOUR NAME</label><input class="field" id="${id}" maxlength="16" autocomplete="off" spellcheck="false" placeholder="Name your friends will see" value="${esc(nick() || player().tag)}">`;
+const shareLink = async (btn, url, text) => {
+  try { if (navigator.share && matchMedia("(pointer: coarse)").matches) { await navigator.share({ title: "Topbinz", text, url }); return; } } catch { return; }
+  try { await navigator.clipboard.writeText(url); btn.textContent = "LINK COPIED"; } catch { prompt("Copy this link", url); }
+};
+
+const RONDO = PROMPTS.filter((p) => p.answers.length >= 16);
+const rondo = { ws: null, code: null, st: null, prev: null, tries: 0, sugg: null };
+
+function openRondo(code) {
+  show("party");
+  if (code) return joinRondo(code);
+  if (!rondo.ws) drawRondo();
+}
+
+function leaveRondo() {
+  const ws = rondo.ws;
+  rondo.ws = null; rondo.code = null; rondo.st = null; rondo.prev = null;
+  if (ws) try { ws.close(); } catch {}
+  history.replaceState(null, "", location.pathname);
+}
+
+function joinRondo(code) {
+  code = String(code || "").toUpperCase().replace(/[^A-Z0-9]/g, "").slice(0, 4);
+  if (code.length !== 4) return drawRondo("That code needs 4 letters.");
+  if (!nick()) return drawRondo("", code);
+  if (rondo.ws) try { rondo.ws.close(); } catch {}
+  rondo.code = code;
+  history.replaceState(null, "", `?room=${code}`);
+  const ws = new WebSocket(`${API.replace("https", "wss")}/room/${code}/ws`);
+  rondo.ws = ws;
+  ws.onopen = () => { rondo.tries = 0; ws.send(JSON.stringify({ t: "hello", id: me(), name: nick(), pl: player().id })); };
+  ws.onmessage = (e) => { const m = JSON.parse(e.data); if (m.t === "full") { leaveRondo(); drawRondo("That room is full."); return; } if (m.t === "state") { rondo.prev = rondo.st; rondo.st = m; rondoSounds(); drawRondo(); } };
+  ws.onclose = () => { if (rondo.ws !== ws) return; if (rondo.tries++ < 5 && !el.party.hidden) setTimeout(() => rondo.ws === ws && joinRondo(code), 1500); else { leaveRondo(); drawRondo("Lost the connection to the room."); } };
+  drawRondo();
+}
+
+function rondoSounds() {
+  const a = rondo.prev, b = rondo.st;
+  if (!a || !b) return;
+  if (b.phase === "playing" && a.holder !== b.holder && b.log.length) sfx.play("kick", 0.6);
+  if (b.heat > a.heat) sfx.play("tick", b.heat === 2 ? 1 : 3);
+  if (b.phase === "pop" && a.phase !== "pop") { sfx.play("whistle", 0.5); sfx.play(b.out === me() ? "aww" : "ooh"); }
+  if (b.phase === "ready" && a.phase !== "ready") sfx.play("blip", 2);
+  if (b.phase === "over" && a.phase !== "over") { sfx.play("final"); if (b.winner === me()) sfx.play("cheer", 1); }
+}
+
+function drawRondo(msg = "", pending = "") {
+  const st = rondo.st, box = el.party, typed = $("#rAns") && !$("#rAns").disabled ? $("#rAns").value : "";
+  if (!st) {
+    box.innerHTML = `
+      <p class="kicker">LIVE WITH FRIENDS</p>
+      <h2 class="title">RONDO</h2>
+      <p class="rules">One prompt, one ball. Name an answer nobody has used yet to pass it on. The ball is ticking, and whoever holds it when it blows is out. Last one standing wins.</p>
+      <div class="panel">${nickField("rNick")}</div>
+      <div class="panel">
+        <p class="h2"><span>START A ROOM</span><b>2–10 PLAYERS</b></p>
+        <button class="btn" id="rNew" type="button">CREATE ROOM ▶</button>
+        <p class="h2"><span>OR JOIN ONE</span></p>
+        <div class="ans"><input class="field code" id="rCode" maxlength="4" placeholder="CODE" autocomplete="off" spellcheck="false" value="${esc(pending || rondo.code || "")}"><button class="btn ghost" id="rJoin" type="button">JOIN</button></div>
+        <p class="fb">${esc(msg)}</p>
+      </div>
+      <ul class="how"><li><span>★</span>A rare answer (Panenka or better) is a through ball: it skips the next player.</li><li><span>★</span>Each round brings a new prompt. Answers can't be repeated within a round.</li></ul>
+      <div class="row"><button class="btn ghost" id="rBack" type="button">◀ MENU</button></div>`;
+    const name = () => setNick($("#rNick").value) || setNick(player().tag);
+    $("#rNew").onclick = async (e) => { name(); e.target.disabled = true; const r = await api("/room/new", {}); e.target.disabled = false; if (r.code) joinRondo(r.code); else drawRondo("Couldn't reach the server. Try again."); };
+    $("#rJoin").onclick = () => { name(); joinRondo($("#rCode").value); };
+    $("#rCode").onkeydown = (e) => { if (e.key === "Enter") $("#rJoin").click(); };
+    $("#rBack").onclick = () => { leaveRondo(); goHome(); };
+    return;
+  }
+  const you = me(), host = st.host === you, P = byId.get(st.prompt), names = Object.fromEntries(st.players.map((p) => [p.id, p.name]));
+  const holder = st.players.find((p) => p.id === st.holder), mine = st.phase === "playing" && st.holder === you;
+  let head = "", body = "";
+  if (st.phase === "lobby") {
+    head = `<p class="kicker">RONDO · ROOM</p><h2 class="title code">${esc(rondo.code)}</h2>`;
+    body = `<div class="panel"><p class="h2"><span>IN THE ROOM</span><b>${st.players.length}/10</b></p><div class="roster" id="rRoster"></div>
+      ${host ? `<button class="btn" id="rStart" type="button" ${st.players.length < 2 ? "disabled" : ""}>${st.players.length < 2 ? "WAITING FOR A FRIEND…" : "KICK OFF ▶"}</button>` : `<p class="note">Waiting for ${esc(names[st.host] || "the host")} to kick off.</p>`}
+      <button class="btn ghost" id="rInvite" type="button">INVITE FRIENDS</button></div>`;
+  } else if (st.phase === "over") {
+    const w = st.players.find((p) => p.id === st.winner);
+    head = `<p class="kicker">FULL TIME</p><h2 class="title">${w ? esc(w.name) + " WINS" : "NO WINNER"}</h2>`;
+    body = `<div class="panel"><div class="roster" id="rRoster"></div>${host ? `<button class="btn" id="rAgain" type="button">PLAY AGAIN ▶</button>` : `<p class="note">Waiting for ${esc(names[st.host] || "the host")} to start another game.</p>`}</div>`;
+  } else {
+    const out = st.players.find((p) => p.id === st.out), left = P ? P.answers.map((a, i) => [a, i]).filter(([, i]) => !st.used.includes(i)).sort((x, y) => y[0].share - x[0].share).slice(0, 3).map(([a]) => a.name) : [];
+    head = `<p class="kicker">RONDO · ROUND ${st.round}</p>`;
+    body = `<div class="card rondo">
+        <h2 class="q">${P ? esc(P.q) : "…"}</h2><p class="sub">${P ? esc(P.sub || "") : ""}</p>
+        <div class="ring ${st.heat ? "h" + st.heat : ""}" id="rRing"><div class="ball" id="rBall"></div></div>
+        <p class="turn">${st.phase === "ready" ? "GET READY…" : st.phase === "pop" ? `${out ? esc(out.name) : "Someone"} WAS HOLDING IT. OUT!` : mine ? "YOUR BALL! NAME ONE AND PASS IT" : `${holder ? esc(holder.name) : "…"} HAS THE BALL`}</p>
+        <form class="ans" id="rForm" autocomplete="off"><input class="field big" id="rAns" placeholder="${mine ? "type an answer…" : "wait for the ball…"}" ${mine ? "" : "disabled"} spellcheck="false" autocapitalize="characters" enterkeyhint="go"><button class="btn" type="submit" ${mine ? "" : "disabled"}>PASS</button></form>
+        <div class="sugg" id="rSugg"></div>
+        <p class="fb" id="rFb"></p>
+        ${st.phase === "pop" && left.length ? `<p class="note">Still available: ${left.map(esc).join(", ")}</p>` : ""}
+        <div class="used">${st.log.slice().reverse().map((l) => `<span class="${l.skip ? "thru" : ""}">${esc(l.name)}<small>${esc(names[l.by] || "")}${l.skip ? " · THROUGH BALL" : ""}</small></span>`).join("")}</div>
+      </div>`;
+  }
+  box.innerHTML = `${head}${body}<div class="row"><button class="btn ghost" id="rLeave" type="button">LEAVE ROOM</button></div>`;
+  $("#rLeave").onclick = () => { leaveRondo(); drawRondo(); };
+  const roster = $("#rRoster");
+  if (roster) for (const p of st.players) {
+    const d = document.createElement("div");
+    d.className = "mate" + (p.on ? "" : " off") + (st.phase === "over" && p.id === st.winner ? " win" : "");
+    face(d, p.pl);
+    d.insertAdjacentHTML("beforeend", `<b>${esc(p.name)}${p.id === you ? " (YOU)" : ""}</b><small>${p.id === st.host ? "HOST" : p.on ? "" : "AWAY"}</small>`);
+    roster.appendChild(d);
+  }
+  if ($("#rStart")) $("#rStart").onclick = () => rondo.ws && rondo.ws.send(JSON.stringify({ t: "start", prompts: shuffle(RONDO.map((p) => p.id)) }));
+  if ($("#rAgain")) $("#rAgain").onclick = () => rondo.ws && rondo.ws.send(JSON.stringify({ t: "again" }));
+  if ($("#rInvite")) $("#rInvite").onclick = (e) => shareLink(e.target, `${location.origin}${location.pathname}?room=${rondo.code}`, "Join my Topbinz Rondo room");
+  const ring = $("#rRing");
+  if (ring) {
+    const live = st.players, n = live.length, R = 40;
+    live.forEach((p, i) => {
+      const an = -Math.PI / 2 + (i / n) * Math.PI * 2, d = document.createElement("div");
+      d.className = "seat" + (p.alive ? "" : " out") + (p.id === st.holder ? " has" : "") + (p.id === you ? " me" : "");
+      d.style.left = `${50 + Math.cos(an) * R}%`; d.style.top = `${50 + Math.sin(an) * R}%`;
+      face(d, p.pl);
+      d.insertAdjacentHTML("beforeend", `<b>${esc(p.name)}</b>`);
+      ring.appendChild(d);
+      if (p.id === st.holder) { const b = $("#rBall"); b.style.left = d.style.left; b.style.top = d.style.top; }
+    });
+    const prev = rondo.prev && rondo.prev.players.findIndex((p) => p.id === rondo.prev.holder), cur = live.findIndex((p) => p.id === st.holder), b = $("#rBall");
+    if (prev >= 0 && prev !== cur && cur >= 0 && rondo.prev.round === st.round) {
+      const a0 = -Math.PI / 2 + (prev / n) * Math.PI * 2;
+      b.animate([{ left: `${50 + Math.cos(a0) * R}%`, top: `${50 + Math.sin(a0) * R}%` }, { left: b.style.left, top: b.style.top }], { duration: 320, easing: "ease-out" });
+    }
+    if (st.phase === "pop") b.classList.add("boom");
+  }
+  const form = $("#rForm");
+  if (form && mine) {
+    const input = $("#rAns"), fb = $("#rFb"), sg = $("#rSugg");
+    input.value = typed;
+    input.focus({ preventScroll: true });
+    const send = (i) => { const a = P.answers[i]; rondo.ws.send(JSON.stringify({ t: "answer", i, pts: a.pts, name: a.name })); input.value = ""; };
+    form.onsubmit = (e) => {
+      e.preventDefault();
+      const m = match(P, input.value);
+      sg.innerHTML = "";
+      if (m.kind === "empty") return;
+      if (m.kind === "ok") { if (st.used.includes(m.i)) { fb.textContent = `${P.answers[m.i].name} has already been used.`; sfx.play("buzz"); } else send(m.i); return; }
+      if (m.kind === "suggest") {
+        const list = m.list.filter((i) => !st.used.includes(i));
+        if (!list.length) { fb.textContent = "Already used. Try another."; sfx.play("buzz"); return; }
+        sg.innerHTML = `<span class="lab">DID YOU MEAN</span>`;
+        for (const i of list) { const c = document.createElement("button"); c.type = "button"; c.className = "chip"; c.textContent = P.answers[i].name; c.onclick = () => send(i); sg.appendChild(c); }
+        return;
+      }
+      fb.textContent = "Not a valid answer. Try another.";
+      sfx.play("buzz");
+    };
+  }
+}
+
+const shuffle = (list) => { const a = list.slice(); for (let i = a.length - 1; i > 0; i--) { const j = Math.floor(Math.random() * (i + 1)); [a[i], a[j]] = [a[j], a[i]]; } return a; };
+
+const league = { id: null, data: null, busy: false };
+const myLeagues = () => store.load().leagues || [];
+const saveLeagues = (list) => { const s = store.load(); s.leagues = list; store.save(s); };
+
+async function postScores() {
+  const d = todayDone(), list = myLeagues();
+  if (!d || !list.length) return;
+  const s = store.load(), posted = s.posted || {};
+  for (const l of list) {
+    if (posted[l.id] === today.key) continue;
+    const r = await api(`/league/${l.id}/score`, { pid: me(), name: nick() || player().tag, pl: d.pl || player().id, date: today.key, score: d.total });
+    if (!r.error) { const t = store.load(); t.posted = { ...(t.posted || {}), [l.id]: today.key }; store.save(t); }
+  }
+}
+
+function openLeague(id) {
+  show("league");
+  const list = myLeagues();
+  league.id = id || league.id || (list[0] && list[0].id) || null;
+  if (league.id) history.replaceState(null, "", `?league=${league.id}`);
+  drawLeague();
+  if (league.id) loadLeague();
+}
+
+async function loadLeague() {
+  const id = league.id;
+  league.busy = true;
+  const r = await api(`/league/${id}?d=${today.key}`);
+  if (league.id !== id) return;
+  league.busy = false;
+  league.data = r.error ? { error: r.error } : r;
+  drawLeague();
+}
+
+const fmtDay = (k) => new Date(k + "T12:00:00").toLocaleDateString("en-US", { month: "short", day: "numeric" });
+const fmtMonth = (k) => new Date(k + "-15T12:00:00").toLocaleDateString("en-US", { month: "long", year: "numeric" });
+
+function drawLeague(msg = "") {
+  const box = el.league, list = myLeagues(), id = league.id, joined = list.some((l) => l.id === id), D = league.data;
+  const tabs = list.length > 1 ? `<div class="tabs">${list.map((l) => `<button class="tabb${l.id === id ? " on" : ""}" type="button" data-id="${l.id}">${esc(l.name)}</button>`).join("")}</div>` : "";
+  const start = `<div class="panel"><p class="h2"><span>START A LEAGUE</span></p>${nickField("lNick")}<label class="lab" for="lName">LEAGUE NAME</label><input class="field" id="lName" maxlength="28" placeholder="e.g. Sunday League" autocomplete="off"><button class="btn" id="lNew" type="button">CREATE LEAGUE ▶</button>
+    <p class="h2"><span>OR JOIN WITH A CODE</span></p><div class="ans"><input class="field code" id="lCode" maxlength="6" placeholder="CODE" autocomplete="off" spellcheck="false"><button class="btn ghost" id="lJoin" type="button">JOIN</button></div><p class="fb">${esc(msg)}</p></div>`;
+  const how = `<ul class="how"><li><span>1</span>Everyone plays the Daily Strike. Your score is sent to your leagues automatically.</li><li><span>2</span>Each day is ranked like Ballon d'Or votes: 15, 12, 10, 8, 7, 5, 4, 3, 2, 1 points for 1st to 10th. Tied scores share the place.</li><li><span>3</span>Most points Monday to Sunday wins that week's Ballon d'Or. Ties go to most 1st places, then 2nd places, and so on.</li><li><span>4</span>Most Ballon d'Ors in a month wins the Super Ballon d'Or. Ties go to total points.</li></ul>`;
+  let main = "";
+  if (!id) main = `<p class="kicker">PLAY WITH FRIENDS</p><h2 class="title">BALLON D'OR LEAGUE</h2><p class="rules">Your group's daily scores go on one leaderboard. Win the week for the Ballon d'Or, win the month for the Super Ballon d'Or.</p>${start}${how}`;
+  else if (!D || league.busy && !D.name) main = `<p class="kicker">BALLON D'OR LEAGUE</p><p class="note">Loading the table…</p>`;
+  else if (D.error) main = `<p class="kicker">BALLON D'OR LEAGUE</p><p class="fb">${D.error === "offline" ? "Couldn't reach the server. Check your connection." : "That league doesn't exist."}</p>${start}`;
+  else if (!joined) main = `<p class="kicker">YOU'RE INVITED</p><h2 class="title">${esc(D.name)}</h2><p class="rules">${Object.keys(D.members).length} player${Object.keys(D.members).length === 1 ? "" : "s"} competing for the Ballon d'Or.</p><div class="panel">${nickField("lNick")}<button class="btn" id="lAccept" type="button">JOIN THE LEAGUE ▶</button><p class="fb">${esc(msg)}</p></div>${how}`;
+  else {
+    const M = D.members, S = D.standings, nm = (pid) => (M[pid] ? M[pid].name : "Former player"), tr = S.trophies || {}, played = new Map(S.today.rows.map((r) => [r.pid, r]));
+    const wk = S.week.rows, everyone = Object.keys(M).filter((pid) => !wk.some((r) => r.pid === pid));
+    const rows = [...wk, ...everyone.map((pid) => ({ pid, pts: 0, places: [], days: 0 }))];
+    main = `<p class="kicker">BALLON D'OR LEAGUE</p><h2 class="title">${esc(D.name)}</h2>${tabs}
+      <div class="panel"><p class="h2"><span>THIS WEEK</span><b>${fmtDay(S.week.start)} – ${fmtDay(S.week.end)}</b></p>
+        <div class="table">${rows.map((r, i) => `<div class="tr${r.pid === me() ? " me" : ""}" data-pl="${M[r.pid] ? M[r.pid].pl : "messi"}"><span class="pos">${r.pts ? i + 1 : "–"}</span><span class="who"><b>${esc(nm(r.pid))}</b><small>${(tr[r.pid] && tr[r.pid].ballon) ? `BALLON D'OR ×${tr[r.pid].ballon}` : ""}${(tr[r.pid] && tr[r.pid].superBallon) ? ` · SUPER ×${tr[r.pid].superBallon}` : ""}</small></span><span class="tdy">${played.has(r.pid) ? `${played.get(r.pid).score}<small>TODAY</small>` : `<small>NOT YET</small>`}</span><span class="pts">${r.pts}<small>PTS</small></span></div>`).join("")}</div>
+        <p class="note">${S.week.rows.length ? `${esc(nm(S.week.rows[0].pid))} leads the race for this week's Ballon d'Or.` : "No scores yet this week. Play the Daily Strike to get on the board."}</p></div>
+      ${todayDone() ? "" : `<button class="btn" id="lPlay" type="button">PLAY TODAY'S STRIKE ▶</button>`}
+      <div class="panel"><p class="h2"><span>SUPER BALLON D'OR RACE</span><b>${fmtMonth(S.month.month)}</b></p>${S.month.rows.length ? `<div class="table">${S.month.rows.map((r) => `<div class="tr small"><span class="who"><b>${esc(nm(r.pid))}</b></span><span class="pts">${r.golds}<small>BALLON D'ORS</small></span></div>`).join("")}</div>` : `<p class="note">The first Ballon d'Or of the month is handed out on Sunday night.</p>`}</div>
+      <div class="panel"><p class="h2"><span>TROPHY CABINET</span></p>${S.pastWeeks.length || S.supers.length ? `${S.supers.map((m) => `<p class="cup super"><b>SUPER BALLON D'OR · ${esc(fmtMonth(m.month))}</b>${m.winners.map((p) => esc(nm(p))).join(" & ") || "Not awarded"}</p>`).join("")}${S.pastWeeks.map((w) => `<p class="cup"><b>BALLON D'OR · WEEK OF ${esc(fmtDay(w.start).toUpperCase())}</b>${w.winners.map((p) => esc(nm(p))).join(" & ") || "Not awarded"}${w.rows[0] ? ` · ${w.rows[0].pts} pts` : ""}</p>`).join("")}` : `<p class="note">Empty for now. The first Ballon d'Or goes to whoever tops this week.</p>`}</div>
+      <div class="row"><button class="btn ghost" id="lInvite" type="button">INVITE FRIENDS</button><button class="btn ghost" id="lAnother" type="button">NEW OR JOIN</button><button class="btn ghost" id="lQuit" type="button">LEAVE LEAGUE</button></div>${how}`;
+  }
+  box.innerHTML = `${main}<div class="row"><button class="btn ghost" id="lBack" type="button">◀ MENU</button></div>`;
+  for (const t of box.querySelectorAll(".tabb")) t.onclick = () => { league.id = t.dataset.id; league.data = null; openLeague(league.id); };
+  for (const r of box.querySelectorAll(".tr[data-pl]")) r.insertBefore(face(r, r.dataset.pl, "mini"), r.querySelector(".who"));
+  const name = () => ($("#lNick") ? setNick($("#lNick").value) : nick()) || setNick(player().tag);
+  const enter = async (lid, lname) => {
+    const r = await api(`/league/${lid}/join`, { pid: me(), name: name(), pl: player().id });
+    if (r.error) return drawLeague(r.error === "offline" ? "Couldn't reach the server. Try again." : r.error === "no such league" ? "No league with that code." : "Couldn't join. " + r.error);
+    saveLeagues([...myLeagues().filter((l) => l.id !== lid), { id: lid, name: r.name || lname || "League" }]);
+    league.id = lid; league.data = r;
+    await postScores();
+    openLeague(lid);
+  };
+  if ($("#lNew")) $("#lNew").onclick = async (e) => { e.target.disabled = true; name(); const r = await api("/league", { name: $("#lName").value }); if (r.id) enter(r.id, $("#lName").value); else { e.target.disabled = false; drawLeague("Couldn't reach the server. Try again."); } };
+  if ($("#lJoin")) $("#lJoin").onclick = () => { const c = $("#lCode").value.toUpperCase().replace(/[^A-Z0-9]/g, ""); if (c.length !== 6) return drawLeague("League codes have 6 characters."); league.data = null; enter(c); };
+  if ($("#lAccept")) $("#lAccept").onclick = () => enter(id, D.name);
+  if ($("#lInvite")) $("#lInvite").onclick = (e) => shareLink(e.target, `${location.origin}${location.pathname}?league=${id}`, `Join my Topbinz league "${D.name}"`);
+  if ($("#lAnother")) $("#lAnother").onclick = () => { league.id = null; league.data = null; history.replaceState(null, "", location.pathname); drawLeague(); };
+  if ($("#lQuit")) $("#lQuit").onclick = async () => { await api(`/league/${id}/leave`, { pid: me() }); saveLeagues(myLeagues().filter((l) => l.id !== id)); league.id = null; league.data = null; openLeague(); };
+  if ($("#lPlay")) $("#lPlay").onclick = () => start("daily");
+  $("#lBack").onclick = () => { history.replaceState(null, "", location.pathname); goHome(); };
+}
+
+$("#goRondo").addEventListener("click", () => openRondo());
+$("#goLeague").addEventListener("click", () => openLeague());
+el.party = $("#party");
+el.league = $("#league");
+
 introLog();
 squad();
 sndLabel();
 show("intro");
+{
+  const q = new URLSearchParams(location.search), room = q.get("room"), lg = q.get("league");
+  if (room) openRondo(room);
+  else if (lg) openLeague(lg.toUpperCase().replace(/[^A-Z0-9]/g, "").slice(0, 6));
+  postScores();
+}
 </script>
 </body>
 </html>

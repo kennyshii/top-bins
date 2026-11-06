@@ -12,10 +12,12 @@ A daily soccer trivia game. Each prompt asks you to name something, like a Ballo
 - Play as one of 10 stars (Messi, Ronaldo, Mbappé, Yamal, Haaland, Bellingham, Neymar, Palmer, Vinícius Jr or Son), each drawn with their own hair, face and kit, and their name and number on the back. Each one earns +10 on their favorite finish and celebrates goals their own way, from Ronaldo's SIUUU to Haaland's zen pose and Vini's corner-flag dance
 - Stadium sound the whole time you're on the site, plus whistles, shots, the net and every celebration, all generated in the browser, with a mute button
 - Scores, streaks and today's result are saved in your browser
+- **Rondo**: a live party mode for 2–10 friends. Name an unused answer to pass the ball; whoever holds it when it blows is out
+- **Ballon d'Or League**: friends' daily scores are ranked with Ballon d'Or points (15, 12, 10…), the week's winner gets the Ballon d'Or and the month's top winner gets the Super Ballon d'Or
 
 ## Running it
 
-It's a single HTML file with no build step. Open `index.html` in a browser or serve the folder with any static server.
+The game is a single HTML file with no build step. Rondo rooms and leagues run on a small Cloudflare Worker in `api/`. Open `index.html` in a browser or serve the folder with any static server.
 
 ## Notes
 
