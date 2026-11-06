@@ -171,7 +171,28 @@ svg { display: block; width: 100%; height: auto; overflow: visible; }
 .mode span { font-size: 17px; color: var(--mute); line-height: 1.1; }
 .mode:hover { border-color: var(--cyan); }
 .mode:focus-visible { outline: 2px dashed var(--gold); outline-offset: 3px; }
-#party, #league { display: flex; flex-direction: column; gap: 14px; padding-top: 2vh; }
+#party, #league { display: flex; flex-direction: column; gap: 14px; padding-top: 2vh; min-height: calc(100svh - 110px); }
+.rgap { flex: 1; min-height: 36svh; }
+.lgap { min-height: 44svh; }
+#party .panel, #party .card, #party .how { background: #0f0b2a; border-color: #4a3a8c; box-shadow: 0 0 0 2px #050a14, 0 0 22px rgba(255, 93, 143, 0.12); }
+#party .card.rondo { margin-top: 0; }
+#party .card.dock { gap: 10px; }
+#party .kicker { color: #ff8fb8; }
+#party .title { text-shadow: 3px 0 #ff5d8f, -3px 0 #4de3ff, 0 0 18px rgba(255, 93, 143, 0.5); }
+#party .turn.hot1 { color: #ff8a3d; }
+#party .turn.hot2 { color: #ff4d2e; animation: wake 0.3s steps(2) infinite; }
+#party .btn { border-color: #ff5d8f; box-shadow: 0 0 0 2px var(--void), 0 0 16px rgba(255, 93, 143, 0.3); }
+#party .btn:hover { background: #ff5d8f; }
+#party .btn.ghost { border-color: #4a3a8c; box-shadow: none; }
+#party .rules { background: #0f0b2a; border: 2px solid #4a3a8c; padding: 10px 12px; color: #c9c0f0; }
+#league .panel, #league .how, #league .plate { background: #0d0a12; border: 2px solid rgba(201, 162, 39, 0.6); box-shadow: 0 0 0 2px #050a14, 0 0 22px rgba(255, 211, 107, 0.1); }
+#league .plate { margin: 0; padding: 10px 12px; color: #e8dcb8; }
+#league .h2 span, #league .kicker { color: var(--gold); }
+#league .title { color: #ffe9a8; text-shadow: 3px 0 #c9a227, -2px 0 #7a5410, 0 0 22px rgba(255, 211, 107, 0.45); }
+#league .btn { border-color: var(--gold); box-shadow: 0 0 0 2px var(--void), 0 0 16px rgba(255, 211, 107, 0.25); }
+#league .btn:hover { background: var(--gold); color: var(--void); }
+#league .btn.ghost { border-color: rgba(201, 162, 39, 0.45); box-shadow: none; }
+#league .how li span { color: var(--gold); }
 #party[hidden], #league[hidden] { display: none; }
 .title { margin: 0; font-family: var(--display); font-weight: 700; font-size: clamp(26px, 8vw, 44px); line-height: 1; letter-spacing: 3px; color: var(--ink); text-shadow: 3px 0 var(--rose), -3px 0 var(--cyan); overflow-wrap: anywhere; }
 .title.code { letter-spacing: 12px; }
@@ -183,23 +204,11 @@ svg { display: block; width: 100%; height: auto; overflow: visible; }
 .btn:disabled:hover { background: #0a1426; color: var(--ink); }
 .roster { display: grid; grid-template-columns: repeat(auto-fill, minmax(88px, 1fr)); gap: 8px; }
 .mate { display: flex; flex-direction: column; align-items: center; gap: 3px; padding: 6px 4px; border: 2px solid var(--line); min-width: 0; }
-.mate canvas, .seat canvas { width: 44px; height: 44px; image-rendering: pixelated; image-rendering: crisp-edges; }
+.mate canvas { width: 44px; height: 44px; image-rendering: pixelated; image-rendering: crisp-edges; }
 .mate b { font-weight: 400; font-size: 18px; max-width: 100%; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 .mate small { font-family: var(--display); font-size: 8px; letter-spacing: 2px; color: var(--gold); min-height: 1em; }
 .mate.off { opacity: 0.45; }
 .mate.win { border-color: var(--gold); box-shadow: 0 0 16px rgba(255, 211, 107, 0.3); }
-.ring { position: relative; width: min(100%, 320px); aspect-ratio: 1; margin: 4px auto; border: 2px dashed rgba(125, 147, 184, 0.25); border-radius: 50%; }
-.seat { position: absolute; transform: translate(-50%, -50%); display: flex; flex-direction: column; align-items: center; gap: 2px; width: 76px; }
-.seat b { font-weight: 400; font-size: 16px; max-width: 76px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; background: rgba(5, 10, 20, 0.7); padding: 0 4px; }
-.seat.out { opacity: 0.3; filter: grayscale(1); }
-.seat.has b { color: var(--gold); }
-.seat.me b { text-decoration: underline; }
-.ball { position: absolute; width: 22px; height: 22px; margin: -30px 0 0 18px; transform: translate(-50%, -50%); border-radius: 50%; background: radial-gradient(circle at 35% 35%, #fff 0 28%, #eef4ff 29% 52%, #1b2438 53% 64%, #b9c6db 65%); box-shadow: 0 0 0 2px #050a14; z-index: 2; }
-.ring.h1 .ball { animation: jit 0.2s steps(2) infinite; box-shadow: 0 0 0 2px #050a14, 0 0 14px #ff8a3d; }
-.ring.h2 .ball { animation: jit 0.08s steps(2) infinite; background: radial-gradient(circle at 35% 35%, #fff7d6 0 28%, #ff8a3d 29% 60%, #ff4d2e 61%); box-shadow: 0 0 0 2px #050a14, 0 0 22px #ff4d2e; }
-.ball.boom { animation: boom 0.5s steps(5) forwards; }
-@keyframes jit { 50% { transform: translate(calc(-50% + 2px), calc(-50% - 1px)); } }
-@keyframes boom { 40% { transform: translate(-50%, -50%) scale(2.4); background: #ffd36b; } to { transform: translate(-50%, -50%) scale(3); opacity: 0; } }
 .turn { margin: 0; text-align: center; font-family: var(--display); font-size: 12px; letter-spacing: 2px; color: var(--gold); }
 .used { display: flex; flex-wrap: wrap; gap: 6px; }
 .used span { display: flex; flex-direction: column; padding: 2px 8px; border: 1px solid var(--line); font-size: 18px; line-height: 1.05; }
@@ -225,7 +234,7 @@ svg { display: block; width: 100%; height: auto; overflow: visible; }
 .cup:first-of-type { border-top: 0; }
 .cup b { font-family: var(--display); font-size: 9px; letter-spacing: 2px; font-weight: 400; color: var(--gold); }
 .cup.super b { color: var(--cyan); }
-@media (prefers-reduced-motion: reduce) { #answer.shake, .stamp, .snd.wake, .ball { animation: none; } }
+@media (prefers-reduced-motion: reduce) { #answer.shake, .stamp, .snd.wake, #party .turn.hot2 { animation: none; } }
 </style>
 </head>
 <body>
@@ -1989,7 +1998,7 @@ function show(which) {
   el.stamp.hidden = true;
   el.skip.hidden = true;
   clearTimeout(advanceTimer);
-  if (which !== "play") { phase = which; pitch.empty(); }
+  if (which !== "play") { phase = which; if (which === "party") pitch.scene("rondo"); else if (which === "league") pitch.scene("gala"); else pitch.empty(); }
   sfx.bed(which === "play" ? 0.07 : 0.05);
   document.querySelector(".logo").style.visibility = which === "intro" ? "hidden" : "visible";
   scrollTo({ top: 0 });
@@ -2778,6 +2787,7 @@ const pitch = (() => {
     P = 3;
     W = Math.ceil(innerWidth / P); H = Math.ceil(innerHeight / P);
     cv.width = W; cv.height = H;
+    sceneBg = {};
     tv.width = Math.round(innerWidth * (devicePixelRatio || 1)); tv.height = Math.round(innerHeight * (devicePixelRatio || 1));
     MX = Math.ceil(W * 1.5); MY = Math.ceil(H * 0.7); MB = Math.ceil(H * 1.2);
     const gw = Math.round(Math.min(W * 0.62, H * 0.92)), gh = Math.round(gw * 0.46);
@@ -3773,6 +3783,7 @@ const pitch = (() => {
   function stateAt(now) {
     const m = mode, s = Math.max(0, (now - m.t0) / 1000);
     clk = now / 1000;
+    if (m.type === "scene") return { scene: m.name };
     if (m.type === "kick" && s >= KICK) mode = { type: "idle", t0: m.t0 + KICK * 1000 };
     else if (m.type === "respot" && s >= RESPOT) mode = { type: "idle", t0: m.t0 + RESPOT * 1000 };
     else if (m.type === "kick") { m.tm = s; return kickoff(s, m); }
@@ -3787,6 +3798,7 @@ const pitch = (() => {
   }
 
   function render(st, t) {
+    if (st.scene) return drawScene(st.scene, t);
     tags = [];
     const sh = st.shake && !reduce ? [Math.round((Math.random() * 2 - 1) * st.shake), Math.round((Math.random() * 2 - 1) * st.shake)] : [0, 0];
     const z = st.cam.z, ox = Math.round(W / 2 - z * st.cam.x) + sh[0], oy = Math.round(H / 2 - z * st.cam.y) + sh[1];
@@ -3845,6 +3857,171 @@ const pitch = (() => {
     drawTags(st);
   }
 
+  let sceneBg = {}, rd = { players: [], holder: null, heat: 0, phase: "demo", out: null, winner: null, prev: null, passAt: -9, popAt: -9 };
+  const SIT = pose({ p: 13.5, lf: [-2.4, -1.2, 1, -12.6, -5.6], rf: [2.4, -1.8, 1, 12.6, -5.6], lh: [-10.5, 18.5, 1], rh: [10.5, 18.5, 1] });
+  const CHEER = pose({ lh: [-11, -27, 1], rh: [11, -27, 1], mouth: "shout" });
+  const DEMO = ["messi", "ronaldo", "mbappe", "yamal", "haaland", "vini"];
+  if (document.fonts) document.fonts.ready.then(() => { sceneBg = {}; });
+
+  function rondoGeo() {
+    const cx = W / 2, cy = Math.round(H * 0.59), rx = Math.min(W * 0.4, H * 0.46), ry = Math.min(H * 0.13, rx * 0.5);
+    return { cx, cy, rx, ry, S: Math.max(0.36, (H * 0.115) / 64), hz: Math.round(cy - ry - H * 0.2) };
+  }
+
+  function rondoBack() {
+    const c = document.createElement("canvas"), { cx, cy, rx, ry, hz } = rondoGeo(), r = rng(31);
+    c.width = W; c.height = H;
+    const b = c.getContext("2d"), top = hz - Math.round(H * 0.13);
+    for (let y = 0; y < hz; y++) { const u = y / hz; Rc(b, 0, y, W, 1, `rgb(${Math.round(12 + 22 * u)},${Math.round(9 + 9 * u)},${Math.round(34 + 36 * u)})`); }
+    for (let i = 0; i < 80; i++) Rc(b, Math.floor(r() * W), Math.floor(r() * top * 0.8), 1, 1, `rgba(232,241,255,${(0.3 + r() * 0.5).toFixed(2)})`);
+    for (let x = -4; x < W;) {
+      const w = 8 + Math.floor(r() * 20), h = Math.round(H * (0.06 + r() * 0.16));
+      Rc(b, x, top - h + 6, w, h, r() < 0.5 ? "#0b0a1c" : "#100e26");
+      for (let wy = top - h + 9; wy < top + 2; wy += 4) for (let wx = x + 2; wx < x + w - 2; wx += 4) if (r() < 0.3) Rc(b, wx, wy, 1, 2, r() < 0.7 ? "rgba(255,211,107,0.5)" : "rgba(77,227,255,0.45)");
+      x += w + 1;
+    }
+    for (let y = hz; y < H; y++) { const u = (y - hz) / (H - hz), band = Math.floor(Math.pow(u, 0.7) * 10) % 2; Rc(b, 0, y, W, 1, `rgb(${Math.round((band ? 15 : 18) + 8 * u)},${Math.round((band ? 44 : 52) + 14 * u)},${Math.round((band ? 54 : 60) + 10 * u)})`); }
+    Rc(b, 0, top, W, hz - top, "rgba(10,8,28,0.55)");
+    b.strokeStyle = "rgba(170,180,230,0.22)"; b.lineWidth = 1; b.beginPath();
+    for (let x = -H; x < W + H; x += 6) { b.moveTo(x, top); b.lineTo(x + (hz - top), hz); b.moveTo(x, hz); b.lineTo(x + (hz - top), top); }
+    b.stroke();
+    for (let x = 4; x < W; x += 38) Rc(b, x, top - 3, 2, hz - top + 3, "#30355a");
+    Rc(b, 0, top - 3, W, 2, "#454b7a");
+    Rc(b, 0, hz - 1, W, 2, "#262a48");
+    for (const fx of [Math.round(W * 0.07), Math.round(W * 0.93)]) {
+      const lt = Math.round(H * 0.06);
+      Rc(b, fx - 1, lt, 2, hz - lt, "#1c1f38");
+      Rc(b, fx - 7, lt - 3, 14, 4, "#fff7d6");
+      b.fillStyle = "rgba(255,247,214,0.06)"; b.beginPath(); b.moveTo(fx - 6, lt); b.lineTo(fx + 6, lt); b.lineTo(cx + (fx < cx ? -rx * 0.2 : rx * 0.2), H); b.lineTo(cx + (fx < cx ? -rx * 1.4 : rx * 1.4), H); b.closePath(); b.fill();
+    }
+    for (let a = 0; a < TAU; a += 0.04) if (Math.floor(a / 0.04) % 3) Rc(b, cx + Math.cos(a) * rx * 1.16, cy + Math.sin(a) * ry * 1.35, 2, 1, "rgba(232,241,255,0.3)");
+    for (let a = 0; a < TAU; a += 0.08) Rc(b, cx + Math.cos(a) * rx * 0.18, cy + Math.sin(a) * ry * 0.22, 1, 1, "rgba(232,241,255,0.3)");
+    for (const a of [0.4, 2.2, 3.6, 5.3]) { const x = Math.round(cx + Math.cos(a) * rx * 1.3), y = Math.round(cy + Math.sin(a) * ry * 1.55), s = Math.max(2, Math.round(H * 0.012)); for (let i = 0; i < s; i++) Rc(b, x - i, y - s + i, i * 2 + 1, 1, i === Math.floor(s / 2) ? "#fff7d6" : "#ff8a3d"); }
+    return c;
+  }
+
+  function nameTag(text, x, y, col) {
+    const fs = Math.max(5, Math.round(H * 0.02));
+    g.font = `700 ${fs}px Silkscreen, monospace`; g.textAlign = "center"; g.textBaseline = "top";
+    g.fillStyle = "#050a14";
+    for (const [dx, dy] of [[-1, 0], [1, 0], [0, -1], [0, 1]]) g.fillText(text, x + dx, y + dy);
+    g.fillStyle = col; g.fillText(text, x, y);
+  }
+
+  function rondoScene(t) {
+    const G = rondoGeo(), { cx, cy, rx, ry, S } = G, demo = !rd.players.length;
+    const list = demo ? DEMO.map((id) => ({ id, pl: id, name: playerById(id).tag, alive: true })) : rd.players, n = list.length;
+    const seats = new Map(list.map((p, i) => { const an = -Math.PI / 2 + (i / n) * TAU, s = Math.sin(an); return [p.id, { p, x: cx + Math.cos(an) * rx, y: cy + s * ry, d: 0.84 + 0.16 * (s + 1) / 2 }]; }));
+    const turn = Math.floor(t / 1.3), holder = demo ? list[turn % n].id : rd.holder, prev = demo ? list[(turn + n - 1) % n].id : rd.prev, passAt = demo ? turn * 1.3 : rd.passAt;
+    g.drawImage(sceneBg.rondo || (sceneBg.rondo = rondoBack()), 0, 0);
+    const foot = (sid) => { const s = seats.get(sid); return s ? [s.x + (cx - s.x) * 0.16, s.y + (cy - s.y) * 0.16 + 1] : [cx, cy]; };
+    let bp = holder && seats.has(holder) ? foot(holder) : [cx, cy - Math.abs(Math.sin(t * 4)) * H * 0.05];
+    const u = (t - passAt) / 0.35;
+    if (prev && holder && u >= 0 && u < 1 && seats.has(prev)) { const a = foot(prev), e = ease(u); bp = [lerp(a[0], bp[0], e), lerp(a[1], bp[1], e) - Math.sin(Math.PI * u) * H * 0.07]; }
+    const order = [...seats.values()].sort((a, b) => a.y - b.y), ballY = bp[1];
+    let ballDrawn = false;
+    const ball = () => {
+      ballDrawn = true;
+      if (rd.phase === "pop" && t - rd.popAt < 1) {
+        const a = t - rd.popAt;
+        burst({ x: bp[0], y: bp[1], t: a, n: 34, sp: H * 0.5, life: 0.9, cols: ["#fff7d6", "#ffd36b", "#ff8a3d", "#ff4d2e"], grav: H * 0.4, seed: 91 });
+        if (a < 0.12) { g.fillStyle = `rgba(255,247,214,${(0.6 * (1 - a / 0.12)).toFixed(2)})`; g.fillRect(0, 0, W, H); }
+        return;
+      }
+      if (rd.phase === "pop") return;
+      const s = Math.max(4, Math.round(H * 0.026)), hot = demo ? 0 : rd.heat, jx = hot === 2 && !reduce ? Math.round(Math.sin(t * 70)) : 0;
+      if (hot) { const a = 0.25 + 0.2 * Math.sin(t * (hot === 2 ? 24 : 10)); for (let k = 3; k >= 1; k--) R(bp[0] - s * k * 0.7, bp[1] - s / 2 - s * k * 0.7, s * k * 1.4, s * k * 1.4, `rgba(${hot === 2 ? "255,77,46" : "255,138,61"},${(a / k).toFixed(2)})`); }
+      R(bp[0] - s * 0.6, bp[1] + s * 0.35, s * 1.2, Math.max(1, s * 0.25), "rgba(0,0,0,0.4)");
+      ballAt(bp[0] + jx, bp[1] - s / 2, s, t * 40, t * 10);
+      if (hot === 2) { const r2 = rng(Math.floor(t * 30)); for (let i = 0; i < 6; i++) R(bp[0] + (r2() - 0.5) * s * 3, bp[1] - s / 2 + (r2() - 0.5) * s * 3, 1, 1, r2() < 0.5 ? "#ffd36b" : "#ff4d2e"); }
+    };
+    for (const st of order) {
+      if (!ballDrawn && st.y > ballY) ball();
+      const p = st.p, pl = playerById(p.pl), me2 = p.id === holder;
+      let ps = standAt({ view: "front", mouth: "smile" }), dy = 0;
+      if (!demo && rd.phase === "pop" && p.id === rd.out) ps = react("head", { view: "front", mouth: "o" });
+      else if (!demo && !p.alive) ps = SIT;
+      else if (!demo && rd.phase === "over" && p.id === rd.winner) { ps = CHEER; dy = -Math.abs(Math.sin(t * 6)) * S * 9; }
+      else if (me2 && (demo || rd.phase === "playing")) ps = pose({ lh: [-13, 9, 2], rh: [13, 9, 2], mouth: !demo && rd.heat === 2 ? "o" : "grin", look: 0.4 });
+      R(st.x - 14 * S * st.d, st.y - 1, 28 * S * st.d, Math.max(1, 3 * S), "rgba(0,0,0,0.35)");
+      star(g, pl, ps, S * st.d, st.x, st.y + dy);
+      nameTag(p.name.toUpperCase(), st.x, st.y + 3, me2 ? "#ffd36b" : p.alive ? "#e8f1ff" : "#7d93b8");
+      if (!demo && rd.phase === "over" && p.id === rd.winner) for (let i = 0; i < 8; i++) { const a = t * 2 + (i * TAU) / 8, rr = S * 26; R(st.x + Math.cos(a) * rr, st.y - S * 34 + Math.sin(a) * rr * 0.5, 2, 2, i % 2 ? "#ffd36b" : "#ffffff"); }
+    }
+    if (!ballDrawn) ball();
+  }
+
+  function galaGeo() { const R2 = Math.round(Math.min(W * 0.13, H * 0.085)); return { cx: W / 2, by: Math.round(H * 0.4), R: R2, floor: Math.round(H * 0.4 + R2 * 2.9) }; }
+
+  function galaBack() {
+    const c = document.createElement("canvas"), { cx, by, R: Rr, floor } = galaGeo(), r = rng(17);
+    c.width = W; c.height = H;
+    const b = c.getContext("2d");
+    for (let y = 0; y < H; y++) { const u = y / H; Rc(b, 0, y, W, 1, `rgb(${Math.round(8 + 18 * u)},${Math.round(6 + 8 * u)},${Math.round(14 + 14 * u)})`); }
+    for (let y = 0; y < floor; y += 8) for (let x = (y / 8) % 2 ? 0 : 8; x < W; x += 16) Rc(b, x, y, 1, 1, "rgba(255,211,107,0.12)");
+    const cw = Math.round(W * 0.2);
+    for (const side of [0, 1]) for (let x = 0; x < cw; x++) {
+      const fold = Math.sin(x / Math.max(3, W * 0.012)) * 0.5 + 0.5, X = side ? W - 1 - x : x, k = 0.5 + 0.5 * fold;
+      Rc(b, X, 0, 1, floor + 4, `rgb(${Math.round(60 + 50 * k)},${Math.round(12 + 10 * k)},${Math.round(30 + 16 * k)})`);
+    }
+    for (const side of [0, 1]) Rc(b, side ? W - cw - 2 : cw, 0, 2, floor + 4, "#c9a227");
+    Rc(b, 0, 0, W, Math.max(4, Math.round(H * 0.03)), "#4e1428");
+    for (let x = 0; x < W; x += 6) Rc(b, x, Math.max(4, Math.round(H * 0.03)), 3, 2, "#c9a227");
+    for (let y = floor; y < H; y++) { const u = (y - floor) / (H - floor); Rc(b, 0, y, W, 1, `rgb(${Math.round(20 + 12 * u)},${Math.round(14 + 8 * u)},${Math.round(22 + 10 * u)})`); }
+    for (let x = 0; x < W; x += 24) Rc(b, x, floor, 1, H - floor, "rgba(255,211,107,0.06)");
+    Rc(b, 0, floor, W, 2, "#c9a227");
+    for (const [sx, a] of [[W * 0.18, 0.05], [W * 0.5, 0.08], [W * 0.82, 0.05]]) { b.fillStyle = `rgba(255,236,170,${a})`; b.beginPath(); b.moveTo(sx - 4, 0); b.lineTo(sx + 4, 0); b.lineTo(cx + Rr * 2.2, floor + 6); b.lineTo(cx - Rr * 2.2, floor + 6); b.closePath(); b.fill(); }
+    b.fillStyle = "rgba(255,236,170,0.1)"; b.beginPath(); b.ellipse(cx, floor + 4, Rr * 2.6, Math.max(3, Rr * 0.5), 0, 0, TAU); b.fill();
+    const pw = Math.round(Rr * 1.5), ph = Math.round(Rr * 0.9), py = floor - ph;
+    Rc(b, cx - pw / 2, py, pw, ph, "#0d0a14"); Rc(b, cx - pw / 2, py, pw, 2, "#ffd36b"); Rc(b, cx - pw / 2, py + Math.round(ph * 0.45), pw, 2, "#c9a227");
+    b.save(); b.font = `700 ${Math.max(4, Math.round(Rr * 0.22))}px Silkscreen, monospace`; b.textAlign = "center"; b.textBaseline = "middle"; b.fillStyle = "#ffd36b"; b.fillText("BALLON D'OR", cx, py + Math.round(ph * 0.72)); b.restore();
+    for (let i = 0; i < 40; i++) Rc(b, Math.floor(r() * W), Math.floor(r() * floor * 0.9), 1, 1, "rgba(255,236,170,0.35)");
+    return c;
+  }
+
+  let globe = null;
+  function trophy(t, cx, by, Rr) {
+    const d = Rr * 2 + 2;
+    if (!globe || globe.width !== d) { globe = document.createElement("canvas"); globe.width = globe.height = d; }
+    const gc = globe.getContext("2d"), img = gc.createImageData(d, d), px = new Uint32Array(img.data.buffer), spin = t * 0.7;
+    const pal = [0xff10305a, 0xff1a5490, 0xff2a7ec2, 0xff3aa2dc, 0xff5cc8f0, 0xff9ae6ff, 0xffd6f7ff];
+    for (let y = 0; y < d; y++) for (let x = 0; x < d; x++) {
+      const nx = (x - Rr) / Rr, ny = (y - Rr) / Rr, r2 = nx * nx + ny * ny;
+      if (r2 > 1) continue;
+      const nz = Math.sqrt(1 - r2), l = Math.max(0, Math.min(1, -0.45 * nx - 0.55 * ny + 0.7 * nz)), lon = Math.atan2(nx, nz) + spin, lat = Math.asin(Math.max(-1, Math.min(1, ny)));
+      let c = Math.min(6, Math.floor(l * 6.99));
+      if (Math.sin(lon * 2 + 1) * Math.cos(lat * 3) + Math.sin(lon * 3.7 - lat * 2) * 0.5 > 0.45) c = Math.min(6, c + 1); else if (Math.abs(lat) < 0.04) c = Math.max(0, c - 1);
+      if (r2 > 0.86) c = Math.max(0, c - 1);
+      px[y * d + x] = pal[c];
+    }
+    gc.putImageData(img, 0, 0);
+    const neck = Math.round(Rr * 0.5), nh = Math.round(Rr * 0.75), top = by + Rr - 2;
+    for (let i = 0; i < nh; i++) { const w = Math.round(lerp(neck * 0.5, neck * 1.4, i / nh)); R(cx - w / 2, top + i, w, 1, i % 3 ? "#c9a227" : "#ffd36b"); }
+    R(cx - neck * 0.8, top + nh, neck * 1.6, Math.max(2, Rr * 0.12), "#7a5410");
+    g.drawImage(globe, Math.round(cx - Rr - 1), Math.round(by - Rr - 1));
+    for (let i = 0; i < 5; i++) { const ph = (t * 0.9 + i * 0.37) % 1, a = (i * 2.3 + Math.floor(t * 0.9 + i * 0.37) * 1.7) % TAU, rr = Rr * (1.15 + (i % 3) * 0.2); if (ph < 0.5) { const s = Math.max(1, Math.round(Rr * 0.08 * (1 - Math.abs(ph - 0.25) * 4))), x = cx + Math.cos(a) * rr, y = by + Math.sin(a) * rr; R(x - s, y, s * 2 + 1, 1, "#fff7d6"); R(x, y - s, 1, s * 2 + 1, "#fff7d6"); } }
+  }
+
+  function galaScene(t) {
+    const { cx, by, R: Rr, floor } = galaGeo();
+    g.drawImage(sceneBg.gala || (sceneBg.gala = galaBack()), 0, 0);
+    trophy(t, cx, by, Rr);
+    const S = Math.max(0.4, (H * 0.2) / 64);
+    R(cx - Rr * 2.6 - 14 * S, floor - 1, 28 * S, Math.max(1, 3 * S), "rgba(0,0,0,0.4)");
+    star(g, who, pose({ lh: [-9, 14, 2], rh: [14, -6, 1], mouth: "smile", look: -0.3, lean: Math.sin(t * 0.8) * 0.5 }), S, cx - Rr * 2.6, floor);
+    const r = rng(Math.floor(t * 8));
+    for (let i = 0; i < 10; i++) { const x = ((i * 97 + t * 14) % W), y = ((i * 53 + t * (18 + i * 3)) % (floor * 0.9)); R(x, y, 1, 2, i % 3 ? "#ffd36b" : "#fff7d6"); if (r() < 0.02) break; }
+  }
+
+  function drawScene(name, t) {
+    g.setTransform(1, 0, 0, 1, 0, 0);
+    g.imageSmoothingEnabled = false;
+    g.fillStyle = "#03050b"; g.fillRect(0, 0, W, H);
+    if (name === "rondo") rondoScene(t); else galaScene(t);
+    tags = [];
+    tg.clearRect(0, 0, tv.width, tv.height);
+  }
+
   function frame(now) {
     requestAnimationFrame(frame);
     if (now - last < 15 || !L) return;
@@ -3861,6 +4038,14 @@ const pitch = (() => {
   const kx = () => (lastSt && lastSt.keeper ? lastSt.keeper.x : W / 2);
   return {
     empty() { mode = { type: "empty", t0: performance.now() }; },
+    scene(name) { mode = { type: "scene", name, t0: performance.now() }; },
+    rondo(st) {
+      const t = performance.now() / 1000;
+      if (!st) { rd = { players: [], holder: null, heat: 0, phase: "demo", out: null, winner: null, prev: null, passAt: -9, popAt: -9 }; return; }
+      if (st.holder !== rd.holder) { rd.prev = rd.holder; rd.passAt = st.phase === "playing" && rd.phase === "playing" ? t : -9; }
+      if (st.phase === "pop" && rd.phase !== "pop") rd.popAt = t;
+      Object.assign(rd, { players: st.players, holder: st.holder, heat: st.heat, phase: st.phase, out: st.out, winner: st.winner });
+    },
     idle() { mode = { type: "idle", t0: performance.now() }; },
     kickoff() {
       const now = performance.now();
@@ -3947,6 +4132,7 @@ function rondoSounds() {
 }
 
 function drawRondo(msg = "", pending = "") {
+  pitch.rondo(rondo.st);
   const st = rondo.st, box = el.party, typed = $("#rAns") && !$("#rAns").disabled ? $("#rAns").value : "";
   if (!st) {
     box.innerHTML = `
@@ -3985,10 +4171,10 @@ function drawRondo(msg = "", pending = "") {
   } else {
     const out = st.players.find((p) => p.id === st.out), left = P ? P.answers.map((a, i) => [a, i]).filter(([, i]) => !st.used.includes(i)).sort((x, y) => y[0].share - x[0].share).slice(0, 3).map(([a]) => a.name) : [];
     head = `<p class="kicker">RONDO · ROUND ${st.round}</p>`;
-    body = `<div class="card rondo">
-        <h2 class="q">${P ? esc(P.q) : "…"}</h2><p class="sub">${P ? esc(P.sub || "") : ""}</p>
-        <div class="ring ${st.heat ? "h" + st.heat : ""}" id="rRing"><div class="ball" id="rBall"></div></div>
-        <p class="turn">${st.phase === "ready" ? "GET READY…" : st.phase === "pop" ? `${out ? esc(out.name) : "Someone"} WAS HOLDING IT. OUT!` : mine ? "YOUR BALL! NAME ONE AND PASS IT" : `${holder ? esc(holder.name) : "…"} HAS THE BALL`}</p>
+    body = `<div class="card rondo"><h2 class="q">${P ? esc(P.q) : "…"}</h2><p class="sub">${P ? esc(P.sub || "") : ""}</p></div>
+      <div class="rgap"></div>
+      <div class="card rondo dock">
+        <p class="turn ${st.heat ? "hot" + st.heat : ""}">${st.phase === "ready" ? "GET READY…" : st.phase === "pop" ? `${out ? esc(out.name) : "Someone"} WAS HOLDING IT. OUT!` : mine ? "YOUR BALL! NAME ONE AND PASS IT" : `${holder ? esc(holder.name) : "…"} HAS THE BALL`}</p>
         <form class="ans" id="rForm" autocomplete="off"><input class="field big" id="rAns" placeholder="${mine ? "type an answer…" : "wait for the ball…"}" ${mine ? "" : "disabled"} spellcheck="false" autocapitalize="characters" enterkeyhint="go"><button class="btn" type="submit" ${mine ? "" : "disabled"}>PASS</button></form>
         <div class="sugg" id="rSugg"></div>
         <p class="fb" id="rFb"></p>
@@ -3996,7 +4182,7 @@ function drawRondo(msg = "", pending = "") {
         <div class="used">${st.log.slice().reverse().map((l) => `<span class="${l.skip ? "thru" : ""}">${esc(l.name)}<small>${esc(names[l.by] || "")}${l.skip ? " · THROUGH BALL" : ""}</small></span>`).join("")}</div>
       </div>`;
   }
-  box.innerHTML = `${head}${body}<div class="row"><button class="btn ghost" id="rLeave" type="button">LEAVE ROOM</button></div>`;
+  box.innerHTML = `${head}${body}${st.phase === "lobby" || st.phase === "over" ? `<div class="rgap"></div>` : ""}<div class="row"><button class="btn ghost" id="rLeave" type="button">LEAVE ROOM</button></div>`;
   $("#rLeave").onclick = () => { leaveRondo(); drawRondo(); };
   const roster = $("#rRoster");
   if (roster) for (const p of st.players) {
@@ -4009,25 +4195,6 @@ function drawRondo(msg = "", pending = "") {
   if ($("#rStart")) $("#rStart").onclick = () => rondo.ws && rondo.ws.send(JSON.stringify({ t: "start" }));
   if ($("#rAgain")) $("#rAgain").onclick = () => rondo.ws && rondo.ws.send(JSON.stringify({ t: "again" }));
   if ($("#rInvite")) $("#rInvite").onclick = (e) => shareLink(e.target, `${location.origin}${location.pathname}?room=${rondo.code}`, "Join my TopBinz Rondo room");
-  const ring = $("#rRing");
-  if (ring) {
-    const live = st.players, n = live.length, R = 40;
-    live.forEach((p, i) => {
-      const an = -Math.PI / 2 + (i / n) * Math.PI * 2, d = document.createElement("div");
-      d.className = "seat" + (p.alive ? "" : " out") + (p.id === st.holder ? " has" : "") + (p.id === you ? " me" : "");
-      d.style.left = `${50 + Math.cos(an) * R}%`; d.style.top = `${50 + Math.sin(an) * R}%`;
-      face(d, p.pl);
-      d.insertAdjacentHTML("beforeend", `<b>${esc(p.name)}</b>`);
-      ring.appendChild(d);
-      if (p.id === st.holder) { const b = $("#rBall"); b.style.left = d.style.left; b.style.top = d.style.top; }
-    });
-    const prev = rondo.prev && rondo.prev.players.findIndex((p) => p.id === rondo.prev.holder), cur = live.findIndex((p) => p.id === st.holder), b = $("#rBall");
-    if (prev >= 0 && prev !== cur && cur >= 0 && rondo.prev.round === st.round) {
-      const a0 = -Math.PI / 2 + (prev / n) * Math.PI * 2;
-      b.animate([{ left: `${50 + Math.cos(a0) * R}%`, top: `${50 + Math.sin(a0) * R}%` }, { left: b.style.left, top: b.style.top }], { duration: 320, easing: "ease-out" });
-    }
-    if (st.phase === "pop") b.classList.add("boom");
-  }
   const form = $("#rForm");
   if (form && mine) {
     const input = $("#rAns"), fb = $("#rFb"), sg = $("#rSugg");
@@ -4106,7 +4273,7 @@ function drawLeague(msg = "") {
     <p class="h2"><span>OR JOIN WITH A CODE</span></p><div class="ans"><input class="field code" id="lCode" maxlength="6" placeholder="CODE" autocomplete="off" spellcheck="false"><button class="btn ghost" id="lJoin" type="button">JOIN</button></div><p class="fb">${esc(msg)}</p></div>`;
   const how = `<ul class="how"><li><span>1</span>Everyone plays the Daily Strike. Your score is sent to your leagues automatically.</li><li><span>2</span>Each day is ranked like Ballon d'Or votes: 15, 12, 10, 8, 7, 5, 4, 3, 2, 1 points for 1st to 10th. Tied scores share the place.</li><li><span>3</span>Most points Monday to Sunday wins that week's Ballon d'Or. Ties go to most 1st places, then 2nd places, and so on.</li><li><span>4</span>Most Ballon d'Ors in a month wins the Super Ballon d'Or. Ties go to total points.</li></ul>`;
   let main = "";
-  if (!id) main = `<p class="kicker">PLAY WITH FRIENDS</p><h2 class="title">BALLON D'OR LEAGUE</h2><p class="rules">Your group's daily scores go on one leaderboard. Win the week for the Ballon d'Or, win the month for the Super Ballon d'Or.</p>${start}${how}`;
+  if (!id) main = `<p class="kicker">PLAY WITH FRIENDS</p><h2 class="title">BALLON D'OR LEAGUE</h2><div class="lgap"></div><p class="rules plate">Your group's daily scores go on one leaderboard. Win the week for the Ballon d'Or, win the month for the Super Ballon d'Or.</p>${start}${how}`;
   else if (!D || league.busy && !D.name) main = `<p class="kicker">BALLON D'OR LEAGUE</p><p class="note">Loading the table…</p>`;
   else if (D.error) main = `<p class="kicker">BALLON D'OR LEAGUE</p><p class="fb">${D.error === "offline" ? "Couldn't reach the server. Check your connection." : "That league doesn't exist."}</p>${start}`;
   else if (!joined) main = `<p class="kicker">YOU'RE INVITED</p><h2 class="title">${esc(D.name)}</h2><p class="rules">${Object.keys(D.members).length} player${Object.keys(D.members).length === 1 ? "" : "s"} competing for the Ballon d'Or.</p><div class="panel">${nickField("lNick")}<button class="btn" id="lAccept" type="button">JOIN THE LEAGUE ▶</button><p class="fb">${esc(msg)}</p></div>${how}`;
@@ -4114,7 +4281,7 @@ function drawLeague(msg = "") {
     const M = D.members, S = D.standings, nm = (pid) => (M[pid] ? M[pid].name : "Former player"), tr = S.trophies || {}, played = new Map(S.today.rows.map((r) => [r.pid, r]));
     const wk = S.week.rows, everyone = Object.keys(M).filter((pid) => !wk.some((r) => r.pid === pid));
     const rows = [...wk, ...everyone.map((pid) => ({ pid, pts: 0, places: [], days: 0 }))];
-    main = `<p class="kicker">BALLON D'OR LEAGUE</p><h2 class="title">${esc(D.name)}</h2>${tabs}
+    main = `<p class="kicker">BALLON D'OR LEAGUE</p><h2 class="title">${esc(D.name)}</h2>${tabs}<div class="lgap"></div>
       <div class="panel"><p class="h2"><span>THIS WEEK</span><b>${fmtDay(S.week.start)} – ${fmtDay(S.week.end)}</b></p>
         <div class="table">${rows.map((r, i) => `<div class="tr${r.pid === me() ? " me" : ""}" data-pl="${M[r.pid] ? M[r.pid].pl : "messi"}"><span class="pos">${r.pts ? i + 1 : "–"}</span><span class="who"><b>${esc(nm(r.pid))}</b><small>${(tr[r.pid] && tr[r.pid].ballon) ? `BALLON D'OR ×${tr[r.pid].ballon}` : ""}${(tr[r.pid] && tr[r.pid].superBallon) ? ` · SUPER ×${tr[r.pid].superBallon}` : ""}</small></span><span class="tdy">${played.has(r.pid) ? `${played.get(r.pid).score}<small>TODAY</small>` : `<small>NOT YET</small>`}</span><span class="pts">${r.pts}<small>PTS</small></span></div>`).join("")}</div>
         <p class="note">${S.week.rows.length ? `${esc(nm(S.week.rows[0].pid))} leads the race for this week's Ballon d'Or.` : "No scores yet this week. Play the Daily Strike to get on the board."}</p></div>
