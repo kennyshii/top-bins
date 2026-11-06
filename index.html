@@ -3972,34 +3972,52 @@ const pitch = (() => {
     Rc(b, 0, floor, W, 2, "#c9a227");
     for (const [sx, a] of [[W * 0.18, 0.05], [W * 0.5, 0.08], [W * 0.82, 0.05]]) { b.fillStyle = `rgba(255,236,170,${a})`; b.beginPath(); b.moveTo(sx - 4, 0); b.lineTo(sx + 4, 0); b.lineTo(cx + Rr * 2.2, floor + 6); b.lineTo(cx - Rr * 2.2, floor + 6); b.closePath(); b.fill(); }
     b.fillStyle = "rgba(255,236,170,0.1)"; b.beginPath(); b.ellipse(cx, floor + 4, Rr * 2.6, Math.max(3, Rr * 0.5), 0, 0, TAU); b.fill();
-    const pw = Math.round(Rr * 1.5), ph = Math.round(Rr * 0.9), py = floor - ph;
-    Rc(b, cx - pw / 2, py, pw, ph, "#0d0a14"); Rc(b, cx - pw / 2, py, pw, 2, "#ffd36b"); Rc(b, cx - pw / 2, py + Math.round(ph * 0.45), pw, 2, "#c9a227");
-    b.save(); b.font = `700 ${Math.max(4, Math.round(Rr * 0.22))}px Silkscreen, monospace`; b.textAlign = "center"; b.textBaseline = "middle"; b.fillStyle = "#ffd36b"; b.fillText("BALLON D'OR", cx, py + Math.round(ph * 0.72)); b.restore();
     for (let i = 0; i < 40; i++) Rc(b, Math.floor(r() * W), Math.floor(r() * floor * 0.9), 1, 1, "rgba(255,236,170,0.35)");
     return c;
   }
 
   let globe = null;
+  const PHI = (1 + Math.sqrt(5)) / 2, PANELS = (() => {
+    const v = [], add = (x, y, z) => { const l = Math.hypot(x, y, z); v.push([x / l, y / l, z / l]); };
+    for (const a of [-1, 1]) for (const b of [-1, 1]) { add(0, a, b * PHI); add(a, b * PHI, 0); add(a * PHI, 0, b); }
+    for (const a of [-1, 1]) for (const b of [-1, 1]) for (const c of [-1, 1]) add(a, b, c);
+    for (const a of [-1, 1]) for (const b of [-1, 1]) { add(0, a * PHI, b / PHI); add(a / PHI, 0, b * PHI); add(a * PHI, b / PHI, 0); }
+    return v;
+  })();
+  const GOLD = [[0, 52, 30, 8], [0.3, 128, 82, 18], [0.55, 196, 140, 40], [0.75, 236, 192, 78], [0.9, 252, 226, 140], [1, 255, 244, 200]];
+  const goldAt = (u) => { u = Math.max(0, Math.min(1, u)); let i = 1; while (i < GOLD.length - 1 && GOLD[i][0] < u) i++; const [a, ...p] = GOLD[i - 1], [b, ...q] = GOLD[i], k = (u - a) / (b - a || 1); return p.map((x, j) => x + (q[j] - x) * k); };
   function trophy(t, cx, by, Rr) {
     const d = Rr * 2 + 2;
     if (!globe || globe.width !== d) { globe = document.createElement("canvas"); globe.width = globe.height = d; }
-    const gc = globe.getContext("2d"), img = gc.createImageData(d, d), px = new Uint32Array(img.data.buffer), spin = t * 0.7;
-    const pal = [0xff10305a, 0xff1a5490, 0xff2a7ec2, 0xff3aa2dc, 0xff5cc8f0, 0xff9ae6ff, 0xffd6f7ff];
+    const gc = globe.getContext("2d"), img = gc.createImageData(d, d), px = new Uint32Array(img.data.buffer), sp = t * 0.55, cs = Math.cos(sp), sn = Math.sin(sp), ct = Math.cos(0.35), st = Math.sin(0.35);
+    const ll = Math.hypot(-0.5, -0.68, 0.72), Lx = -0.5 / ll, Ly = -0.68 / ll, Lz = 0.72 / ll, hl = Math.hypot(Lx, Ly, Lz + 1), seam = 0.9 / Rr;
     for (let y = 0; y < d; y++) for (let x = 0; x < d; x++) {
-      const nx = (x - Rr) / Rr, ny = (y - Rr) / Rr, r2 = nx * nx + ny * ny;
+      const nx = (x + 0.5 - Rr - 1) / Rr, ny = (y + 0.5 - Rr - 1) / Rr, r2 = nx * nx + ny * ny;
       if (r2 > 1) continue;
-      const nz = Math.sqrt(1 - r2), l = Math.max(0, Math.min(1, -0.45 * nx - 0.55 * ny + 0.7 * nz)), lon = Math.atan2(nx, nz) + spin, lat = Math.asin(Math.max(-1, Math.min(1, ny)));
-      let c = Math.min(6, Math.floor(l * 6.99));
-      if (Math.sin(lon * 2 + 1) * Math.cos(lat * 3) + Math.sin(lon * 3.7 - lat * 2) * 0.5 > 0.45) c = Math.min(6, c + 1); else if (Math.abs(lat) < 0.04) c = Math.max(0, c - 1);
-      if (r2 > 0.86) c = Math.max(0, c - 1);
-      px[y * d + x] = pal[c];
+      const nz = Math.sqrt(1 - r2), ry2 = ny * ct - nz * st, rz2 = ny * st + nz * ct, wx = nx * cs + rz2 * sn, wz = -nx * sn + rz2 * cs;
+      let d1 = -2, d2 = -2;
+      PANELS.forEach((p, j) => { const q = p[0] * wx + p[1] * ry2 + p[2] * wz - (j < 12 ? 0.035 : 0); if (q > d1) { d2 = d1; d1 = q; } else if (q > d2) d2 = q; });
+      const dif = Math.max(0, nx * Lx + ny * Ly + nz * Lz), spec = Math.pow(Math.max(0, (nx * Lx + ny * Ly + nz * (Lz + 1)) / hl), 36), fill = Math.max(0, nx * 0.55 + ny * 0.62 + nz * 0.55) * 0.22, rim = (1 - nz) ** 2;
+      let u = 0.2 + dif * 0.7 + fill - rim * 0.22;
+      const onSeam = (d1 - d2) / Math.max(0.3, nz) < seam;
+      if (onSeam) u = u * 0.5 - 0.04;
+      let [cr, cg, cb] = goldAt(u);
+      if (!onSeam) { cr += spec * 120; cg += spec * 110; cb += spec * 90; }
+      px[y * d + x] = (255 << 24) | (Math.min(255, Math.round(cb)) << 16) | (Math.min(255, Math.round(cg)) << 8) | Math.min(255, Math.round(cr));
     }
     gc.putImageData(img, 0, 0);
-    const neck = Math.round(Rr * 0.5), nh = Math.round(Rr * 0.75), top = by + Rr - 2;
-    for (let i = 0; i < nh; i++) { const w = Math.round(lerp(neck * 0.5, neck * 1.4, i / nh)); R(cx - w / 2, top + i, w, 1, i % 3 ? "#c9a227" : "#ffd36b"); }
-    R(cx - neck * 0.8, top + nh, neck * 1.6, Math.max(2, Rr * 0.12), "#7a5410");
+    const floor = Math.round(by + Rr * 2.9), cupT = by + Rr * 0.78, cupB = Math.round(by + Rr * 1.12);
+    for (let y = Math.round(cupT); y < cupB; y++) { const k = (y - cupT) / (cupB - cupT), w = Math.round(Rr * lerp(0.42, 0.62, k)); for (let x = -w; x < w; x++) R(cx + x, y, 1, 1, `rgb(${goldAt(0.78 - (x / w) * 0.35 - k * 0.15).map(Math.round).join(",")})`); }
+    const w1 = Rr * 0.86, w2 = Rr * 1.34, top2 = Math.round(cupB + Rr * 0.34);
+    for (const [y0, y1, wa, wb] of [[cupB, top2, w1, w1 * 1.06], [top2, floor, w2, w2 * 1.08]]) for (let y = y0; y < y1; y++) { const k = (y - y0) / Math.max(1, y1 - y0), w = lerp(wa, wb, k) / 2; R(cx - w, y, w, 1, "#1d1a26"); R(cx, y, w, 1, "#0b0910"); }
+    R(cx - w1 * 0.5, cupB, w1, 1, "#ffd36b"); R(cx - w2 * 0.5, top2, w2, 1, "#ffd36b");
+    R(cx - w2 * 0.46, top2 + Math.round((floor - top2) * 0.72), w2 * 0.92, 1, "#7a5410");
+    g.save(); g.textAlign = "center"; g.textBaseline = "middle"; g.fillStyle = "#e8c45a";
+    g.font = `700 ${Math.max(4, Math.round(Rr * 0.2))}px Silkscreen, monospace`; g.fillText("BALLON D'OR", cx, top2 + (floor - top2) * 0.38);
+    if (Rr >= 24) { g.font = `${Math.round(Rr * 0.11)}px Silkscreen, monospace`; g.fillStyle = "#a88a3a"; g.fillText("FRANCE FOOTBALL", cx, top2 + (floor - top2) * 0.86); }
+    g.restore();
     g.drawImage(globe, Math.round(cx - Rr - 1), Math.round(by - Rr - 1));
-    for (let i = 0; i < 5; i++) { const ph = (t * 0.9 + i * 0.37) % 1, a = (i * 2.3 + Math.floor(t * 0.9 + i * 0.37) * 1.7) % TAU, rr = Rr * (1.15 + (i % 3) * 0.2); if (ph < 0.5) { const s = Math.max(1, Math.round(Rr * 0.08 * (1 - Math.abs(ph - 0.25) * 4))), x = cx + Math.cos(a) * rr, y = by + Math.sin(a) * rr; R(x - s, y, s * 2 + 1, 1, "#fff7d6"); R(x, y - s, 1, s * 2 + 1, "#fff7d6"); } }
+    for (let i = 0; i < 5; i++) { const ph = (t * 0.9 + i * 0.37) % 1, a = (i * 2.3 + Math.floor(t * 0.9 + i * 0.37) * 1.7) % TAU, rr = Rr * (1.12 + (i % 3) * 0.18); if (ph < 0.5) { const s2 = Math.max(1, Math.round(Rr * 0.08 * (1 - Math.abs(ph - 0.25) * 4))), x = cx + Math.cos(a) * rr, y = by + Math.sin(a) * rr; R(x - s2, y, s2 * 2 + 1, 1, "#fff7d6"); R(x, y - s2, 1, s2 * 2 + 1, "#fff7d6"); } }
   }
 
   function galaScene(t) {
