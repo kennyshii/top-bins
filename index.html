@@ -105,6 +105,8 @@ body { background: var(--void); color: var(--ink); font-family: var(--body); fon
 .timer i.off { background: rgba(125, 147, 184, 0.18); }
 .timer.hot i:not(.off) { background: var(--rose); }
 .fb { margin: 0; min-height: 1.25em; font-size: 19px; color: var(--rose); }
+.pass { align-self: flex-end; margin-top: -10px; font-family: var(--display); font-size: 10px; letter-spacing: 2px; color: var(--mute); background: none; border: 2px solid var(--line); padding: 8px 12px; cursor: pointer; }
+.pass:hover { color: var(--ink); border-color: var(--mute); }
 .sugg { display: flex; flex-wrap: wrap; align-items: center; gap: 8px; }
 .sugg .lab { color: var(--gold); }
 .chip { font-family: var(--body); font-size: 22px; color: var(--void); background: var(--gold); border: 0; padding: 2px 10px 3px; cursor: pointer; text-transform: uppercase; }
@@ -211,6 +213,7 @@ svg { display: block; width: 100%; height: auto; overflow: visible; }
       <div class="sugg" id="sugg" hidden></div>
       <div class="timer" id="timer"></div>
       <p class="fb" id="fb" aria-live="polite"></p>
+      <button class="pass" id="pass" type="button">I DON'T KNOW · SKIP</button>
     </div>
   </section>
 
@@ -1631,7 +1634,7 @@ const oneIn = (share) => Math.max(2, Math.round(1 / share)).toLocaleString("en-U
 const BOOST = 10;
 const BIG = new Set(["topbins", "panenka", "screamer"]);
 const PLAYERS = [
-  { id: "messi", foot: "L", name: "Messi", tag: "MESSI", shirt: "MESSI", no: 10, tall: 0.93, boost: "topbins", why: "bends it into the top corner", cel: ["shirt", "boot", "sky"], celName: "running to the stands to show his shirt on the big ones, kissing his boot off the post, fingers to the sky on tap-ins", beard: true,
+  { id: "messi", foot: "L", name: "Messi", tag: "MESSI", shirt: "MESSI", no: 10, tall: 0.93, boost: "topbins", why: "bends it into the top corner", cel: ["shirt", "boot"], celName: "running to the stands to show his shirt on the big ones, kissing his boot on the rest", beard: true,
     kit: { h: "#3b2414", h2: "#5a3a22", s: "#e3ad84", w: "#f4f8ff", v: "#75aadb", r: "#1b2438", n: "#1b2438", k: "#f4f8ff", b: "#ffd36b" } },
   { id: "ronaldo", name: "Ronaldo", tag: "RONALDO", shirt: "RONALDO", no: 7, tall: 1.03, boost: "screamer", why: "free-kick specialist", cel: ["siu", "calma"], celName: "the finger twirl and a mid-air SIUUU on the big ones, CALMA on the rest",
     kit: { h: "#17100b", h2: "#3a2a1c", s: "#d29a6c", w: "#c8102e", r: "#ffd36b", n: "#0b6b3a", k: "#c8102e", b: "#4de3ff" } },
@@ -1798,7 +1801,7 @@ const sfx = (() => {
     aww() { chant("ao", 1.2, 0.45, 0.72); swell(0.15); },
     siu() { swell(1, 2.2); const t = t0(); hit({ t, dur: 0.22, type: "highpass", f: 4200, gain: 0.28, a: 0.05 }); chant("iu", 1.6, 0.72, 1.06, t + 0.16); },
     hey() { swell(0.9, 1.6); chant("e", 0.5, 0.7, 1.05); },
-    jude() { swell(0.9, 3.4); const t = t0(); for (let i = 0; i < 4; i++) { chant("ue", 0.5, 0.62, 0.9, t + i * 0.74); for (const d of [0.5, 0.6]) hit({ t: t + i * 0.74 + d, dur: 0.04, type: "highpass", f: 1500, gain: 0.32, src: claps }); } },
+    jude() { swell(1, 3.6); const t = t0(); for (let i = 0; i < 4; i++) { const at = t + i * 0.76; chant("u", 0.32, 1.25, 1.02, at); chant("e", 0.42, 1.25, 0.9, at + 0.3); for (const d of [0.52, 0.62]) hit({ t: at + d, dur: 0.05, type: "highpass", f: 1500, gain: 0.55, src: claps }); } },
     hush() { duck(); chant("o", 1.1, 0.16, 0.92); },
     shh() { duck(); hit({ dur: 1.2, f: 3200, q: 1.2, gain: 0.24, a: 0.15 }); },
     gong() { duck(); const t = t0(); [[196, 0.13, 3.2], [394, 0.06, 2.2], [589, 0.04, 1.4], [786, 0.025, 0.9]].forEach(([f, gain, dur]) => tone({ t, f, dur, gain, a: 0.01 })); },
@@ -1964,7 +1967,7 @@ function ask(how) {
   tick = setInterval(draw, 100);
 }
 
-function resolve(i, typed, fixed) {
+function resolve(i, typed, fixed, gave) {
   clearInterval(tick);
   clearSugg();
   el.answer.disabled = true;
@@ -1986,7 +1989,7 @@ function resolve(i, typed, fixed) {
   el.sBonus.hidden = !bonus;
   el.sBonus.textContent = `+${bonus} ${pl.tag} BOOST`;
   if (bonus) restamp(el.sBonus, hit + 0.35);
-  el.sSaid.textContent = ans ? ans.name : "Time's up";
+  el.sSaid.textContent = ans ? ans.name : gave ? "Skipped" : "Time's up";
   const fixNote = ans && fixed ? ` You typed “${typed.trim()}”, so we fixed the spelling.` : "";
   el.sHow.textContent = ans ? `About 1 in ${oneIn(ans.share)} players say this. ${shot.line}${fixNote}` : `Most players say ${p.top.name}.`;
   el.next.textContent = game.round >= 6 ? "SEE RESULTS ▶" : "NEXT PROMPT ▶";
@@ -2058,6 +2061,7 @@ function suggest(list, why) {
   sfx.play("blip", 1);
 }
 
+$("#pass").addEventListener("click", () => { if (game && phase === "ask" && !el.answer.disabled) resolve(null, "", false, true); });
 el.form.addEventListener("submit", (e) => {
   e.preventDefault();
   if (!game || el.answer.disabled) return;
@@ -3480,30 +3484,32 @@ const pitch = (() => {
   };
 
   const CEL = {
-    siu: { len: 4.1, title: "THE SIUUU", sfx: [[0.35, "cheer", 0.5], [1.44, "whoosh", 0.4], [1.97, "siu", 0, 1]], f(c, a, st) {
-      const to = near(a, sideOf(a) * 0.2, 0.42), run = (t) => dash(t, a, 0, 1.32, [a.x0, a.y0], to, { A: 0.7, view: "front" });
-      const twirl = (t, ps) => { const ph = t * 12; return over(ps, { lh: [-9, 13 + Math.sin(t * 9) * 3, 2], rh: [6 + Math.cos(ph) * 3.2, -15.5 + Math.sin(ph) * 1.9, 1], ex: [{ k: "twirl", hand: "r", ph, r: 3.2 }] }, ease(seg(t, 0.2, 0.38)) * (1 - ease(seg(t, 1.22, 1.38)))); };
-      if (c < 1.32) { const r = run(c); r.pose = twirl(c, r.pose); return r; }
+    siu: { len: 5.0, title: "THE SIUUU", sfx: [[0.35, "cheer", 0.5], [2.36, "whoosh", 0.4], [2.88, "siu", 0, 1]], f(c, a, st) {
+      const to = far(sideOf(a)), ph = c * 12, b = Math.abs(Math.sin(c * 6)) * 0.8;
+      const twirl = pose({ p: 0.6 + b, lh: [-9.5, 14, 2], rh: [6 + Math.cos(ph) * 3.2, -15.5 + Math.sin(ph) * 1.9, 1], mouth: "smile", look: -0.3, ex: [{ k: "twirl", hand: "r", ph, r: 3.2 }] });
       const crouch = pose({ p: 6, lf: [-5.2, 0, 1], rf: [5.2, 0, 1], A: [[18, -40, 30], [18, -40, 30]] });
       const air = (u) => {
         const dn = inOut(seg(u, 0.45, 1)), sp = ease(seg(u, 0.55, 1));
         return pose({ sx: Math.cos(TAU * inOut(seg(u, 0.08, 0.88))), dy: -84 * u * (1 - u), lh: [lerp(-10, -19, dn), lerp(-20, 15, dn), 1], rh: [lerp(10, 19, dn), lerp(-20, 15, dn), 1], lf: [lerp(-3.4, -8.4, sp), lerp(-6, -1.2, sp), 1], rf: [lerp(3.4, 8.4, sp), lerp(-6, -1.2, sp), 1], mouth: "o" });
       };
-      if (c < 1.45) return at(to, blendPose(twirl(c, run(c).pose), crouch, ease(seg(c, 1.3, 1.45))));
-      if (c < 1.97) { const u = seg(c, 1.45, 1.97); return at(to, blendPose(crouch, air(u), ease(seg(u, 0, 0.16)))); }
+      if (c < 2.25) return arrive(c, a, 1.35, to, twirl, 0.38, { A: 0.9 });
+      if (c < 2.38) return at(to, blendPose(twirl, crouch, ease(seg(c, 2.25, 2.38))));
+      if (c < 2.88) { const u = seg(c, 2.38, 2.88); return at(to, blendPose(crouch, air(u), ease(seg(u, 0, 0.16)))); }
       const land = pose({ p: 3, lf: [-8.4, 0, 1], rf: [8.4, 0, 1], lh: [-19, 16, 1], rh: [19, 16, 1], mouth: "shout", look: -0.4 }), sq = pose({ ...land, p: 7, lh: [-17.5, 18.5, 1], rh: [17.5, 18.5, 1] });
-      if (c > 2.0) st.fx.push(say("SIUUU!", to, kAt(a, to[1]), c - 2.0, 1.7, undefined, a.z));
-      const d = c - 1.97;
+      if (c > 2.92) st.fx.push(say("SIUUU!", to, kAt(a, to[1]), c - 2.92, 1.7, undefined, a.z));
+      const d = c - 2.88;
       return at(to, d < 0.09 ? blendPose(air(1), sq, easeOut(d / 0.09)) : blendPose(sq, land, inOut(seg(d, 0.09, 0.42))));
     } },
-    calma: { len: 3.6, title: "CALMA, CALMA", sfx: [[0.75, "hush", 0, 1]], f(c, a, st) {
-      const to = near(a, sideOf(a) * 0.25, 0.4), b = 0.5 - 0.5 * Math.cos(TAU * 1.5 * Math.max(0, c - 0.6)), r = dash(c, a, 0, 2.7, [a.x0, a.y0], to, { A: 0.45, view: "front" });
-      r.pose = over(r.pose, { lh: [-9, 13 + Math.sin(c * 8) * 3 * (1 - seg(c, 2.3, 2.7)), 2], rh: [13.5, 4 + b * 9, 1], flat: "r", look: 0.25 + b * 0.25, mouth: b > 0.55 ? "o" : "flat" }, ease(seg(c, 0.45, 0.7)));
-      st.fx.push(say("CALMA", [r.x, r.y], kAt(a, r.y), c - 0.8, 1.6, "#e8f1ff", a.z));
+    calma: { len: 3.8, title: "CALMA, CALMA", sfx: [[1.05, "hush", 0, 1]], f(c, a, st) {
+      const s = sideOf(a), mid = near(a, s * 0.42, 0.1), to = near(a, s * 0.5, 0.34), b = 0.5 - 0.5 * Math.cos(TAU * 1.5 * Math.max(0, c - 1.0));
+      if (c < 0.95) return dash(c, a, 0, 0.95, [a.x0, a.y0], mid, { A: 0.75 });
+      const r = dash(c, a, 0.95, 3.2, mid, to, { A: 0.45, view: "front" });
+      r.pose = over(r.pose, { lh: [-9, 13 + Math.sin(c * 8) * 3 * (1 - seg(c, 2.8, 3.2)), 2], rh: [13.5, 4 + b * 9, 1], flat: "r", look: 0.25 + b * 0.25, mouth: b > 0.55 ? "o" : "flat" }, ease(seg(c, 0.9, 1.15)));
+      st.fx.push(say("CALMA", [r.x, r.y], kAt(a, r.y), c - 1.2, 1.6, "#e8f1ff", a.z));
       return r;
     } },
     shirt: { len: 4.6, stay: true, title: "SHIRT TO THE CROWD", sfx: [[0.4, "cheer", 0.6, 1], [2.95, "card"]], f(c, a, st) {
-      const to = near(a, sideOf(a) * 0.3, 0.36), k = kAt(a, to[1]), r0 = a.ref ? [a.ref.x, a.ref.gy ?? a.ref.y] : L.refPos, rt = [to[0] - sideOf(a) * 9 * k, to[1] - k];
+      const to = far(sideOf(a)), k = kAt(a, to[1]), r0 = a.ref ? [a.ref.x, a.ref.gy ?? a.ref.y] : L.refPos, rt = [to[0] - sideOf(a) * 9 * k, to[1] + k];
       if (c >= 2.1) st.ref = c < 2.8 ? jog(c, 2.1, 2.8, r0, rt, L.ks, 8) : { u: "point", l: "stand", x: rt[0], y: rt[1], k: L.ks };
       if (c >= 2.95) st.fx.push({ type: "card", x: rt[0] + 5 * L.ks, y: rt[1] - 19.5 * L.ks, k: L.ks });
       const grab = pose({ lh: [3.6, 15.5, 2], rh: [-3.6, 15.5, 2], look: 0.5 }), lift = pose({ lh: [-3.2, -25, 1], rh: [3.2, -25, 1], look: -0.2 }), off = pose({ ...lift, bare: true, ex: [{ k: "heldShirt" }] });
@@ -3513,7 +3519,7 @@ const pitch = (() => {
       return at(to, blendPose(off, show, inOut(seg(c, 2.02, 2.35))));
     } },
     boot: { len: 4.2, stay: true, title: "KISSING THE BOOT", sfx: [[0.4, "cheer", 0.5], [1.95, "blip", 3], [2.5, "cheer", 0.9, 1]], f(c, a, st) {
-      const to = near(a, sideOf(a) * 0.3, 0.3), k = kAt(a, to[1]);
+      const to = near(a, sideOf(a) * 0.5, 0.18), k = kAt(a, to[1]);
       const crouch = pose({ p: 9, lf: [-3.8, 0, 1], rf: [4.4, 0, 1], lh: [-6.5, 21, 2], rh: [9, 10, 2], look: 0.8 });
       const kiss = pose({ lf: [-3.6, -1.4, 1], rf: [3.8, 0, 1], lh: [-10.5, -9.6, 2], rh: [10, 12, 2], mouth: "o", eyes: "closed", bootless: "l", ex: [{ k: "boot", hand: "l", d: [1, 0.08] }] });
       const raise = pose({ lf: [-3.6, -1.4, 1], rf: [3.8, 0, 1], lh: [-8, -23, 1], rh: [12, 6, 2], mouth: "grin", look: -0.6, bootless: "l", ex: [{ k: "boot", hand: "l", d: [0.35, -1] }] });
@@ -3521,13 +3527,6 @@ const pitch = (() => {
       if (c < 1.4) return arrive(c, a, 1.0, to, crouch, 0.36, { A: 0.75 });
       if (c < 2.3) return at(to, blendPose(crouch, kiss, inOut(seg(c, 1.4, 1.85))));
       return at(to, blendPose(kiss, raise, inOut(seg(c, 2.4, 2.75))));
-    } },
-    sky: { len: 3.2, title: "FINGERS TO THE SKY", sfx: [], f(c, a, st) {
-      const to = near(a, sideOf(a) * 0.45, 0.22), pu = bump(c, 1.6, 2.5, 2) * 2.2, r = dash(c, a, 0, 1.7, [a.x0, a.y0], to, { A: 0.55, look: -1 }), k = kAt(a, r.y), sd = r.pose.view === "side";
-      const up = (side) => ({ lh: [side ? 2 : -6, -22 - pu, 1], rh: [side ? 0.5 : 6, -22 - pu, 1], look: -1, ex: [{ k: "point", hand: "l" }, { k: "point", hand: "r" }] });
-      r.pose = blendPose(over(r.pose, up(sd), ease(seg(c, 0.3, 0.55))), pose({ ...up(false), mouth: "smile" }), ease(seg(c, 1.5, 1.85)));
-      if (c > 0.5 && c < 3.2) st.fx.push({ type: "sparkle", x: r.x, y: r.y - k * 18, t: c, r: k * 5 });
-      return r;
     } },
     slide: { len: 3.8, stay: true, title: "THE KNEE SLIDE", sfx: [[0.35, "cheer", 0.6], [1.0, "whoosh", 0.7], [1.15, "cheer", 1, 1]], f(c, a, st) {
       const s = sideOf(a), mid = near(a, s * 0.42, 0.1), to = near(a, s * 0.62, 0.3), run = (t) => dash(t, a, 0, 1.0, [a.x0, a.y0], mid, { A: 0.95, go: true });
@@ -3552,7 +3551,7 @@ const pitch = (() => {
       return { pose: seq(c, yk), x: meet[0], y: meet[1] - hop, gy: meet[1] };
     } },
     y304: { len: 3.4, title: "304", sfx: [[1.1, "blip", 2], [1.2, "cheer", 0.7]], f(c, a, st) {
-      const to = near(a, sideOf(a) * 0.18, 0.34), k = kAt(a, to[1]), lift = bump(c, 1.6, 3.2) * 0.8;
+      const to = near(a, sideOf(a) * 0.4, 0.18), k = kAt(a, to[1]), lift = bump(c, 1.6, 3.2) * 0.8;
       st.fx.push(say("304", to, k, c - 1.15, 1.5, undefined, a.z));
       return arrive(c, a, 0.95, to, pose({ lh: [6.8, -3.5 - lift, 1], rh: [-6.8, -3.2 - lift, 1], mouth: "smile", look: -0.2, ex: [{ k: "fingers", hand: "l", n: 4, ang: 0.08, len: 5.4, w: 0.8 }, { k: "ok", hand: "r" }] }), 0.4, { A: 0.8 });
     } },
