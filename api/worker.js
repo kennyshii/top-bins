@@ -42,7 +42,8 @@ export default {
   },
 };
 
-const fresh = () => ({ phase: "lobby", host: null, players: [], queue: [], round: 0, prompt: null, used: [], log: [], holder: null, heat: 0, winner: null, out: null, ev: [] });
+const fresh = () => ({ phase: "lobby", host: null, players: [], queue: [], round: 0, prompt: null, used: [], log: [], holder: null, heat: 0, winner: null, out: null, ko: false, playAt: 0, ev: [] });
+const LIVES = 3;
 
 export class Room {
   constructor(ctx) {
@@ -55,8 +56,8 @@ export class Room {
   online(skip) { return new Set(this.socks(skip).map((ws) => this.idOf(ws)).filter(Boolean)); }
   view(skip) {
     const s = this.s, on = this.online(skip);
-    return { t: "state", phase: s.phase, host: s.host, round: s.round, prompt: s.prompt, used: s.used, log: s.log.slice(-40), holder: s.holder, heat: s.heat, winner: s.winner, out: s.out,
-      players: s.players.map((p) => ({ id: p.id, name: p.name, pl: p.pl, alive: p.alive, on: on.has(p.id) })) };
+    return { t: "state", phase: s.phase, host: s.host, round: s.round, prompt: s.prompt, used: s.used, log: s.log.slice(-40), holder: s.holder, heat: s.heat, winner: s.winner, out: s.out, ko: s.ko, since: s.phase === "playing" ? Date.now() - s.playAt : 0,
+      players: s.players.map((p) => ({ id: p.id, name: p.name, pl: p.pl, alive: p.alive, lives: p.lives ?? LIVES, on: on.has(p.id) })) };
   }
   cast(skip) { const v = JSON.stringify(this.view(skip)); for (const ws of this.socks(skip)) { try { ws.send(v); } catch {} } }
   async commit(skip) {
@@ -92,7 +93,7 @@ export class Room {
       let p = s.players.find((x) => x.id === id);
       if (!p) {
         if (s.players.length >= 10) { try { ws.send(JSON.stringify({ t: "full" })); } catch {} return; }
-        p = { id, alive: s.phase === "lobby" };
+        p = { id, alive: s.phase === "lobby", lives: s.phase === "lobby" ? LIVES : 0 };
         s.players.push(p);
       }
       p.name = clean(m.name, 16) || "Player";
@@ -104,7 +105,7 @@ export class Room {
     if (!me) return;
     if (m.t === "start" && me === s.host && s.phase === "lobby" && s.players.length >= 2) {
       s.queue = shuffle(RONDO).slice(0, 40);
-      for (const p of s.players) p.alive = true;
+      for (const p of s.players) { p.alive = true; p.lives = LIVES; }
       s.round = 0;
       s.winner = null;
       this.startRound(s.players[Math.floor(Math.random() * s.players.length)].id);
@@ -122,7 +123,7 @@ export class Room {
     }
     if (m.t === "again" && me === s.host && s.phase === "over") {
       const on = this.online();
-      Object.assign(s, fresh(), { host: s.host, players: s.players.filter((p) => on.has(p.id)).map((p) => ({ ...p, alive: true })) });
+      Object.assign(s, fresh(), { host: s.host, players: s.players.filter((p) => on.has(p.id)).map((p) => ({ ...p, alive: true, lives: LIVES })) });
       return this.commit();
     }
   }
@@ -142,20 +143,20 @@ export class Room {
     const s = this.s, now = Date.now(), fuse = 16000 + Math.random() * 20000;
     s.round += 1;
     s.prompt = s.queue[(s.round - 1) % s.queue.length];
-    s.used = []; s.log = []; s.out = null; s.heat = 0; s.holder = first; s.phase = "ready";
+    s.used = []; s.log = []; s.out = null; s.ko = false; s.heat = 0; s.holder = first; s.phase = "ready";
     s.ev = [{ at: now + 3200, t: "play" }, { at: now + 3200 + fuse - 8000, t: "heat1" }, { at: now + 3200 + fuse - 3500, t: "heat2" }, { at: now + 3200 + fuse, t: "pop" }];
   }
   async alarm() {
     const s = this.s, now = Date.now();
     while (s.ev.length && s.ev[0].at <= now + 50) {
       const e = s.ev.shift();
-      if (e.t === "play") s.phase = "playing";
+      if (e.t === "play") { s.phase = "playing"; s.playAt = now; }
       else if (e.t === "heat1") s.heat = 1;
       else if (e.t === "heat2") s.heat = 2;
       else if (e.t === "pop") {
         const victim = s.players.find((p) => p.id === s.holder);
-        if (victim) victim.alive = false;
-        s.out = s.holder; s.phase = "pop"; s.heat = 0;
+        if (victim) { victim.lives = Math.max(0, (victim.lives ?? LIVES) - 1); if (!victim.lives) victim.alive = false; }
+        s.out = s.holder; s.ko = !!victim && !victim.alive; s.phase = "pop"; s.heat = 0;
         s.ev = [{ at: now + 4200, t: "next" }];
       } else if (e.t === "next") {
         const left = this.alive();

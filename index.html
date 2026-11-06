@@ -214,6 +214,8 @@ svg { display: block; width: 100%; height: auto; overflow: visible; }
 .mate canvas { width: 44px; height: 44px; image-rendering: pixelated; image-rendering: crisp-edges; }
 .mate b { font-weight: 400; font-size: 18px; max-width: 100%; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 .mate small { font-family: var(--display); font-size: 8px; letter-spacing: 2px; color: var(--gold); min-height: 1em; }
+.mate .hp { font-style: normal; color: #ff5d8f; letter-spacing: 1px; }
+.mate .hp u { text-decoration: none; color: #3a2a4a; }
 .mate.off { opacity: 0.45; }
 .mate.win { border-color: var(--gold); box-shadow: 0 0 16px rgba(255, 211, 107, 0.3); }
 .turn { margin: 0; text-align: center; font-family: var(--display); font-size: 12px; letter-spacing: 2px; color: var(--gold); }
@@ -3614,10 +3616,10 @@ const pitch = (() => {
       return at(to, d < 0.09 ? blendPose(air(1), sq, easeOut(d / 0.09)) : blendPose(sq, land, inOut(seg(d, 0.09, 0.42))));
     } },
     calma: { len: 3.8, title: "CALMA, CALMA", sfx: [[1.05, "hush", 0, 1]], f(c, a, st) {
-      const s = sideOf(a), mid = near(a, s * 0.42, 0.1), to = near(a, s * 0.5, 0.34), b = 0.5 - 0.5 * Math.cos(TAU * 1.5 * Math.max(0, c - 1.0));
+      const s = sideOf(a), mid = near(a, s * 0.42, 0.1), to = near(a, s * 0.5, 0.34), u = Math.max(0, c - 1.0), pat = Math.max(0, Math.sin(TAU * 2.1 * u)) ** 1.6, nod = Math.sin(TAU * 0.55 * u);
       if (c < 0.95) return dash(c, a, 0, 0.95, [a.x0, a.y0], mid, { A: 0.75 });
-      const r = dash(c, a, 0.95, 3.2, mid, to, { A: 0.45, view: "front" });
-      r.pose = over(r.pose, { lh: [-9, 13 + Math.sin(c * 8) * 3 * (1 - seg(c, 2.8, 3.2)), 2], rh: [13.5, 4 + b * 9, 1], flat: "r", look: 0.25 + b * 0.25, mouth: b > 0.55 ? "o" : "flat" }, ease(seg(c, 0.9, 1.15)));
+      const r = dash(c, a, 0.95, 3.2, mid, to, { A: 0.4, view: "front" }), calm = 1 - seg(c, 2.9, 3.4) * 0.6;
+      r.pose = over(r.pose, { lh: [-7.6, 17.6 + Math.sin(c * 7) * 0.8, 1], rh: [3.8 + pat * 0.6, 7.4 + pat * 3.6 * calm, 2], flat: "r", look: -0.35 + pat * 0.12, tilt: nod * 0.9, lean: -0.5 + nod * 0.35, mouth: Math.floor(u * 4.2) % 2 ? "o" : "shout" }, ease(seg(c, 0.9, 1.15)));
       st.fx.push(say("CALMA", [r.x, r.y], kAt(a, r.y), c - 1.2, 1.6, "#e8f1ff", a.z));
       return r;
     } },
@@ -3864,7 +3866,7 @@ const pitch = (() => {
     drawTags(st);
   }
 
-  let sceneBg = {}, rd = { players: [], holder: null, heat: 0, phase: "demo", out: null, winner: null, prev: null, passAt: -9, popAt: -9 };
+  let sceneBg = {}, rd = { players: [], holder: null, heat: 0, phase: "demo", out: null, winner: null, prev: null, passAt: -9, popAt: -9, playT: 0 };
   const SIT = pose({ p: 13.5, lf: [-2.4, -1.2, 1, -12.6, -5.6], rf: [2.4, -1.8, 1, 12.6, -5.6], lh: [-10.5, 18.5, 1], rh: [10.5, 18.5, 1] });
   const CHEER = pose({ lh: [-11, -27, 1], rh: [11, -27, 1], mouth: "shout" });
   const DEMO = ["messi", "ronaldo", "mbappe", "yamal", "haaland", "vini"];
@@ -3915,45 +3917,92 @@ const pitch = (() => {
     g.fillStyle = col; g.fillText(text, x, y);
   }
 
+  let hotCv = null;
+  function hotBall(x, y, r, spin, heat, look, t, angry) {
+    const d = Math.ceil(r) * 2 + 2, rr = d / 2 - 1;
+    if (!hotCv || hotCv.width !== d) { hotCv = document.createElement("canvas"); hotCv.width = hotCv.height = d; }
+    const c = hotCv.getContext("2d"), img = c.createImageData(d, d), px = new Uint32Array(img.data.buffer), cs = Math.cos(spin), sn = Math.sin(spin), seam = 0.9 / rr;
+    for (let j = 0; j < d; j++) for (let i = 0; i < d; i++) {
+      const nx = (i + 0.5 - rr - 1) / rr, ny = (j + 0.5 - rr - 1) / rr, r2 = nx * nx + ny * ny;
+      if (r2 > 1) continue;
+      const nz = Math.sqrt(1 - r2), wx = nx * cs + nz * sn, wz = -nx * sn + nz * cs;
+      let d1 = -2, d2 = -2, k1 = 0;
+      PANELS.forEach((p, k) => { const q = p[0] * wx + p[1] * ny + p[2] * wz - (k < 12 ? 0.035 : 0); if (q > d1) { d2 = d1; d1 = q; k1 = k; } else if (q > d2) d2 = q; });
+      const lit = 0.35 + 0.65 * Math.max(0, -0.45 * nx - 0.55 * ny + 0.7 * nz), spec = Math.pow(Math.max(0, -0.3 * nx - 0.4 * ny + 0.87 * nz), 30);
+      let base = (d1 - d2) / Math.max(0.3, nz) < seam ? [90, 90, 100] : k1 < 12 ? [24, 26, 40] : [238, 242, 255];
+      const hot = [255, 60 + 80 * (1 - heat), 40];
+      base = base.map((v, q) => v + (hot[q] - v) * heat * (k1 < 12 ? 0.55 : 0.75));
+      const [cr, cg, cb] = base.map((v) => Math.min(255, Math.round(v * lit + spec * 140)));
+      px[j * d + i] = (255 << 24) | (cb << 16) | (cg << 8) | cr;
+    }
+    c.putImageData(img, 0, 0);
+    if (heat > 0.35) { const a = 0.18 + 0.25 * heat * (0.6 + 0.4 * Math.sin(t * (8 + heat * 20))); for (let k = 3; k >= 1; k--) { g.fillStyle = `rgba(255,${Math.round(120 - heat * 80)},40,${(a / k).toFixed(3)})`; g.beginPath(); g.arc(x, y, r * (1 + k * 0.22), 0, TAU); g.fill(); } }
+    g.drawImage(hotCv, Math.round(x - rr - 1), Math.round(y - rr - 1));
+    const ex = r * 0.34, ey = y - r * 0.12, er = Math.max(1.5, r * 0.2), lx = look[0] * er * 0.45, ly = look[1] * er * 0.35;
+    for (const s of [-1, 1]) {
+      g.fillStyle = "#050a14"; g.beginPath(); g.ellipse(x + s * ex, ey, er + 1, er * 1.2 + 1, 0, 0, TAU); g.fill();
+      g.fillStyle = "#ffffff"; g.beginPath(); g.ellipse(x + s * ex, ey, er, er * 1.2, 0, 0, TAU); g.fill();
+      g.fillStyle = "#050a14"; g.fillRect(Math.round(x + s * ex + lx - er * 0.35), Math.round(ey + ly - er * 0.45), Math.max(1, Math.round(er * 0.7)), Math.max(1, Math.round(er * 0.9)));
+      if (angry) { g.fillStyle = "#050a14"; for (let q = 0; q < er * 2; q++) g.fillRect(Math.round(x + s * ex - er + q), Math.round(ey - er * 1.5 - (s < 0 ? -q : q - er * 2) * 0.35), 1, Math.max(1, Math.round(er * 0.35))); }
+    }
+    g.fillStyle = "#050a14";
+    if (heat > 0.8) { g.beginPath(); g.ellipse(x, y + r * 0.42, r * 0.13, r * 0.16, 0, 0, TAU); g.fill(); }
+    else g.fillRect(Math.round(x - r * 0.16), Math.round(y + r * 0.4), Math.max(2, Math.round(r * 0.32)), Math.max(1, Math.round(r * 0.07)));
+  }
+
+  function hearts(x, y, n, lost, flash, s) {
+    const w = 6 * s, total = 3, x0 = Math.round(x - (total * w) / 2);
+    for (let k = 0; k < total; k++) {
+      const full = k < n, col = full ? "#ff5d8f" : k === n && lost && flash ? "#ffffff" : "#3a2a4a";
+      [".#.#.", "#####", ".###.", "..#.."].forEach((row, j) => [...row].forEach((ch, i) => { if (ch === "#") R(x0 + k * w + i * s, y + j * s, s, s, col); }));
+    }
+  }
+
   function rondoScene(t) {
     const G = rondoGeo(), { cx, cy, rx, ry, S } = G, demo = !rd.players.length;
-    const list = demo ? DEMO.map((id) => ({ id, pl: id, name: playerById(id).tag, alive: true })) : rd.players, n = list.length;
+    const list = demo ? DEMO.map((id) => ({ id, pl: id, name: playerById(id).tag, alive: true, lives: 3 })) : rd.players, n = list.length;
     const seats = new Map(list.map((p, i) => { const an = -Math.PI / 2 + (i / n) * TAU, s = Math.sin(an); return [p.id, { p, x: cx + Math.cos(an) * rx, y: cy + s * ry, d: 0.84 + 0.16 * (s + 1) / 2 }]; }));
-    const turn = Math.floor(t / 1.3), holder = demo ? list[turn % n].id : rd.holder, prev = demo ? list[(turn + n - 1) % n].id : rd.prev, passAt = demo ? turn * 1.3 : rd.passAt;
+    const turn = Math.floor(t / 1.6), holder = demo ? list[turn % n].id : rd.holder, passAt = demo ? turn * 1.6 : rd.passAt;
     g.drawImage(sceneBg.rondo || (sceneBg.rondo = rondoBack()), 0, 0);
-    const foot = (sid) => { const s = seats.get(sid); return s ? [s.x + (cx - s.x) * 0.16, s.y + (cy - s.y) * 0.16 + 1] : [cx, cy]; };
-    let bp = holder && seats.has(holder) ? foot(holder) : [cx, cy - Math.abs(Math.sin(t * 4)) * H * 0.05];
-    const u = (t - passAt) / 0.35;
-    if (prev && holder && u >= 0 && u < 1 && seats.has(prev)) { const a = foot(prev), e = ease(u); bp = [lerp(a[0], bp[0], e), lerp(a[1], bp[1], e) - Math.sin(Math.PI * u) * H * 0.07]; }
-    const order = [...seats.values()].sort((a, b) => a.y - b.y), ballY = bp[1];
+    const playing = !demo && rd.phase === "playing", grow = demo ? 0.25 + 0.15 * Math.sin(t * 0.7) : playing ? clamp((t - rd.playT) / 30) : rd.phase === "ready" ? 0 : 0.1;
+    const heat = demo ? 0 : playing ? clamp(grow * 0.55 + rd.heat * 0.25) : 0, R0 = Math.max(6, H * 0.04), r = Math.min(R0 * (1 + 0.9 * grow), ry * 0.62) * (1 + (heat > 0.5 && !reduce ? 0.04 * Math.sin(t * (10 + heat * 30)) : 0));
+    const hop = clamp((t - passAt) / 0.32), by = cy - R0 * 0.6 - (hop < 1 ? Math.sin(Math.PI * hop) * R0 * 0.7 : 0);
+    const hs = holder && seats.get(holder), look = hs ? [(hs.x - cx) / rx, (hs.y - cy) / ry].map((v) => Math.max(-1, Math.min(1, v))) : [Math.sin(t * 0.9), 0.3 * Math.cos(t * 1.3)];
+    if (hs && rd.phase !== "pop") {
+      const pulse = 0.5 + 0.5 * Math.sin(t * (6 + heat * 14));
+      for (let a = 0; a < TAU; a += 0.15) R(hs.x + Math.cos(a) * 15 * S * hs.d, hs.y + Math.sin(a) * 5 * S * hs.d, 2, 1, `rgba(255,93,143,${(0.4 + 0.5 * pulse).toFixed(2)})`);
+      const ang = Math.atan2((hs.y - cy) * 2, hs.x - cx);
+      for (let k = 0; k < 3; k++) { const dd = R0 * (1.6 + k * 0.9) + ((t * 30) % (R0 * 0.9)), ax = cx + Math.cos(ang) * dd, ay = cy + Math.sin(ang) * dd * 0.5; R(ax - 1, ay - 1, 3, 2, `rgba(255,93,143,${(0.7 - k * 0.18).toFixed(2)})`); }
+    }
+    const order = [...seats.values()].sort((a, b) => a.y - b.y);
     let ballDrawn = false;
     const ball = () => {
       ballDrawn = true;
-      if (rd.phase === "pop" && t - rd.popAt < 1) {
+      if (rd.phase === "pop") {
         const a = t - rd.popAt;
-        burst({ x: bp[0], y: bp[1], t: a, n: 34, sp: H * 0.5, life: 0.9, cols: ["#fff7d6", "#ffd36b", "#ff8a3d", "#ff4d2e"], grav: H * 0.4, seed: 91 });
-        if (a < 0.12) { g.fillStyle = `rgba(255,247,214,${(0.6 * (1 - a / 0.12)).toFixed(2)})`; g.fillRect(0, 0, W, H); }
+        if (a < 1.1) {
+          burst({ x: cx, y: by, t: a, n: 44, sp: H * 0.55, life: 1, cols: ["#fff7d6", "#ffd36b", "#ff8a3d", "#ff4d2e", "#eef4ff", "#1b2438"], grav: H * 0.45, seed: 91 });
+          if (a < 0.14) { g.fillStyle = `rgba(255,247,214,${(0.65 * (1 - a / 0.14)).toFixed(2)})`; g.fillRect(0, 0, W, H); }
+        }
         return;
       }
-      if (rd.phase === "pop") return;
-      const s = Math.max(4, Math.round(H * 0.026)), hot = demo ? 0 : rd.heat, jx = hot === 2 && !reduce ? Math.round(Math.sin(t * 70)) : 0;
-      if (hot) { const a = 0.25 + 0.2 * Math.sin(t * (hot === 2 ? 24 : 10)); for (let k = 3; k >= 1; k--) R(bp[0] - s * k * 0.7, bp[1] - s / 2 - s * k * 0.7, s * k * 1.4, s * k * 1.4, `rgba(${hot === 2 ? "255,77,46" : "255,138,61"},${(a / k).toFixed(2)})`); }
-      R(bp[0] - s * 0.6, bp[1] + s * 0.35, s * 1.2, Math.max(1, s * 0.25), "rgba(0,0,0,0.4)");
-      ballAt(bp[0] + jx, bp[1] - s / 2, s, t * 40, t * 10);
-      if (hot === 2) { const r2 = rng(Math.floor(t * 30)); for (let i = 0; i < 6; i++) R(bp[0] + (r2() - 0.5) * s * 3, bp[1] - s / 2 + (r2() - 0.5) * s * 3, 1, 1, r2() < 0.5 ? "#ffd36b" : "#ff4d2e"); }
+      R(cx - r * 0.8, cy - R0 * 0.6 + r * 0.85, r * 1.6, Math.max(1, r * 0.22), "rgba(0,0,0,0.35)");
+      hotBall(cx, by, r, t * (0.6 + heat * 5), heat, look, t, heat > 0.5);
+      if (heat > 0.7 && !reduce) { const q = rng(Math.floor(t * 30)); for (let i = 0; i < 8; i++) R(cx + (q() - 0.5) * r * 2.6, by + (q() - 0.5) * r * 2.6, 1, 1, q() < 0.5 ? "#ffd36b" : "#ff4d2e"); }
     };
     for (const st of order) {
-      if (!ballDrawn && st.y > ballY) ball();
-      const p = st.p, pl = playerById(p.pl), me2 = p.id === holder;
+      if (!ballDrawn && st.y > cy - R0 * 0.2) ball();
+      const p = st.p, pl = playerById(p.pl), me2 = p.id === holder, hit = !demo && rd.phase === "pop" && p.id === rd.out;
       let ps = standAt({ view: "front", mouth: "smile" }), dy = 0;
-      if (!demo && rd.phase === "pop" && p.id === rd.out) ps = react("head", { view: "front", mouth: "o" });
+      if (hit) ps = react("head", { view: "front", mouth: "o" });
       else if (!demo && !p.alive) ps = SIT;
       else if (!demo && rd.phase === "over" && p.id === rd.winner) { ps = CHEER; dy = -Math.abs(Math.sin(t * 6)) * S * 9; }
-      else if (me2 && (demo || rd.phase === "playing")) ps = pose({ lh: [-13, 9, 2], rh: [13, 9, 2], mouth: !demo && rd.heat === 2 ? "o" : "grin", look: 0.4 });
+      else if (me2 && (demo || playing)) ps = pose({ lh: [-13, 9, 2], rh: [13, 9, 2], mouth: heat > 0.7 ? "o" : "grin", look: 0.4 });
       R(st.x - 14 * S * st.d, st.y - 1, 28 * S * st.d, Math.max(1, 3 * S), "rgba(0,0,0,0.35)");
       star(g, pl, ps, S * st.d, st.x, st.y + dy);
       nameTag(p.name.toUpperCase(), st.x, st.y + 3, me2 ? "#ffd36b" : p.alive ? "#e8f1ff" : "#7d93b8");
-      if (!demo && rd.phase === "over" && p.id === rd.winner) for (let i = 0; i < 8; i++) { const a = t * 2 + (i * TAU) / 8, rr = S * 26; R(st.x + Math.cos(a) * rr, st.y - S * 34 + Math.sin(a) * rr * 0.5, 2, 2, i % 2 ? "#ffd36b" : "#ffffff"); }
+      { const hsz = Math.max(1, Math.round(S * st.d * 0.75)); hearts(st.x, Math.round(st.y + dy - 70 * S * st.d - 5 * hsz), p.lives ?? 3, hit, Math.floor(t * 8) % 2, hsz); }
+      if (!demo && rd.phase === "over" && p.id === rd.winner) for (let i = 0; i < 8; i++) { const a = t * 2 + (i * TAU) / 8, rr2 = S * 26; R(st.x + Math.cos(a) * rr2, st.y - S * 34 + Math.sin(a) * rr2 * 0.5, 2, 2, i % 2 ? "#ffd36b" : "#ffffff"); }
     }
     if (!ballDrawn) ball();
   }
@@ -4066,9 +4115,11 @@ const pitch = (() => {
     scene(name) { mode = { type: "scene", name, t0: performance.now() }; },
     rondo(st) {
       const t = performance.now() / 1000;
-      if (!st) { rd = { players: [], holder: null, heat: 0, phase: "demo", out: null, winner: null, prev: null, passAt: -9, popAt: -9 }; return; }
+      if (!st) { rd = { players: [], holder: null, heat: 0, phase: "demo", out: null, winner: null, prev: null, passAt: -9, popAt: -9, playT: 0 }; return; }
       if (st.holder !== rd.holder) { rd.prev = rd.holder; rd.passAt = st.phase === "playing" && rd.phase === "playing" ? t : -9; }
       if (st.phase === "pop" && rd.phase !== "pop") rd.popAt = t;
+      if (st.phase === "playing") rd.playT = t - (st.since || 0) / 1000;
+      if (st.holder !== rd.holder && st.phase === "playing") rd.passAt = t;
       Object.assign(rd, { players: st.players, holder: st.holder, heat: st.heat, phase: st.phase, out: st.out, winner: st.winner });
     },
     idle() { mode = { type: "idle", t0: performance.now() }; },
@@ -4163,7 +4214,7 @@ function drawRondo(msg = "", pending = "") {
     box.innerHTML = `<div class="side l">
       <p class="kicker">LIVE WITH FRIENDS</p>
       <h2 class="title">RONDO</h2>
-      <p class="rules">One prompt, one ball. Name an answer nobody has used yet to pass it on. The ball is ticking, and whoever holds it when it blows is out. Last one standing wins.</p></div>
+      <p class="rules">One prompt and one very angry ball. It stares at whoever has to answer. Name an answer nobody has used yet and it turns to the next player. It swells as it ticks, and whoever it's staring at when it bursts loses a heart. Everyone has 3. Last one with hearts left wins.</p></div>
       <div class="side r"><div class="panel">${nickField("rNick")}</div>
       <div class="panel">
         <p class="h2"><span>START A ROOM</span><b>2–10 PLAYERS</b></p>
@@ -4198,7 +4249,7 @@ function drawRondo(msg = "", pending = "") {
     head = `<p class="kicker">RONDO · ROUND ${st.round}</p>`;
     head += `<div class="card rondo"><h2 class="q">${P ? esc(P.q) : "…"}</h2><p class="sub">${P ? esc(P.sub || "") : ""}</p></div>`;
     body = `<div class="card rondo dock">
-        <p class="turn ${st.heat ? "hot" + st.heat : ""}">${st.phase === "ready" ? "GET READY…" : st.phase === "pop" ? `${out ? esc(out.name) : "Someone"} WAS HOLDING IT. OUT!` : mine ? "YOUR BALL! NAME ONE AND PASS IT" : `${holder ? esc(holder.name) : "…"} HAS THE BALL`}</p>
+        <p class="turn ${st.heat ? "hot" + st.heat : ""}">${st.phase === "ready" ? "GET READY…" : st.phase === "pop" ? `${out ? esc(out.name) : "Someone"} ${st.ko ? "IS OUT!" : `LOSES A HEART · ${out ? out.lives : 0} LEFT`}` : mine ? "IT'S STARING AT YOU! NAME ONE" : `IT'S STARING AT ${holder ? esc(holder.name) : "…"}`}</p>
         <form class="ans" id="rForm" autocomplete="off"><input class="field big" id="rAns" placeholder="${mine ? "type an answer…" : "wait for the ball…"}" ${mine ? "" : "disabled"} spellcheck="false" autocapitalize="characters" enterkeyhint="go"><button class="btn" type="submit" ${mine ? "" : "disabled"}>PASS</button></form>
         <div class="sugg" id="rSugg"></div>
         <p class="fb" id="rFb"></p>
@@ -4213,7 +4264,7 @@ function drawRondo(msg = "", pending = "") {
     const d = document.createElement("div");
     d.className = "mate" + (p.on ? "" : " off") + (st.phase === "over" && p.id === st.winner ? " win" : "");
     face(d, p.pl);
-    d.insertAdjacentHTML("beforeend", `<b>${esc(p.name)}${p.id === you ? " (YOU)" : ""}</b><small>${p.id === st.host ? "HOST" : p.on ? "" : "AWAY"}</small>`);
+    d.insertAdjacentHTML("beforeend", `<b>${esc(p.name)}${p.id === you ? " (YOU)" : ""}</b><small>${st.phase !== "lobby" && p.lives != null ? `<i class="hp">${"♥".repeat(p.lives)}<u>${"♥".repeat(Math.max(0, 3 - p.lives))}</u></i> ` : ""}${p.id === st.host ? "HOST" : p.on ? "" : "AWAY"}</small>`);
     roster.appendChild(d);
   }
   if ($("#rStart")) $("#rStart").onclick = () => rondo.ws && rondo.ws.send(JSON.stringify({ t: "start" }));
