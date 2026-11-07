@@ -1,0 +1,172 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="robots" content="noindex, nofollow">
+<title>TopBinz Stats</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Silkscreen:wght@400;700&family=VT323&display=swap">
+<style>
+:root {
+  --void: #050a14; --panel: #0d1530; --line: #233158; --ink: #e8f1ff; --mute: #8aa0c4; --faint: #3a4a70;
+  --gold: #ffd36b; --rose: #ff5d8f; --cyan: #4de3ff; --normal: #189bbb; --niche: #e0436f;
+  --display: "Silkscreen", "Courier New", monospace; --body: "VT323", "Courier New", monospace;
+}
+* { box-sizing: border-box; }
+html, body { margin: 0; }
+body { background: var(--void); color: var(--ink); font-family: var(--body); font-size: 20px; line-height: 1.25; }
+main { max-width: 1080px; margin: 0 auto; padding: 24px 16px 48px; display: grid; gap: 16px; }
+h1 { margin: 0; font-family: var(--display); font-weight: 700; font-size: clamp(26px, 6vw, 40px); letter-spacing: 3px; color: var(--rose); text-shadow: 3px 0 var(--cyan); }
+.top { display: flex; flex-wrap: wrap; gap: 12px; align-items: end; justify-content: space-between; }
+.kicker { margin: 4px 0 0; font-family: var(--display); font-size: 11px; letter-spacing: 3px; color: var(--cyan); }
+.panel { background: var(--panel); border: 2px solid var(--line); padding: 16px; min-width: 0; }
+.h2 { margin: 0 0 12px; font-family: var(--display); font-size: 11px; letter-spacing: 2px; color: var(--mute); display: flex; justify-content: space-between; gap: 12px; flex-wrap: wrap; }
+.tiles { display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 12px; }
+.tile { background: var(--panel); border: 2px solid var(--line); padding: 12px; display: grid; gap: 4px; align-content: start; }
+.tile b { font-family: var(--display); font-size: 10px; letter-spacing: 2px; color: var(--mute); font-weight: 400; }
+.tile .v { font-size: 44px; line-height: 0.9; font-variant-numeric: tabular-nums; }
+.tile small { color: var(--mute); font-size: 17px; }
+.seg { display: inline-flex; border: 2px solid var(--line); }
+.seg button, .btn { font-family: var(--display); font-size: 11px; letter-spacing: 2px; color: var(--mute); background: none; border: 0; padding: 8px 12px; cursor: pointer; }
+.seg button[aria-pressed="true"] { color: var(--void); background: var(--gold); }
+.btn { border: 2px solid var(--line); color: var(--ink); }
+.btn:hover, .seg button:hover { color: var(--ink); }
+.seg button[aria-pressed="true"]:hover { color: var(--void); }
+button:focus-visible, input:focus-visible { outline: 2px dashed var(--gold); outline-offset: 2px; }
+.legend { font-family: var(--body); letter-spacing: 0; display: flex; gap: 16px; font-size: 18px; color: var(--mute); }
+.legend i { display: inline-block; width: 12px; height: 12px; border-radius: 2px; margin-right: 6px; vertical-align: -1px; }
+.chart { position: relative; }
+.chart svg { display: block; width: 100%; height: auto; overflow: visible; }
+.tip { position: absolute; pointer-events: none; background: var(--void); border: 2px solid var(--line); padding: 6px 10px; font-size: 18px; white-space: nowrap; transform: translate(-50%, calc(-100% - 10px)); z-index: 2; }
+.tip b { color: var(--ink); font-weight: 400; }
+.tip span { color: var(--mute); }
+.wrap { overflow-x: auto; }
+table { border-collapse: collapse; width: 100%; font-variant-numeric: tabular-nums; font-size: 19px; }
+th, td { padding: 6px 10px; text-align: right; border-bottom: 1px solid var(--line); white-space: nowrap; }
+th { font-family: var(--display); font-size: 10px; letter-spacing: 1px; color: var(--mute); font-weight: 400; }
+th:first-child, td:first-child { text-align: left; }
+td.z { color: var(--faint); }
+.lock { max-width: 420px; margin: 12vh auto 0; display: grid; gap: 12px; }
+.lock input { font-family: var(--body); font-size: 22px; color: var(--ink); background: var(--void); border: 2px solid var(--line); padding: 10px 12px; width: 100%; }
+.note { margin: 0; color: var(--mute); font-size: 18px; }
+.err { color: var(--rose); }
+.foot { display: flex; flex-wrap: wrap; gap: 12px; align-items: center; justify-content: space-between; }
+</style>
+</head>
+<body>
+<main id="app"></main>
+<script>
+const API = "https://topbinz-api.topbinz.workers.dev", KEY = "tb-stats-key", app = document.getElementById("app");
+const store = { get() { try { return localStorage.getItem(KEY) || ""; } catch { return ""; } }, set(v) { try { v ? localStorage.setItem(KEY, v) : localStorage.removeItem(KEY); } catch {} } };
+const esc = (s) => String(s).replace(/[&<>"']/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c]));
+const fmt = (n) => (n || 0).toLocaleString("en-US");
+let data = null, range = 30, key = store.get();
+
+function lock(msg) {
+  app.innerHTML = `<form class="lock panel" id="f"><h1>TOPBINZ STATS</h1><p class="note">Private. Enter your stats key to unlock.</p>
+    <label class="note" for="k">Stats key</label><input id="k" type="password" autocomplete="current-password" required>
+    ${msg ? `<p class="note err">${esc(msg)}</p>` : ""}<button class="btn" type="submit">UNLOCK ▶</button></form>`;
+  document.getElementById("f").onsubmit = (e) => { e.preventDefault(); key = document.getElementById("k").value.trim(); load(); };
+}
+
+async function load() {
+  if (!key) return lock();
+  app.innerHTML = `<p class="note">Loading…</p>`;
+  try {
+    const r = await fetch(`${API}/stats?days=60`, { headers: { Authorization: `Bearer ${key}` }, cache: "no-store" });
+    if (r.status === 401) { store.set(""); key = ""; return lock("That key didn't work."); }
+    if (!r.ok) throw new Error(r.status);
+    data = await r.json();
+    store.set(key);
+    draw();
+  } catch { app.innerHTML = `<p class="note err">Couldn't reach the stats server. <button class="btn" id="retry">TRY AGAIN</button></p>`; document.getElementById("retry").onclick = load; }
+}
+
+function days() {
+  const by = new Map(data.days.map((d) => [d.day, d])), out = [], end = new Date(`${data.today}T00:00:00Z`);
+  for (let i = range - 1; i >= 0; i--) { const k = new Date(end - i * 86400000).toISOString().slice(0, 10); out.push({ day: k, ...(by.get(k) || {}) }); }
+  return out;
+}
+const g = (d, k) => d[k] || 0;
+const sum = (rows, k) => rows.reduce((s, d) => s + g(d, k), 0);
+const avg = (rows, lv) => { const n = sum(rows, `daily_finish.${lv}`); return n ? Math.round(sum(rows, `daily_finish.${lv}.sum`) / n) : null; };
+const short = (k) => new Date(`${k}T00:00:00Z`).toLocaleDateString("en-GB", { day: "numeric", month: "short", timeZone: "UTC" });
+
+function bars(rows, series, label) {
+  const W = Math.max(280, Math.round((app.clientWidth || 800) - 36)), H = 220, L = 34, B = 24, T = 8, n = rows.length, bw = (W - L) / n, max = Math.max(1, ...rows.map((d) => series.reduce((s, x) => s + g(d, x.k), 0)));
+  const step = Math.max(1, Math.ceil(max / 4)), top = step * Math.ceil(max / step), y = (v) => T + (H - T - B) * (1 - v / top);
+  let grid = "";
+  for (let v = 0; v <= top; v += step) grid += `<line x1="${L}" x2="${W}" y1="${y(v)}" y2="${y(v)}" stroke="var(--line)" stroke-width="1"/><text x="${L - 6}" y="${y(v) + 5}" fill="var(--mute)" font-size="15" text-anchor="end">${v}</text>`;
+  let marks = "", hits = "";
+  rows.forEach((d, i) => {
+    const x = L + i * bw + bw * 0.18, w = Math.max(2, bw * 0.64);
+    let base = 0;
+    series.forEach((s, j) => {
+      const v = g(d, s.k);
+      if (!v) return;
+      const y0 = y(base), y1 = y(base + v) + (base ? 2 : 0), h = Math.max(1, y0 - y1), last = series.slice(j + 1).every((t) => !g(d, t.k)), r = last ? Math.min(4, w / 2, h) : 0;
+      marks += `<path d="M${x},${y0} V${y1 + r} Q${x},${y1} ${x + r},${y1} H${x + w - r} Q${x + w},${y1} ${x + w},${y1 + r} V${y0} Z" fill="${s.c}"/>`;
+      base += v;
+    });
+    if (i % Math.ceil(n / 8) === 0 || i === n - 1) marks += `<text x="${x + w / 2}" y="${H - 4}" fill="var(--mute)" font-size="15" text-anchor="middle">${short(d.day)}</text>`;
+    hits += `<rect x="${L + i * bw}" y="0" width="${bw}" height="${H - B}" fill="transparent" data-i="${i}"/>`;
+  });
+  return `<svg viewBox="0 0 ${W} ${H}" role="img" aria-label="${esc(label)}">${grid}${marks}${hits}</svg>`;
+}
+
+function hover(el, rows, series) {
+  const tip = document.createElement("div"), svg = el.querySelector("svg");
+  tip.className = "tip"; tip.hidden = true; el.appendChild(tip);
+  svg.addEventListener("pointermove", (e) => {
+    const i = e.target.dataset && e.target.dataset.i;
+    if (i === undefined) { tip.hidden = true; return; }
+    const d = rows[+i], box = el.getBoundingClientRect();
+    tip.innerHTML = `<b>${short(d.day)}</b><br>${series.map((s) => `<span>${esc(s.name)}</span> <b>${fmt(g(d, s.k))}</b>`).join("<br>")}`;
+    tip.style.left = `${Math.min(box.width - 70, Math.max(70, e.clientX - box.left))}px`;
+    tip.style.top = `${e.clientY - box.top}px`;
+    tip.hidden = false;
+  });
+  svg.addEventListener("pointerleave", () => { tip.hidden = true; });
+}
+
+function draw() {
+  const rows = days(), today = rows[rows.length - 1], fin = (lv) => sum(rows, `daily_finish.${lv}`);
+  const P = [{ k: "visit", name: "Players", c: "var(--normal)" }], D = [{ k: "daily_finish.normal", name: "Normal", c: "var(--normal)" }, { k: "daily_finish.niche", name: "Niche", c: "var(--niche)" }];
+  const tile = (label, v, sub) => `<div class="tile"><b>${label}</b><span class="v">${v}</span>${sub ? `<small>${sub}</small>` : ""}</div>`;
+  const an = avg(rows, "normal"), ah = avg(rows, "niche");
+  const cell = (v) => `<td class="${v ? "" : "z"}">${v ? fmt(v) : "0"}</td>`;
+  app.innerHTML = `<div class="top"><div><h1>TOPBINZ STATS</h1><p class="kicker">PRIVATE · COUNTS ONLY · UPDATED ${new Date().toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" })}</p></div>
+      <div class="seg" role="group" aria-label="Range">${[7, 30, 60].map((n) => `<button type="button" data-r="${n}" aria-pressed="${n === range}">${n} DAYS</button>`).join("")}</div></div>
+    <div class="tiles">
+      ${tile("PLAYERS TODAY", fmt(g(today, "visit")), `${fmt(g(today, "new"))} new`)}
+      ${tile(`PLAYERS · ${range}D`, fmt(sum(rows, "visit")), `${fmt(sum(rows, "new"))} new · player-days`)}
+      ${tile("ALL-TIME PLAYERS", fmt(data.total.players), data.total.since ? `since ${short(data.total.since)}` : "")}
+      ${tile(`DAILIES DONE · ${range}D`, fmt(fin("normal") + fin("niche")), `${fmt(fin("normal"))} normal · ${fmt(fin("niche"))} niche`)}
+      ${tile("AVG DAILY SCORE", an === null ? "–" : an, `normal${ah === null ? "" : ` · niche ${ah}`}`)}
+      ${tile(`UNLIMITED · ${range}D`, fmt(sum(rows, "unl_finish.normal") + sum(rows, "unl_finish.niche")), `${fmt(sum(rows, "unl_start.normal") + sum(rows, "unl_start.niche"))} started`)}
+      ${tile(`RONDO · ${range}D`, fmt(sum(rows, "rondo_game.normal") + sum(rows, "rondo_game.niche")), `games · ${fmt(sum(rows, "rondo_room"))} rooms`)}
+      ${tile(`LEAGUES · ${range}D`, fmt(sum(rows, "league_new")), `created · ${fmt(sum(rows, "league_join"))} joins`)}
+      ${tile(`SHARES · ${range}D`, fmt(sum(rows, "share")), "results copied")}
+    </div>
+    <section class="panel"><p class="h2"><span>PLAYERS PER DAY</span><span>unique browsers</span></p><div class="chart" id="c1">${bars(rows, P, "Players per day")}</div></section>
+    <section class="panel"><p class="h2"><span>DAILIES FINISHED PER DAY</span><span class="legend">${D.map((s) => `<span><i style="background:${s.c}"></i>${s.name}</span>`).join("")}</span></p><div class="chart" id="c2">${bars(rows, D, "Dailies finished per day, Normal and Niche")}</div></section>
+    <section class="panel"><p class="h2"><span>BY DAY</span><span>newest first</span></p><div class="wrap"><table>
+      <thead><tr><th>DAY</th><th>PLAYERS</th><th>NEW</th><th>DAILY N</th><th>DONE N</th><th>AVG N</th><th>DAILY X</th><th>DONE X</th><th>AVG X</th><th>UNLIMITED</th><th>RONDO</th><th>LEAGUES</th><th>JOINS</th><th>SHARES</th></tr></thead>
+      <tbody>${[...rows].reverse().map((d) => { const a = (lv) => g(d, `daily_finish.${lv}`) ? Math.round(g(d, `daily_finish.${lv}.sum`) / g(d, `daily_finish.${lv}`)) : 0; return `<tr><td>${short(d.day)}</td>${cell(g(d, "visit"))}${cell(g(d, "new"))}${cell(g(d, "daily_start.normal"))}${cell(g(d, "daily_finish.normal"))}${cell(a("normal"))}${cell(g(d, "daily_start.niche"))}${cell(g(d, "daily_finish.niche"))}${cell(a("niche"))}${cell(g(d, "unl_finish.normal") + g(d, "unl_finish.niche"))}${cell(g(d, "rondo_game.normal") + g(d, "rondo_game.niche"))}${cell(g(d, "league_new"))}${cell(g(d, "league_join"))}${cell(g(d, "share"))}</tr>`; }).join("")}</tbody></table></div>
+      <p class="note">N = Normal, X = Niche. Days are UTC. Players are counted once per browser per day.</p></section>
+    <div class="foot"><p class="note">Only counts are stored: no names, no emails, no answers.</p><span><button class="btn" id="refresh" type="button">REFRESH</button> <button class="btn" id="out" type="button">LOCK</button></span></div>`;
+  hover(document.getElementById("c1"), rows, P);
+  hover(document.getElementById("c2"), rows, D);
+  for (const b of document.querySelectorAll("[data-r]")) b.onclick = () => { range = +b.dataset.r; draw(); };
+  document.getElementById("refresh").onclick = load;
+  document.getElementById("out").onclick = () => { store.set(""); key = ""; lock(); };
+}
+
+let rz;
+addEventListener("resize", () => { clearTimeout(rz); rz = setTimeout(() => data && draw(), 150); });
+load();
+</script>
+</body>
+</html>

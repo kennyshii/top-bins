@@ -2062,6 +2062,7 @@ function start(mode) {
   }
   pitch.setPlayer(pl);
   if (mode === "daily" && lv === "normal" && myLeagues().length) runSend("start", { pl: pl.id, set: game.set });
+  track(mode === "daily" ? "daily_start" : "unl_start", { lv });
   if (game.round >= 7) return finish();
   show("play");
   el.card.hidden = true;
@@ -2240,6 +2241,7 @@ el.next.addEventListener("click", next);
 
 function finish() {
   const g = game;
+  track(g.mode === "daily" ? "daily_finish" : "unl_finish", { lv: g.level, n: g.total });
   if (g.mode === "daily") {
     const s = store.load();
     const st = s.stats || { streak: 0, played: 0, sum: 0, best: 0, last: "" };
@@ -2346,6 +2348,7 @@ function renderResults(g) {
   $("#menu").addEventListener("click", () => { introLog(); show("intro"); });
   $("#copy").addEventListener("click", async (e) => {
     const text = shareText(g);
+    track("share");
     try { await navigator.clipboard.writeText(text); e.target.textContent = "COPIED"; }
     catch { const box = $("#copyBox"); box.hidden = false; box.value = text; box.focus(); box.select(); e.target.textContent = "SELECT AND COPY"; }
   });
@@ -4245,6 +4248,8 @@ const pitch = (() => {
 const API = "https://topbinz-api.topbinz.workers.dev";
 const me = () => { const s = store.load(); if (!s.pid) { s.pid = Array.from(crypto.getRandomValues(new Uint8Array(12)), (b) => b.toString(16).padStart(2, "0")).join(""); store.save(s); } return s.pid; };
 const nick = () => store.load().nick || "";
+const track = (e, o = {}) => { if (location.protocol === "file:" || /^(localhost|127\.0\.0\.1)$/.test(location.hostname)) return; try { fetch(`${API}/stat`, { method: "POST", headers: { "Content-Type": "text/plain" }, body: JSON.stringify({ pid: me(), e, ...o }), keepalive: true }).catch(() => {}); } catch {} };
+track("visit");
 const setNick = (v) => { const s = store.load(); s.nick = String(v || "").trim().slice(0, 16); store.save(s); return s.nick; };
 const api = (path, body) => fetch(API + path, body ? { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify(body) } : {}).then((r) => r.json()).catch(() => ({ error: "offline" }));
 const face = (host, id, cls = "") => { const cv = document.createElement("canvas"); cv.width = 28; cv.height = 28; cv.className = cls; pitch.portrait(cv, playerById(id)); host.appendChild(cv); return cv; };

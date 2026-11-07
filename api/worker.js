@@ -1,6 +1,6 @@
 import { PROMPTS, byId, match, shotOf, BOOSTS, dailySet, dayNo } from "./game.js";
 
-const CORS = { "Access-Control-Allow-Origin": "*", "Access-Control-Allow-Methods": "GET, POST, OPTIONS", "Access-Control-Allow-Headers": "Content-Type" };
+const CORS = { "Access-Control-Allow-Origin": "*", "Access-Control-Allow-Methods": "GET, POST, OPTIONS", "Access-Control-Allow-Headers": "Content-Type, Authorization" };
 const json = (v, status = 200) => new Response(JSON.stringify(v), { status, headers: { "Content-Type": "application/json", ...CORS } });
 const CODE = "ABCDEFGHJKLMNPQRSTUVWXYZ23456789";
 const makeCode = (n) => Array.from(crypto.getRandomValues(new Uint8Array(n)), (b) => CODE[b % CODE.length]).join("");
@@ -9,6 +9,10 @@ const okCode = (s, n) => typeof s === "string" && s.length === n && [...s].every
 const okDay = (k) => /^\d{4}-\d{2}-\d{2}$/.test(k) && Math.abs(parseDay(k) - Date.now()) < 2 * 86400000;
 const RONDO = { normal: PROMPTS.filter((p) => p.answers.length >= 16 && !p.niche).map((p) => p.id), niche: PROMPTS.filter((p) => p.answers.length >= 16 && p.niche).map((p) => p.id) };
 const TURN_MS = 25000, GRACE_MS = 4000, BOOST = 10;
+const EVENTS = { visit: 1, daily_start: 1, daily_finish: 1, unl_start: 60, unl_finish: 60, share: 20 };
+const SERVER_EVENTS = { rondo_room: 1, rondo_game: 1, league_new: 1, league_join: 1 };
+const hex = async (s) => [...new Uint8Array(await crypto.subtle.digest("SHA-256", new TextEncoder().encode(s)))].slice(0, 12).map((b) => b.toString(16).padStart(2, "0")).join("");
+const stat = (env, o) => env.STATS.get(env.STATS.idFromName("all")).fetch(new Request("https://stats/add", { method: "POST", body: JSON.stringify(o) })).catch(() => {});
 
 const accept = (p, typed, i) => {
   if (!p || !Number.isInteger(i) || i < 0 || i >= p.answers.length) return false;
@@ -18,10 +22,23 @@ const accept = (p, typed, i) => {
 const shuffle = (list) => { const a = list.slice(); for (let i = a.length - 1; i > 0; i--) { const j = Math.floor(Math.random() * (i + 1)); [a[i], a[j]] = [a[j], a[i]]; } return a; };
 
 export default {
-  async fetch(req, env) {
+  async fetch(req, env, ctx) {
     if (req.method === "OPTIONS") return new Response(null, { headers: CORS });
     const url = new URL(req.url), parts = url.pathname.split("/").filter(Boolean);
-    if (parts[0] === "room" && parts[1] === "new" && req.method === "POST") return json({ code: makeCode(4) });
+    if (parts[0] === "stat" && req.method === "POST") {
+      const b = await req.json().catch(() => ({})), e = String(b.e || ""), pid = clean(b.pid, 40);
+      if (!EVENTS[e] || !pid) return json({ ok: false }, 400);
+      const lv = b.lv === "niche" || b.lv === "normal" ? b.lv : null, n = Number.isFinite(+b.n) ? Math.max(0, Math.min(1000, Math.round(+b.n))) : null;
+      ctx.waitUntil(stat(env, { e, lv, n: e.endsWith("finish") ? n : null, who: await hex(`topbinz:${pid}`) }));
+      return json({ ok: true });
+    }
+    if (parts[0] === "stats" && req.method === "GET") {
+      const key = env.STATS_KEY || "", auth = req.headers.get("Authorization") || "";
+      if (key.length < 24 || (await hex(auth)) !== (await hex(`Bearer ${key}`))) return json({ error: "locked" }, 401);
+      const res = await env.STATS.get(env.STATS.idFromName("all")).fetch(new Request(`https://stats/read${url.search}`));
+      return new Response(res.body, { status: res.status, headers: { "Content-Type": "application/json", "Cache-Control": "no-store", ...CORS } });
+    }
+    if (parts[0] === "room" && parts[1] === "new" && req.method === "POST") { ctx.waitUntil(stat(env, { e: "rondo_room" })); return json({ code: makeCode(4) }); }
     if (parts[0] === "room" && okCode(parts[1], 4) && parts[2] === "ws") return env.ROOM.get(env.ROOM.idFromName(parts[1])).fetch(req);
     if (parts[0] === "run" && req.method === "POST") {
       const body = await req.json().catch(() => ({})), pid = clean(body.pid, 40), day = String(body.date || "");
@@ -32,6 +49,7 @@ export default {
     if (parts[0] === "league" && parts.length === 1 && req.method === "POST") {
       const body = await req.json().catch(() => ({})), id = makeCode(6);
       const res = await env.LEAGUE.get(env.LEAGUE.idFromName(id)).fetch(new Request(`https://league/${id}/create`, { method: "POST", body: JSON.stringify({ name: body.name }) }));
+      if (res.ok) ctx.waitUntil(stat(env, { e: "league_new" }));
       return res.ok ? json({ id }) : json({ error: "could not create" }, 500);
     }
     if (parts[0] === "league" && okCode(parts[1], 6)) {
@@ -46,7 +64,8 @@ const fresh = () => ({ phase: "lobby", level: "normal", host: null, players: [],
 const LIVES = 3;
 
 export class Room {
-  constructor(ctx) {
+  constructor(ctx, env) {
+    this.env = env;
     this.ctx = ctx;
     this.s = fresh();
     ctx.blockConcurrencyWhile(async () => { this.s = (await ctx.storage.get("s")) || fresh(); });
@@ -105,6 +124,7 @@ export class Room {
     if (!me) return;
     if (m.t === "start" && me === s.host && s.phase === "lobby" && s.players.length >= 2) {
       s.queue = shuffle(RONDO[s.level === "niche" ? "niche" : "normal"]).slice(0, 40);
+      this.ctx.waitUntil(stat(this.env, { e: "rondo_game", lv: s.level === "niche" ? "niche" : "normal" }));
       for (const p of s.players) { p.alive = true; p.lives = LIVES; }
       s.round = 0;
       s.winner = null;
@@ -297,6 +317,7 @@ export class League {
       if (op === "leave") { delete members[pid]; await st.put("members", members); return json({ ok: true }); }
       if (!members[pid] && Object.keys(members).length >= 60) return json({ error: "league is full" }, 403);
       const was = members[pid] || {};
+      if (!members[pid]) this.ctx.waitUntil(stat(this.env, { e: "league_join" }));
       members[pid] = { name: clean(body.name, 16) || was.name || "Player", pl: BOOSTS[body.pl] ? body.pl : was.pl || "messi", joined: was.joined || now };
       await st.put("members", members);
       if (op === "score") {
@@ -311,5 +332,43 @@ export class League {
     }
     const q = url.searchParams.get("d") || "", today = okDay(q) ? q : keyOf(now);
     return json({ name: meta.name, members, note, standings: standings(scores, today) });
+  }
+}
+
+export class Stats {
+  constructor(ctx) { this.ctx = ctx; }
+  async fetch(req) {
+    const url = new URL(req.url), st = this.ctx.storage, day = new Date().toISOString().slice(0, 10);
+    if (url.pathname === "/add") {
+      const { e, lv, n, who } = await req.json().catch(() => ({}));
+      if (!EVENTS[e] && !SERVER_EVENTS[e]) return new Response("bad", { status: 400 });
+      const key = lv ? `${e}.${lv}` : e, d = (await st.get(`d:${day}`)) || {}, t = (await st.get("t")) || { players: 0, since: day };
+      if (who) {
+        const wk = `w:${day}:${who}:${key}`, c = (await st.get(wk)) || 0;
+        if (c >= EVENTS[e]) return new Response("capped");
+        await st.put(wk, c + 1);
+        if (e === "visit" && !(await st.get(`p:${who}`))) { await st.put(`p:${who}`, day); t.players += 1; d.new = (d.new || 0) + 1; await st.put("t", t); }
+      }
+      d[key] = (d[key] || 0) + 1;
+      if (Number.isFinite(n) && n !== null) { d[`${key}.sum`] = (d[`${key}.sum`] || 0) + n; d[`${key}.best`] = Math.max(d[`${key}.best`] || 0, n); }
+      await st.put(`d:${day}`, d);
+      if (!(await st.getAlarm())) await st.setAlarm(Date.now() + 6 * 3600000);
+      return new Response("ok");
+    }
+    if (url.pathname === "/read") {
+      const n = Math.max(1, Math.min(400, Number(url.searchParams.get("days")) || 60)), from = new Date(Date.now() - (n - 1) * 86400000).toISOString().slice(0, 10);
+      const rows = await st.list({ prefix: "d:", start: `d:${from}` });
+      return new Response(JSON.stringify({ today: day, total: (await st.get("t")) || { players: 0 }, days: [...rows].map(([k, v]) => ({ day: k.slice(2), ...v })) }), { headers: { "Content-Type": "application/json" } });
+    }
+    return new Response("not found", { status: 404 });
+  }
+  async alarm() {
+    const st = this.ctx.storage, cut = `w:${new Date(Date.now() - 2 * 86400000).toISOString().slice(0, 10)}`;
+    for (let more = true; more;) {
+      const keys = [...(await st.list({ prefix: "w:", end: cut, limit: 1024 })).keys()];
+      for (let i = 0; i < keys.length; i += 128) await st.delete(keys.slice(i, i + 128));
+      more = keys.length === 1024;
+    }
+    await st.setAlarm(Date.now() + 6 * 3600000);
   }
 }
